@@ -1,0 +1,146 @@
+/* ===========================================================
+   Progress Tracking Styles
+   Add these to your style.css or include as separate stylesheet
+   
+   Styling for:
+   - Progress bars (visual progress indicators)
+   - Mark Complete buttons
+   - Toast notifications (success messages)
+   - Completed module states
+   =========================================================== */
+
+/* Progress Bar */
+.module-progress {
+  margin: 0.8rem 0;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--copper);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+/* Module Actions Container */
+.module-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+  flex-wrap: wrap;
+}
+
+/* Mark Complete Button */
+.btn-complete {
+  flex-shrink: 0;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 0.5em 1rem;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-complete:hover {
+  background: #3a6942;
+}
+
+.btn-complete:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Completed State */
+.btn-complete.completed {
+  background: var(--ink-soft);
+  cursor: default;
+  opacity: 0.8;
+}
+
+/* Completed Module Row */
+.module-list li.completed {
+  opacity: 0.85;
+  background: #f0f8f5;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--green);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  animation: slideIn 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(74, 122, 82, 0.3);
+}
+
+.toast-notification.error {
+  background: var(--copper-dark);
+  box-shadow: 0 4px 12px rgba(162, 79, 34, 0.3);
+}
+
+.toast-notification.success {
+  background: var(--green);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .toast-notification {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+  }
+
+  .module-actions {
+    flex-direction: column;
+  }
+
+  .btn-complete {
+    width: 100%;
+  }
+}
