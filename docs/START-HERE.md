@@ -21,8 +21,11 @@ Live tracking of where this specific deployment actually stands (not just the ge
 
 - ✅ Supabase project connected — `js/supabase-client.js` has real project URL + publishable key wired in
 - ✅ `ARCHITECTURE.md` and `IMPLEMENTATION-GUIDE.md` now written
+- ✅ `css/style.css` received — full design system already built (colors, type, layout, `h1`–`h3` styling included)
+- ⏳ `css/progress-tracking-styles.css` received — confirmed to be a later-stage feature (progress bars, complete button, toasts), not core theming
+- ⚠️ No HTML files exist yet (`index.html`, `course-*.html`, `login.html`, `pending.html`) — these will be built fresh against `style.css`, not adapted from prior versions
 - ⚠️ Live Supabase project has more tables than documented (`profiles`, `enrollments`, `instructor_enrollments`, `course_progress`, `module_completions`, `student_progress`, `instructor_student_progress`, `stalled_overrides`, `student_audit_log`) — see [ARCHITECTURE.md](./ARCHITECTURE.md) "Known Gap" section
-- ⏳ CSS theme files — not yet supplied; `h1` branding update deferred until later
+- ⏳ `h1` — whether this means style or literal text is still to be clarified, deferred for now
 - ⏳ Known console error ("Supabase client not initialized" / ES-version related) — investigation deferred until remaining files are in hand
 
 ---
@@ -65,8 +68,8 @@ Read in this order:
 ### HTML Files (Updated)
 ```
 index.html                   ← Dynamic landing page (built directly as index.html)
-course-cabling.html          ← Updated (replace old one)
-course-networking.html       ← Updated (replace old one)
+course-cabling.html          ← Built fresh (no old file to replace)
+course-networking.html       ← Built fresh (no old file to replace)
 login.html                   ← Same as before (no changes)
 pending.html                 ← Same as before (no changes)
 ```
@@ -131,9 +134,9 @@ Replace these files on your server:
 1. **Replace `index.html`**
    - Upload the dynamic version directly as `index.html` to your site root
 
-2. **Replace course pages**
-   - Upload `course-cabling.html` (replaces old one)
-   - Upload `course-networking.html` (replaces old one)
+2. **Build course pages**
+   - Create `course-cabling.html` (no prior version exists)
+   - Create `course-networking.html` (no prior version exists)
 
 3. **Add new JavaScript files**
    - Upload `js/load-courses.js` (new)
