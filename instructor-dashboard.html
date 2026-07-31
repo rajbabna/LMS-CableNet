@@ -332,6 +332,18 @@
     }
     .modal-footer .btn { flex: 0 1 auto; }
 
+    .role-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--copper-dark);
+      border: 1px solid var(--copper);
+      border-radius: 999px;
+      padding: 0.2em 0.7em;
+      margin-left: 1rem;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .dashboard-container { grid-template-columns: 1fr; }
@@ -349,6 +361,7 @@
     <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
     <nav class="nav-actions">
       <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);">Admin Panel</span>
+      <span id="roleBadge" class="role-badge" style="display:none;"></span>
       <a href="#" id="logoutLink" onclick="handleLogout(); return false;" style="margin-left:1.4rem;">Logout</a>
     </nav>
   </header>
@@ -418,6 +431,24 @@
         <div class="wire-divider" style="margin: 1.2rem 0; height: 4px;">
           <span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span>
+        </div>
+
+        <div id="pendingInstructorsSection" class="divider-section" style="display:none;">
+          <h3>👥 Pending Instructor Requests</h3>
+          <table class="audit-log">
+            <thead>
+              <tr>
+                <th>Instructor</th>
+                <th>Signed up</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="pendingInstructorsBody">
+              <tr>
+                <td colspan="3" class="empty-state">No pending requests.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div class="divider-section">
@@ -576,10 +607,10 @@
 
         console.log('✅ Authenticated as:', session.user.email);
 
-        // Verify instructor/admin role
+        // Verify instructor/admin role AND approval
         const { data: profile, error: profileError } = await supabaseClient
           .from('profiles')
-          .select('role')
+          .select('role, approved')
           .eq('id', session.user.id)
           .single();
 
@@ -595,6 +626,19 @@
           return;
         }
 
+        if (!profile.approved) {
+          console.log('Instructor not approved yet:', profile.role);
+          window.location.href = 'pending.html';
+          return;
+        }
+
+        // Show role badge
+        const roleBadge = document.getElementById('roleBadge');
+        if (roleBadge) {
+          roleBadge.textContent = profile.role === 'admin' ? 'Admin' : 'Instructor';
+          roleBadge.style.display = '';
+        }
+
         // Re-enable interactive elements
         document.getElementById('courseFilter').disabled = false;
         document.querySelectorAll('.btn-primary, .btn-table').forEach(btn => btn.disabled = false);
@@ -602,6 +646,9 @@
         // Load dashboard data
         await loadDashboard();
         await loadAuditLog();
+        if (profile.role === 'admin') {
+          await loadPendingInstructors();
+        }
 
       } catch (err) {
         console.error('Auth check error:', err);
@@ -851,6 +898,64 @@
     }
 
     function closeHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
+
+    // ============================================
+    // PENDING INSTRUCTOR REQUESTS (admin only)
+    // ============================================
+    async function loadPendingInstructors() {
+      const section = document.getElementById('pendingInstructorsSection');
+      if (!section) return;
+      section.style.display = '';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_pending_instructors');
+        if (error) {
+          console.error('Pending instructors error:', error.message);
+          return;
+        }
+
+        const tbody = document.getElementById('pendingInstructorsBody');
+        if (!data || data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No pending requests.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.map(row => `
+          <tr>
+            <td>
+              <strong>${row.full_name || row.email}</strong>
+              <div style="font-size: 0.75rem; color: var(--ink-soft);">${row.email}</div>
+            </td>
+            <td style="font-size: 0.8rem; color: var(--ink-soft);">${new Date(row.created_at).toLocaleDateString()}</td>
+            <td>
+              <button class="btn btn-table btn-primary"
+                onclick="approveInstructor('${row.user_id}')">
+                Approve
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Pending instructors load error:', err);
+      }
+    }
+
+    async function approveInstructor(userId) {
+      try {
+        const { data, error } = await supabaseClient.rpc('approve_instructor', {
+          p_user_id: userId
+        });
+
+        if (error) { showAlert(`Error: ${error.message}`, 'error'); return; }
+        if (data === 'not_found') { showAlert('Instructor not found.', 'error'); return; }
+
+        showAlert('✓ Instructor approved', 'success');
+        await loadPendingInstructors();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+      }
+    }
 
     // ============================================
     // AUDIT LOG

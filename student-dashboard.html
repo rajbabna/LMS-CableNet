@@ -152,6 +152,18 @@
     color: var(--ink-soft);
   }
 
+  .role-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    border-radius: 999px;
+    padding: 0.2em 0.7em;
+    margin-left: 1rem;
+  }
+
   @media (max-width: 768px) {
     .courses-grid { grid-template-columns: 1fr; }
   }
@@ -163,6 +175,7 @@
   <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
   <nav class="nav-actions">
     <span data-user-name style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <span data-user-role class="role-badge">Student</span>
     <a href="#" data-action="logout" id="logout-link" style="margin-left:1.4rem;">Log out</a>
   </nav>
 </header>
@@ -240,10 +253,16 @@
 
     console.log("✅ Auth passed - showing dashboard");
     
-    // Display user name
+    // Display user name + role badge
     const userNameEl = document.querySelector('[data-user-name]');
     if (userNameEl) {
       userNameEl.textContent = profile.full_name || session.user.email;
+    }
+    const roleBadgeEl = document.querySelector('[data-user-role]');
+    if (roleBadgeEl) {
+      roleBadgeEl.textContent = profile.role === 'instructor' || profile.role === 'admin'
+        ? 'Instructor'
+        : 'Student';
     }
     
     // Setup logout

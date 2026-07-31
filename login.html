@@ -71,6 +71,34 @@
       cursor: not-allowed;
     }
 
+    /* Role selection */
+    .role-options {
+      display: flex;
+      gap: 0.8rem;
+    }
+    .role-option {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.8rem 0.6rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--ink);
+    }
+    .role-option:hover { border-color: var(--copper); }
+    .role-option input { display: none; }
+    .role-option input:checked + span {
+      color: var(--copper-dark);
+      font-weight: 600;
+    }
+    .role-option:has(input:checked) {
+      border-color: var(--copper);
+      background: #FBF4EF;
+    }
+
     /* Smooth button transitions */
     .btn {
       width: 100%;
@@ -204,6 +232,20 @@
           >
         </div>
 
+        <div class="field">
+          <label>I am a...</label>
+          <div class="role-options">
+            <label class="role-option">
+              <input type="radio" name="signup-role" value="student" checked>
+              <span>🎓 Student</span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="signup-role" value="instructor">
+              <span>🧑‍🏫 Instructor</span>
+            </label>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-primary" id="signupBtn">
           <span id="signupBtnText">Create Account</span>
         </button>
@@ -254,6 +296,24 @@
       return data;
     }
 
+    // Sync the profile's role from the auth user's signup metadata.
+    // Needed because email confirmation means no session exists at signup
+    // time, so the profile row may be missing or still defaulted to student.
+    async function syncProfileRole(user, profile) {
+      const metaRole = user?.user_metadata?.role;
+      if (!metaRole) return profile;
+
+      const currentRole = profile?.role;
+      if (!profile || currentRole !== metaRole) {
+        const { error } = await supabaseClient.rpc('set_profile_role', { p_role: metaRole });
+        if (!error) {
+          const synced = await getProfile(user.id);
+          if (synced) return synced;
+        }
+      }
+      return profile;
+    }
+
     function routeByRole(profile) {
       if (!profile) {
         window.location.replace('pending.html');
@@ -262,7 +322,8 @@
 
       const role = profile.role;
       if (role === 'admin' || role === 'instructor') {
-        window.location.replace('instructor-dashboard.html');
+        // Instructors must be approved too (admin approves them)
+        window.location.replace(profile.approved ? 'instructor-dashboard.html' : 'pending.html');
       } else if (role === 'student') {
         window.location.replace(profile.approved ? 'student-dashboard.html' : 'pending.html');
       } else {
@@ -277,7 +338,8 @@
       try {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
-          const profile = await getProfile(user.id);
+          let profile = await getProfile(user.id);
+          profile = await syncProfileRole(user, profile);
           routeByRole(profile);
         }
       } catch (err) {
@@ -318,7 +380,8 @@
         if (data.user) {
           showAlert(`Welcome back, ${data.user.email}!`, 'success');
           const profile = await getProfile(data.user.id);
-          setTimeout(() => routeByRole(profile), 1200);
+          const synced = await syncProfileRole(data.user, profile);
+          setTimeout(() => routeByRole(synced), 1200);
         }
       } catch (err) {
         showAlert(`Error: ${err.message}`, 'error');
@@ -336,6 +399,7 @@
       const email = document.getElementById('signup-email').value.trim();
       const password = document.getElementById('signup-password').value;
       const confirm = document.getElementById('signup-confirm').value;
+      const role = document.querySelector('input[name="signup-role"]:checked')?.value || 'student';
 
       if (!email || !password || !confirm) {
         showAlert('Please fill in all fields', 'error');
@@ -359,7 +423,13 @@
       signupBtnText.innerHTML = '<span class="spinner"></span> Creating account...';
 
       try {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { role }
+          }
+        });
 
         if (error) {
           showAlert(`Sign up failed: ${error.message}`, 'error');
@@ -369,10 +439,20 @@
         }
 
         if (data.user) {
-          showAlert('Account created — waiting for approval.', 'success');
-          setTimeout(() => {
-            window.location.replace('pending.html');
-          }, 1200);
+          // If a session exists (email confirmation off), stamp the role now.
+          // Otherwise it's synced from user_metadata on first login.
+          if (data.session) {
+            await supabaseClient.rpc('set_profile_role', { p_role: role });
+          }
+
+          const isStaff = role === 'instructor' || role === 'admin';
+          showAlert(
+            isStaff
+              ? 'Account created — awaiting instructor approval.'
+              : 'Account created — waiting for approval.',
+            'success'
+          );
+          setTimeout(() => window.location.replace('pending.html'), 1200);
         }
       } catch (err) {
         showAlert(`Error: ${err.message}`, 'error');

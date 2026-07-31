@@ -57,7 +57,7 @@
 
       <span class="eyebrow">Status: awaiting approval</span>
       <h2>Your account is registered.</h2>
-      <p>An instructor needs to approve your access before you can open the course material. You'll be able to log in as soon as that happens.</p>
+      <p id="pending-message">Your access request has been sent to an instructor for review. You'll be able to log in as soon as it's approved.</p>
 
       <button type="button" class="btn btn-ghost" id="logout-btn" style="width:100%;">Log out</button>
 
@@ -73,6 +73,28 @@
       await supabaseClient.auth.signOut();
       window.location.href = 'index.html';
     });
+
+    (async () => {
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) return;
+
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!error && profile) {
+          const isStaff = profile.role === 'instructor' || profile.role === 'admin';
+          document.getElementById('pending-message').textContent = isStaff
+            ? 'Your instructor account is awaiting approval by an administrator. You\u2019ll get access as soon as it\u2019s approved.'
+            : 'Your access request has been sent to an instructor for review. You\u2019ll be able to log in as soon as it\u2019s approved.';
+        }
+      } catch (err) {
+        console.error('Pending page error:', err);
+      }
+    })();
   </script>
 </body>
 </html>
