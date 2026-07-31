@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Pending — Cable&Net Courses</title>
+  <meta name="description" content="Your Cable&Net Courses account is registered and awaiting instructor approval.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .pending-box {
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    .pending-box .eyebrow {
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .pending-box p {
+      margin: 0 0 1.2em;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    .back-link {
+      margin-top: 1.4rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+    .back-link a { color: var(--ink-soft); text-decoration: none; }
+    .back-link a:hover { color: var(--copper-dark); text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-shell">
+    <div class="auth-card pending-box">
+      <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+
+      <div class="wire-divider">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+
+      <span class="eyebrow">Status: awaiting approval</span>
+      <h2>Your account is registered.</h2>
+      <p>An instructor needs to approve your access before you can open the course material. You'll be able to log in as soon as that happens.</p>
+
+      <button type="button" class="btn btn-ghost" id="logout-btn" style="width:100%;">Log out</button>
+
+      <p class="back-link"><a href="index.html">&larr; Back to Courses</a></p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

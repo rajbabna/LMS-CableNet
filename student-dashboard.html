@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard — Cable &amp; Net Courses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CSS Stylesheets -->
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/progress-tracking-styles.css">
+
+<style>
+  /* Dashboard-specific styles (restored from old/student-dashboard.html) */
+  .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.8rem;
+  }
+
+  .course-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .course-card:hover {
+    border-color: var(--copper);
+    box-shadow: 0 4px 12px rgba(194, 98, 45, 0.15);
+  }
+
+  .course-card .port-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.25em 0.6em;
+    display: inline-block;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .course-card h3 {
+    margin: 0 0 1.2rem 0;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .progress-section {
+    flex-grow: 1;
+    margin-bottom: 1.4rem;
+  }
+
+  .progress-label {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.6rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar {
+    height: 8px;
+    margin-bottom: 0.8rem;
+  }
+
+  .progress-percentage {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .enrollment-date {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-bottom: 1.2rem;
+  }
+
+  .course-status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5em 0.8em;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 1.4rem;
+    font-weight: 600;
+  }
+
+  .course-status.not-started { background: #E8E5DC; color: var(--ink-soft); }
+  .course-status.in-progress  { background: #FBE8DC; color: var(--copper-dark); }
+  .course-status.completed    { background: #E4EEE1; color: var(--green); }
+
+  .course-actions {
+    display: flex;
+    gap: 0.8rem;
+  }
+
+  .btn-continue {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--copper);
+    color: #fff;
+    padding: 0.7em 1.2em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    text-align: center;
+  }
+
+  .btn-continue:hover {
+    background: var(--copper-dark);
+    text-decoration: none;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--ink-soft);
+  }
+
+  .empty-state h2 { color: var(--ink-soft); margin-bottom: 0.5em; }
+
+  .loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 2rem;
+    font-family: var(--font-mono);
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 768px) {
+    .courses-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <span data-user-name style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" id="logout-link" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<main>
+  <section class="hero">
+    <h1>My Courses</h1>
+    <p class="lede">Your enrolled courses and progress</p>
+  </section>
+  
+  <!-- Populated by student-dashboard.js (same pattern as load-courses.js on landing page) -->
+  <div id="coursesGrid" class="courses-grid" style="margin-top: 2rem;">
+    <div class="loading">Loading your courses...</div>
+  </div>
+</main>
+
+<div class="wire-divider"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- Load config and client BEFORE auth check -->
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+
+<!-- Auth Check & Setup -->
+<script>
+  (async () => {
+    console.log("🔐 Student Dashboard: Checking auth...");
+
+    // Check if user is logged in
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (!session) {
+      console.error("❌ Not logged in, redirecting to login");
+      window.location.replace("login.html");
+      return;
+    }
+
+    console.log("✅ User is logged in:", session.user.id);
+    
+    // Load user profile
+    const { data: profile, error: profileError } = await supabaseClient
+      .from("profiles")
+      .select("full_name, role, approved")
+      .eq("id", session.user.id)
+      .single();
+    
+    if (profileError) {
+      console.error("❌ Profile error:", profileError.message);
+      window.location.replace("login.html");
+      return;
+    }
+
+    console.log("✅ Profile loaded:", { role: profile.role, approved: profile.approved });
+
+    // Check if student and approved
+    if (profile.role !== "student") {
+      console.error("❌ Not a student role:", profile.role);
+      window.location.replace(profile.role === "admin" || profile.role === "instructor"
+        ? "instructor-dashboard.html"
+        : "index.html");
+      return;
+    }
+
+    if (!profile.approved) {
+      console.error("❌ Student not approved");
+      window.location.replace("pending.html");
+      return;
+    }
+
+    console.log("✅ Auth passed - showing dashboard");
+    
+    // Display user name
+    const userNameEl = document.querySelector('[data-user-name]');
+    if (userNameEl) {
+      userNameEl.textContent = profile.full_name || session.user.email;
+    }
+    
+    // Setup logout
+    const logoutLink = document.getElementById("logout-link");
+    if (logoutLink) {
+      logoutLink.addEventListener("click", async (e) => {
+        e.preventDefault();
+        console.log("🚀 Logging out...");
+        await supabaseClient.auth.signOut();
+        window.location.replace("index.html");
+      });
+    }
+  })();
+</script>
+
+<!-- Load student's enrolled courses (same pattern as landing page, but from enrollments table) -->
+<script src="js/progress/student-dashboard.js"></script>
+
+</body>
+</html>

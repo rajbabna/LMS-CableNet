@@ -1,5 +1,7 @@
 # 🚀 Cable&Net Courses - Dynamic System READY TO DEPLOY
 
+> 🔖 Picking this back up after a break? Check [RESUME.md](./RESUME.md) first for exactly where things stopped.
+
 > 📁 All documentation lives in `/docs`. Site files (`index.html`, `course-*.html`, `js/`, SQL) live in the project root — one level up from this folder.
 
 ## ✅ What's Done

@@ -8,3 +8,6 @@ const SUPABASE_URL = "https://mantjzpfhikezztonrga.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_t5GiOxBzTlWkRDR0pS0f0g_L1JhYfI0";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Expose globally so classic (non-module) scripts can use it
+window.supabaseClient = supabaseClient;

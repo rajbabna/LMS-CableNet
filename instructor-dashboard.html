@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructor Dashboard — Cable&Net Courses</title>
+  <meta name="description" content="Instructor dashboard for Cable&Net Courses. Monitor student progress, manage enrollments, and review audit logs.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Main theme CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* ===========================================================
+       Dashboard-specific styles (extends style.css)
+       =========================================================== */
+
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .dashboard-section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.8rem;
+    }
+
+    .dashboard-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+      color: var(--ink);
+    }
+
+    /* Filter controls */
+    .filter-bar {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar select {
+      padding: 0.6em 0.8em;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .filter-bar select:focus {
+      outline: 2px solid var(--copper);
+      outline-offset: 1px;
+    }
+
+    /* Data table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .data-table thead {
+      background: var(--line);
+    }
+
+    .data-table th {
+      padding: 0.8em 0.9em;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      border-bottom: 2px solid var(--line);
+    }
+
+    .data-table td {
+      padding: 0.9em;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+
+    .data-table tbody tr:hover {
+      background: #F9F7F2;
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      padding: 0.3em 0.6em;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-active    { background: #E4EEE1; color: var(--green); }
+    .status-completed { background: #E8F4FF; color: var(--blue); }
+    .status-withdrawn { background: #F7E4DC; color: var(--copper-dark); }
+    .status-paused    { background: #FEF3E0; color: var(--brown); }
+
+    /* Stalled indicator */
+    .stalled-flag {
+      color: var(--copper-dark);
+      font-weight: 600;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--copper);
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      min-width: 2.2em;
+      text-align: right;
+    }
+
+    /* Action buttons in table */
+    .action-buttons {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-table {
+      padding: 0.35em 0.7em;
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .btn-status {
+      background: var(--copper);
+      color: #fff;
+      border: 1px solid var(--copper);
+    }
+    .btn-status:hover { background: var(--copper-dark); border-color: var(--copper-dark); }
+
+    .btn-history {
+      background: var(--teal);
+      color: #fff;
+      border: 1px solid var(--teal);
+    }
+    .btn-history:hover { background: #1F4A52; border-color: #1F4A52; }
+
+    .btn-stalled {
+      background: transparent;
+      color: var(--copper-dark);
+      border: 1px solid var(--copper-dark);
+    }
+    .btn-stalled:hover { background: #F7E4DC; }
+
+    /* Primary action button */
+    .btn-action { width: 100%; margin-bottom: 1.2rem; }
+
+    /* Divider in right column */
+    .divider-section {
+      margin-top: 2rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--line);
+    }
+    .divider-section h3 { font-size: 1rem; margin-bottom: 1rem; }
+
+    /* Audit log table */
+    .audit-log {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .audit-log th {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      padding: 0.6em 0.7em;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-weight: 600;
+    }
+    .audit-log td {
+      padding: 0.6em 0.7em;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink-soft);
+    }
+    .audit-log tbody tr:hover { background: #F9F7F2; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--ink-soft);
+      font-style: italic;
+    }
+
+    /* Alert messages */
+    .alert-msg {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.7em 0.9em;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+      border: 1px solid transparent;
+    }
+    .alert-msg.show    { display: block; }
+    .alert-success { background: #E4EEE1; border-color: var(--green); color: var(--green); }
+    .alert-error   { background: #F7E4DC; border-color: var(--copper-dark); color: var(--copper-dark); }
+    .alert-info    { background: #E8F4FF; border-color: var(--teal); color: var(--teal); }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--line);
+      border-top-color: var(--copper);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5em;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(28, 36, 48, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 480px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+    .modal h3 { font-size: 1.2rem; margin-bottom: 1.4rem; color: var(--ink); }
+
+    .field { margin-bottom: 1.2rem; }
+    .field label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 0.5em;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 0.7em 0.8em;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    .field textarea { resize: vertical; min-height: 100px; }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus { outline: 2px solid var(--copper); outline-offset: 1px; }
+    .field small { display: block; font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.3em; }
+
+    .modal-footer {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: flex-end;
+      margin-top: 1.8rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--line);
+    }
+    .modal-footer .btn { flex: 0 1 auto; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-container { grid-template-columns: 1fr; }
+      .action-buttons { flex-direction: column; }
+      .btn-table { width: 100%; text-align: center; }
+      .data-table { font-size: 0.85rem; }
+      .data-table th, .data-table td { padding: 0.6em 0.7em; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+    <nav class="nav-actions">
+      <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);">Admin Panel</span>
+      <a href="#" id="logoutLink" onclick="handleLogout(); return false;" style="margin-left:1.4rem;">Logout</a>
+    </nav>
+  </header>
+
+  <div class="wire-divider">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <main>
+    <!-- Hero -->
+    <div class="hero">
+      <span class="eyebrow">📊 Instructor Dashboard</span>
+      <h1>Student Progress &amp; Enrollment</h1>
+      <p class="lede">Monitor your students' progress across all enrolled courses. Update enrollment status, mark students as stalled, and review the complete audit trail.</p>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert" class="alert-msg" role="alert" aria-live="polite"></div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-container">
+
+      <!-- Left: Student Progress Table -->
+      <div class="dashboard-section">
+        <h2>📚 Your Students</h2>
+
+        <!-- Filter -->
+        <div class="filter-bar">
+          <select id="courseFilter" onchange="loadDashboard()">
+            <option value="">All Courses</option>
+            <option value="cabling">Cabling &amp; Infrastructure</option>
+            <option value="networking">Networking &amp; Troubleshooting</option>
+          </select>
+        </div>
+
+        <!-- Students Table -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>Stalled</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <tr>
+              <td colspan="6" class="empty-state">
+                <span class="spinner"></span> Loading students...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right: Quick Actions & Audit Log -->
+      <div class="dashboard-section">
+        <h2>✅ Quick Actions</h2>
+
+        <button class="btn btn-primary btn-action" id="enrollBtn" onclick="openEnrollModal()">
+          ➕ Enroll New Student
+        </button>
+
+        <div class="wire-divider" style="margin: 1.2rem 0; height: 4px;">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="divider-section">
+          <h3>Recent Audit Log</h3>
+          <table class="audit-log">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Course</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogBody">
+              <tr>
+                <td colspan="3" class="empty-state">
+                  <span class="spinner"></span> Loading...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal: Enroll Student -->
+  <div id="enrollModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="enrollModalTitle">
+    <div class="modal">
+      <h3 id="enrollModalTitle">➕ Enroll New Student</h3>
+
+      <div class="field">
+        <label for="enrollStudentId">Student Email</label>
+        <input type="email" id="enrollStudentId" placeholder="student@example.com" autocomplete="off">
+        <small>Copy the student's email from your enrollment list.</small>
+      </div>
+
+      <div class="field">
+        <label for="enrollCourseId">Course</label>
+        <select id="enrollCourseId">
+          <option value="">-- Select Course --</option>
+          <option value="cabling">Cabling &amp; Infrastructure</option>
+          <option value="networking">Networking &amp; Troubleshooting</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeEnrollModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitEnroll()">Enroll</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Update Status -->
+  <div id="statusModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
+    <div class="modal">
+      <h3 id="statusModalTitle">📝 Update Enrollment Status</h3>
+
+      <div class="field">
+        <label for="statusSelect">New Status</label>
+        <select id="statusSelect">
+          <option value="">-- Select Status --</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="paused">Paused</option>
+          <option value="withdrawn">Withdrawn</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeStatusModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitStatusUpdate()">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Mark Stalled -->
+  <div id="stalledModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="stalledModalTitle">
+    <div class="modal">
+      <h3 id="stalledModalTitle">🚩 Mark Student as Stalled</h3>
+
+      <div class="field">
+        <label for="stalledReason">Reason (required)</label>
+        <textarea id="stalledReason" placeholder="e.g., Missed 3 consecutive modules, unable to reach in office hours..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeStalledModal()">Cancel</button>
+        <button class="btn btn-primary" style="background: var(--copper-dark);" onclick="submitMarkStalled()">Mark Stalled</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Student History -->
+  <div id="historyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="modal">
+      <h3 id="historyModalTitle">📜 Student History</h3>
+
+      <table class="data-table" style="margin-bottom: 1rem;">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Previous</th>
+            <th>New</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr>
+            <td colspan="4" class="empty-state">
+              <span class="spinner"></span> Loading history...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeHistoryModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- Load config and client BEFORE auth check -->
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <script>
+    // ============================================
+    // STATE
+    // ============================================
+    let currentStudentId   = null;
+    let currentEnrollmentId = null;
+    let currentCourseId    = null;
+
+    // ============================================
+    // INITIALISATION
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('Dashboard initialising...');
+
+      // Disable interactive elements until auth check completes
+      document.getElementById('courseFilter').disabled = true;
+      document.querySelectorAll('.btn-primary, .btn-table').forEach(btn => btn.disabled = true);
+
+      try {
+        const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
+
+        if (authError || !session) {
+          console.log('Not authenticated, redirecting to login...');
+          window.location.href = 'login.html';
+          return;
+        }
+
+        console.log('✅ Authenticated as:', session.user.email);
+
+        // Verify instructor/admin role
+        const { data: profile, error: profileError } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError || !profile) {
+          console.error('Profile error:', profileError && profileError.message);
+          window.location.href = 'login.html';
+          return;
+        }
+
+        if (profile.role !== 'admin' && profile.role !== 'instructor') {
+          console.log('Not an instructor role:', profile.role);
+          window.location.href = 'student-dashboard.html';
+          return;
+        }
+
+        // Re-enable interactive elements
+        document.getElementById('courseFilter').disabled = false;
+        document.querySelectorAll('.btn-primary, .btn-table').forEach(btn => btn.disabled = false);
+
+        // Load dashboard data
+        await loadDashboard();
+        await loadAuditLog();
+
+      } catch (err) {
+        console.error('Auth check error:', err);
+        showAlert('Authentication error. Redirecting to login...', 'error');
+
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+      }
+    });
+
+    // ============================================
+    // LOAD DASHBOARD
+    // ============================================
+    async function loadDashboard() {
+      const courseFilter = document.getElementById('courseFilter').value;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_instructor_dashboard', {
+          p_course_id: courseFilter || null
+        });
+
+        if (error) {
+          showAlert(`Error loading dashboard: ${error.message}`, 'error');
+          console.error('Dashboard error:', error);
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          document.getElementById('studentTableBody').innerHTML = `
+            <tr>
+              <td colspan="6" class="empty-state">
+                No students enrolled yet. Use "Enroll New Student" to get started.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        const tbody = document.getElementById('studentTableBody');
+        tbody.innerHTML = data.map(row => `
+          <tr>
+            <td>${row.student_name}</td>
+            <td>${row.course_title}</td>
+            <td>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${row.progress_percentage || 0}%"></div>
+                </div>
+                <div class="progress-text">${row.progress_percentage || 0}%</div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge status-${row.enrollment_status}">
+                ${row.enrollment_status}
+              </span>
+            </td>
+            <td>
+              ${row.is_stalled
+                ? '<span class="stalled-flag">🚩 Yes</span>'
+                : '<span style="color: var(--green);">No</span>'}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-table btn-status"
+                  onclick="openStatusModal('${row.student_id}', '${row.student_name}', '${row.course_id}', '${row.enrollment_status}')">
+                  Status
+                </button>
+                <button class="btn btn-table btn-history"
+                  onclick="openHistoryModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                  History
+                </button>
+                <button class="btn btn-table btn-stalled"
+                  onclick="openStalledModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                  Stalled
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+        console.error('Load dashboard error:', err);
+      }
+    }
+
+    // ============================================
+    // ENROLL STUDENT
+    // ============================================
+    function openEnrollModal()  { document.getElementById('enrollModal').classList.add('active'); }
+
+    function closeEnrollModal() {
+      document.getElementById('enrollModal').classList.remove('active');
+      document.getElementById('enrollStudentId').value = '';
+      document.getElementById('enrollCourseId').value  = '';
+    }
+
+    async function submitEnroll() {
+      const studentEmail = document.getElementById('enrollStudentId').value.trim();
+      const courseId     = document.getElementById('enrollCourseId').value;
+
+      if (!studentEmail || !courseId) {
+        showAlert('Please fill in all fields', 'error');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.rpc('enroll_student', {
+          p_email:     studentEmail,
+          p_course_id: courseId
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          return;
+        }
+
+        if (data === 'not_found') {
+          showAlert('No account found with that email.', 'error');
+          return;
+        }
+
+        showAlert('✓ Student approved and enrolled', 'success');
+        closeEnrollModal();
+        await loadDashboard();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+      }
+    }
+
+    // ============================================
+    // UPDATE STATUS
+    // ============================================
+    function openStatusModal(studentId, studentName, courseId, currentStatus) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('statusModal').classList.add('active');
+      document.getElementById('statusModalTitle').textContent = `📝 Update Status for ${studentName}`;
+      document.getElementById('statusSelect').value = currentStatus;
+    }
+
+    function closeStatusModal() { document.getElementById('statusModal').classList.remove('active'); }
+
+    async function submitStatusUpdate() {
+      const newStatus = document.getElementById('statusSelect').value;
+      if (!newStatus) { showAlert('Please select a status', 'error'); return; }
+
+      try {
+        const { data, error } = await supabaseClient.rpc('update_enrollment_status', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId,
+          p_new_status: newStatus
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          return;
+        }
+
+        if (data === 'not_found') {
+          showAlert('Enrollment not found for this student/course.', 'error');
+          return;
+        }
+
+        showAlert('✓ Status updated', 'success');
+        closeStatusModal();
+        await loadDashboard();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+      }
+    }
+
+    // ============================================
+    // MARK STALLED
+    // ============================================
+    function openStalledModal(studentId, studentName, courseId) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('stalledModal').classList.add('active');
+      document.getElementById('stalledModalTitle').textContent = `🚩 Mark ${studentName} as Stalled`;
+      document.getElementById('stalledReason').value = '';
+    }
+
+    function closeStalledModal() { document.getElementById('stalledModal').classList.remove('active'); }
+
+    async function submitMarkStalled() {
+      const reason = document.getElementById('stalledReason').value;
+
+      if (!reason.trim()) { showAlert('Reason is required', 'error'); return; }
+
+      try {
+        const { data, error } = await supabaseClient.rpc('mark_student_stalled', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId,
+          p_stalled:    true,
+          p_reason:     reason
+        });
+
+        if (error) { showAlert(`Error: ${error.message}`, 'error'); return; }
+
+        showAlert('✓ Student marked as stalled', 'success');
+        closeStalledModal();
+        await loadDashboard();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+      }
+    }
+
+    // ============================================
+    // VIEW HISTORY
+    // ============================================
+    async function openHistoryModal(studentId, studentName, courseId) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('historyModalTitle').textContent = `📜 History for ${studentName}`;
+      document.getElementById('historyModal').classList.add('active');
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_student_history', {
+          p_student_id: studentId,
+          p_course_id:  courseId
+        });
+
+        if (error) { showAlert(`Error loading history: ${error.message}`, 'error'); return; }
+
+        const tbody = document.getElementById('historyTableBody');
+        if (!data || data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No history found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.map(row => `
+          <tr>
+            <td>${row.action}</td>
+            <td>${row.previous_status || '—'}</td>
+            <td>${row.new_status || '—'}</td>
+            <td style="font-size: 0.8rem; color: var(--ink-soft);">${new Date(row.changed_at).toLocaleString()}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    function closeHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
+
+    // ============================================
+    // AUDIT LOG
+    // ============================================
+    async function loadAuditLog() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('student_audit_log')
+          .select('action, course_id, changed_at')
+          .order('changed_at', { ascending: false })
+          .limit(10);
+
+        if (error) { console.error('Audit log error:', error); return; }
+
+        const tbody = document.getElementById('auditLogBody');
+        if (!data || data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No audit entries yet</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.map(row => `
+          <tr>
+            <td style="font-family: var(--font-mono); font-size: 0.75rem;">${row.action}</td>
+            <td style="color: var(--copper-dark); font-weight: 600;">${row.course_id}</td>
+            <td>${new Date(row.changed_at).toLocaleTimeString()}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Audit log load error:', err);
+      }
+    }
+
+    // ============================================
+    // UTILITY
+    // ============================================
+    function showAlert(message, type = 'info') {
+      const alertEl = document.getElementById('alert');
+      alertEl.textContent = message;
+      alertEl.className = `alert-msg show alert-${type}`;
+
+      if (type === 'success') {
+        setTimeout(() => alertEl.classList.remove('show'), 4000);
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) { showAlert(`Error logging out: ${error.message}`, 'error'); return; }
+
+        console.log('✓ Logged out successfully');
+        showAlert('Logging out...', 'info');
+
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1000);
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
+        console.error('Logout error:', err);
+      }
+    }
+  </script>
+</body>
+</html>

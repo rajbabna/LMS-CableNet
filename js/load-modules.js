@@ -1,7 +1,9 @@
 // ===========================================================
 // load-modules.js
 // Fetches modules from Supabase for a specific course
-// and renders them dynamically on the course pages
+// and renders them dynamically on the course pages.
+// Also renders per-module progress + "Mark Complete" buttons,
+// which are handled by js/progress/progress-tracker.js
 // ===========================================================
 
 async function loadModulesForCourse(courseId) {
@@ -10,6 +12,25 @@ async function loadModulesForCourse(courseId) {
   if (!moduleList) {
     console.log('No .module-list container found — skipping module loading');
     return;
+  }
+
+  // Tag the container so progress-tracker.js can read the course id
+  moduleList.setAttribute('data-course-id', courseId);
+
+  // Load the student's completed modules (if logged in) to pre-mark buttons
+  let completedIds = new Set();
+  try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const { data: completions } = await supabaseClient
+        .from('module_completions')
+        .select('module_id')
+        .eq('user_id', user.id)
+        .eq('status', 'completed');
+      completedIds = new Set((completions || []).map(c => c.module_id));
+    }
+  } catch (err) {
+    console.error('Could not load completions:', err);
   }
 
   try {
@@ -39,7 +60,8 @@ async function loadModulesForCourse(courseId) {
     // Render each module as a list item
     modules.forEach(module => {
       const li = document.createElement('li');
-      
+      li.setAttribute('data-module-id', module.id);
+
       // Determine icon or label based on content type
       let contentLabel = 'open lesson';
       switch(module.content_type) {
@@ -58,7 +80,9 @@ async function loadModulesForCourse(courseId) {
         default:
           contentLabel = 'open lesson';
       }
-      
+
+      const completed = completedIds.has(module.id);
+
       li.innerHTML = `
         <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
         <span>
@@ -66,8 +90,20 @@ async function loadModulesForCourse(courseId) {
           ${module.description ? `<br><span style="font-size: 0.9em; color: var(--ink-soft);">${module.description}</span>` : ''}
           <br>
           <a href="${module.content_url}" target="_blank">${contentLabel}</a>
+          <div class="module-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
+            </div>
+            <div class="progress-text">${completed ? '100%' : '0%'}</div>
+          </div>
+          <div class="module-actions">
+            <button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
+              ${completed ? '✓ Completed' : 'Mark Complete'}
+            </button>
+          </div>
         </span>
       `;
+
       moduleList.appendChild(li);
     });
 
