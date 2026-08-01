@@ -547,12 +547,14 @@
       <div class="dashboard-section">
         <h2>✅ Quick Actions</h2>
 
-        <button class="btn btn-primary btn-action" id="enrollBtn" onclick="openEnrollModal()">
-          ➕ Add Student / Account
-        </button>
-        <small style="display:block; margin-top:0.4rem; color: var(--ink-soft);">
-          Enroll an existing student, or create a new account (no confirmation email needed).
-        </small>
+        <div id="enrollSection">
+          <button class="btn btn-primary btn-action" id="enrollBtn" onclick="openEnrollModal()">
+            ➕ Add Student / Account
+          </button>
+          <small style="display:block; margin-top:0.4rem; color: var(--ink-soft);">
+            Enroll an existing student, or create a new account (no confirmation email needed).
+          </small>
+        </div>
 
         <div class="wire-divider" style="margin: 1.2rem 0; height: 4px;">
           <span></span><span></span><span></span><span></span>
@@ -781,6 +783,12 @@
         if (roleBadge) {
           roleBadge.textContent = profile.role === 'admin' ? 'Admin' : 'Instructor';
           roleBadge.style.display = '';
+        }
+
+        // Only admins create accounts / enroll students
+        const enrollSection = document.getElementById('enrollSection');
+        if (enrollSection) {
+          enrollSection.style.display = profile.role === 'admin' ? '' : 'none';
         }
 
         // Re-enable interactive elements
