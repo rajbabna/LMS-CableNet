@@ -69,6 +69,7 @@
     canLog = true;
     document.getElementById('profileName').textContent = profile.full_name || profile.email;
     document.getElementById('profileRole').textContent = profile.role === 'admin' ? 'Admin' : 'Instructor';
+    document.getElementById('profileRole').className = 'role-badge role-badge--' + profile.role;
     document.getElementById('profileRole').style.display = '';
 
     return true;

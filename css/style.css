@@ -130,6 +130,16 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   padding: 0.2em 0.7em;
   margin-left: 1rem;
 }
+.role-badge--admin {
+  background: var(--copper);
+  border-color: var(--copper);
+  color: #fff;
+}
+.role-badge--instructor {
+  background: transparent;
+  border-color: var(--teal);
+  color: var(--teal);
+}
 
 main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 

@@ -773,6 +773,7 @@
         const roleBadge = document.getElementById('roleBadge');
         if (roleBadge) {
           roleBadge.textContent = profile.role === 'admin' ? 'Admin' : 'Instructor';
+          roleBadge.className = `role-badge role-badge--${profile.role}`;
           roleBadge.style.display = '';
         }
 
