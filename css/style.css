@@ -136,8 +136,8 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   color: #fff;
 }
 .role-badge--instructor {
-  background: var(--teal);
-  border-color: var(--teal);
+  background: var(--blue);
+  border-color: var(--blue);
   color: #fff;
 }
 .role-badge--student {
