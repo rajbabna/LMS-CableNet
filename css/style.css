@@ -169,35 +169,6 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 }
 
 /* ===========================================================
-   Practice quiz — the Puter-hosted MCQ sits beside its
-   section heading in its own card, mirroring the port grid.
-   =========================================================== */
-.quiz-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: 2.5rem;
-  align-items: start;
-  margin-top: 2.5rem;
-}
-.quiz-intro h2 { margin: 0.5rem 0 0.8rem; }
-.quiz-card {
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 1.4rem;
-}
-.quiz-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-@media (max-width: 820px) {
-  .quiz-layout { grid-template-columns: 1fr; gap: 1.5rem; }
-}
-
-/* ===========================================================
    Buttons & forms
    =========================================================== */
 .btn {
