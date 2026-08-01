@@ -218,13 +218,13 @@
     <h1>Basic Network Quiz</h1>
   </div>
   <div class="quiz-meta">
-    <span class="pill" id="cardCount">5 questions</span>
+    <span class="pill" id="cardCount">5 of 15 per round</span>
     <span class="pill" id="bestPill">Best: —</span>
   </div>
 
   <!-- Start screen -->
   <div class="start-screen" id="startScreen">
-    <p>Five quick questions to see where you stand before enrolling. No account needed — your best score is saved on your device (and to your Puter account if you sign in).</p>
+    <p>Each attempt deals you 5 random questions from a pool of 15, so you get a fresh mix every time. No account needed — your best score is saved on your device (and to your Puter account if you sign in).</p>
     <button class="btn-primary" id="startBtn">Start Quiz</button>
   </div>
 
@@ -264,7 +264,9 @@
 (function () {
   'use strict';
 
-  // ---- Simple, beginner-friendly questions ----
+  // ---- Beginner-friendly question pool ----
+  // Each attempt deals 5 random questions from this pool, so every
+  // student gets a different set.
   var QUESTIONS = [
     {
       q: "What is the internet?",
@@ -295,11 +297,74 @@
       options: ["To make the internet faster", "To keep our accounts and personal data safe", "To charge devices", "To connect to Wi-Fi"],
       correct: 1,
       explanation: "Passwords protect your accounts so only you (and people you trust) can access them."
+    },
+    {
+      q: "What does an Ethernet cable do?",
+      options: ["Connects a device to a wired network", "Charges your phone wirelessly", "Increases your screen brightness", "Stores your photos"],
+      correct: 0,
+      explanation: "Ethernet is the wired way to connect devices like a computer to a router or switch for a stable link."
+    },
+    {
+      q: "What is a modem?",
+      options: ["The box that connects your home to your internet service", "A tool for cutting cable", "A type of web browser", "An app for printing"],
+      correct: 0,
+      explanation: "A modem connects your home network to your internet service provider's line."
+    },
+    {
+      q: "What is an IP address?",
+      options: ["A unique address that identifies a device on a network", "A password for your Wi-Fi", "A type of cable connector", "An email address"],
+      correct: 0,
+      explanation: "An IP address is like a mailing address for a device, so data can find its way to it."
+    },
+    {
+      q: "What is a LAN?",
+      options: ["A network in a small area like a home or office", "A very long cable", "A type of password", "A web address"],
+      correct: 0,
+      explanation: "LAN stands for Local Area Network — a network covering a small area with devices close together."
+    },
+    {
+      q: "What does 'bandwidth' mean?",
+      options: ["How much data a connection can carry at once", "The width of a cable", "The speed of your fan", "The number of devices you own"],
+      correct: 0,
+      explanation: "Bandwidth is how much data a connection can move at one time — higher is better for streaming and downloads."
+    },
+    {
+      q: "What does a network switch do?",
+      options: ["Connects multiple devices on a network so they can communicate", "Charges your devices", "Connects your home to the power grid", "Stores your passwords"],
+      correct: 0,
+      explanation: "A switch links wired devices and forwards data between them inside a network."
+    },
+    {
+      q: "What does Mbps measure?",
+      options: ["Cable length", "Internet speed", "Screen size", "Battery life"],
+      correct: 1,
+      explanation: "Megabits per second (Mbps) measures how fast data travels on your connection."
+    },
+    {
+      q: "What is a browser cache?",
+      options: ["Stored copies of web pages that make them load faster", "A list of your passwords", "A type of Wi-Fi router", "A backup of your files"],
+      correct: 0,
+      explanation: "The cache keeps recent copies of pages on your device so revisiting them is quicker."
+    },
+    {
+      q: "What does a firewall do?",
+      options: ["Blocks unwanted traffic to protect your network", "Speeds up your internet connection", "Cools down your computer", "Powers your router"],
+      correct: 0,
+      explanation: "A firewall filters what data can enter or leave your network, keeping unwanted traffic out."
+    },
+    {
+      q: "What does the @ symbol separate in an email address?",
+      options: ["The username from the domain", "The password from the username", "The subject from the message", "The sender from the receiver"],
+      correct: 0,
+      explanation: "In name@example.com, the @ separates your username from the mail server's domain."
     }
   ];
 
   var STORE_KEY = 'cn_basic_quiz_best';
   var PUTER_KV_KEY = 'cn_basic_quiz_best_score';
+
+  var POOL_SIZE = QUESTIONS.length;
+  var ROUND_SIZE = 5;
 
   var currentDeck = [];
   var currentIndex = 0;
@@ -374,7 +439,7 @@
     el.startScreen.style.display = 'none';
     el.resultsScreen.style.display = 'none';
     el.quizScreen.style.display = 'block';
-    el.cardCount.textContent = deck.length + ' questions';
+    el.cardCount.textContent = deck.length + ' of ' + POOL_SIZE + ' per round';
     renderQuestion();
   }
 
@@ -456,8 +521,8 @@
   }
 
   // ---- Wire up ----
-  el.startBtn.addEventListener('click', function () { startQuiz(shuffle(QUESTIONS)); });
-  el.retryBtn.addEventListener('click', function () { startQuiz(shuffle(QUESTIONS)); });
+  el.startBtn.addEventListener('click', function () { startQuiz(shuffle(QUESTIONS).slice(0, ROUND_SIZE)); });
+  el.retryBtn.addEventListener('click', function () { startQuiz(shuffle(QUESTIONS).slice(0, ROUND_SIZE)); });
   el.nextBtn.addEventListener('click', function () {
     currentIndex++;
     renderQuestion();
