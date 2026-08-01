@@ -103,6 +103,31 @@
   .course-status.not-started { background: #E8E5DC; color: var(--ink-soft); }
   .course-status.in-progress  { background: #FBE8DC; color: var(--copper-dark); }
   .course-status.completed    { background: #E4EEE1; color: var(--green); }
+  .course-status.preview      { background: #E3EAF7; color: #3B5B92; }
+
+  /* Preview (not enrolled) card styling */
+  .course-card.course-preview {
+    background: var(--paper);
+    border-style: dashed;
+    border-color: var(--line);
+    opacity: 0.92;
+  }
+
+  .course-card.course-preview .course-desc {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin: 0 0 1.2rem 0;
+  }
+
+  .course-card.course-preview .btn-continue {
+    background: var(--line);
+    color: var(--ink-soft);
+  }
+
+  .course-card.course-preview .btn-continue:hover {
+    background: #cfcbbd;
+    box-shadow: none;
+  }
 
   .course-actions {
     display: flex;

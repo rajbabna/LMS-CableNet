@@ -11,13 +11,13 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/progress-tracking-styles.css">
 </head>
-<body>
+<body data-course="networking">
 
 <header class="site-header">
   <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
   <nav class="nav-actions">
     <a href="student-dashboard.html">Dashboard</a>
-    <a href="course-cabling.html">Level 1 — Cabling &amp; Infrastructure</a>
+    <a href="course-cabling.html" data-target-course="cabling">Level 1 — Cabling &amp; Infrastructure</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -33,6 +33,11 @@
     <span class="port-num">PORT 02</span>
     <h1>Level 2 — Network Operations: Configuration &amp; Troubleshooting</h1>
   </section>
+
+  <!-- Preview notice - shown when the student is not enrolled in this course -->
+  <div id="previewBanner" class="preview-banner" style="display:none;">
+    <strong>Preview mode</strong> — You're not enrolled in this course yet. You can browse the module list, but resources and progress tracking are locked. <a href="student-dashboard.html">Back to dashboard</a>
+  </div>
 
   <!-- Populated dynamically by load-modules-UPDATED.js -->
   <ul class="module-list" id="moduleList"></ul>

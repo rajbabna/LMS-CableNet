@@ -80,6 +80,37 @@
   background: #f0f8f5;
 }
 
+/* Preview Mode */
+.preview-banner {
+  margin: 1.2rem 0;
+  padding: 0.9rem 1.2rem;
+  background: #fdf3e3;
+  border: 1px solid #e4c98a;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.preview-banner a {
+  color: var(--copper-dark);
+  text-decoration: underline;
+}
+
+.preview-locked {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  background: #f1f1ee;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  padding: 0.4em 0.8em;
+  margin: 0.2rem 0;
+  cursor: default;
+}
+
+
 /* Toast Notification */
 .toast-notification {
   position: fixed;

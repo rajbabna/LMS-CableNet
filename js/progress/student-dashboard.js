@@ -62,31 +62,53 @@ class StudentDashboard {
 
   async fetchCourses() {
     try {
-      // Query course_progress_view for this user's courses
-      const { data, error } = await this.supabase
-        .from("course_progress_view")
-        .select(`
-          enrollment_id,
-          user_id,
-          course_id,
-          course_title,
-          port_number,
-          total_modules,
-          completed_modules,
-          progress_percentage,
-          status,
-          enrolled_at,
-          completed_at
-        `)
-        .eq("user_id", this.currentUser.id)
+      // Fetch ALL courses (so students can preview unenrolled ones)
+      const { data: allCourses, error: coursesError } = await this.supabase
+        .from("courses")
+        .select("id, title, description, port_number")
         .order("port_number", { ascending: true });
 
-      if (error) {
-        console.error("Fetch courses error:", error);
-        throw error;
+      if (coursesError) {
+        console.error("Fetch courses error:", coursesError);
+        throw coursesError;
       }
 
-      this.courses = data || [];
+      // Fetch this student's enrollments
+      const { data: enrollments } = await this.supabase
+        .from("enrollments")
+        .select("course_id")
+        .eq("user_id", this.currentUser.id);
+
+      const enrolledSet = new Set((enrollments || []).map(e => e.course_id));
+
+      // Fetch progress rows (enrolled courses only)
+      const { data: progressRows } = await this.supabase
+        .from("course_progress_view")
+        .select("*")
+        .eq("user_id", this.currentUser.id);
+
+      const progressByCourse = {};
+      (progressRows || []).forEach(row => {
+        progressByCourse[row.course_id] = row;
+      });
+
+      // Merge: every course gets a card; enrolled ones carry progress data
+      this.courses = (allCourses || []).map(course => {
+        const progress = progressByCourse[course.id];
+        return {
+          course_id: course.id,
+          course_title: course.title,
+          description: course.description,
+          port_number: course.port_number,
+          is_enrolled: enrolledSet.has(course.id),
+          total_modules: progress ? progress.total_modules : 0,
+          completed_modules: progress ? progress.completed_modules : 0,
+          progress_percentage: progress ? progress.progress_percentage : 0,
+          status: progress ? progress.status : null,
+          enrolled_at: progress ? progress.enrolled_at : null,
+          completed_at: progress ? progress.completed_at : null
+        };
+      });
     } catch (error) {
       console.error("Error fetching courses:", error);
       this.courses = [];
@@ -125,6 +147,9 @@ class StudentDashboard {
   createCourseCard(course) {
     const card = document.createElement("div");
     card.className = "course-card";
+    if (!course.is_enrolled) {
+      card.classList.add("course-preview");
+    }
 
     // Calculate progress
     const progressPercent = course.progress_percentage || 0;
@@ -135,16 +160,21 @@ class StudentDashboard {
     let statusLabel = "○ Not Started";
     let statusClass = "not-started";
 
-    if (progressPercent === 100) {
-      statusLabel = "✓ Completed";
-      statusClass = "completed";
-    } else if (progressPercent > 0) {
-      statusLabel = "⟳ In Progress";
-      statusClass = "in-progress";
+    if (course.is_enrolled) {
+      if (progressPercent === 100) {
+        statusLabel = "✓ Completed";
+        statusClass = "completed";
+      } else if (progressPercent > 0) {
+        statusLabel = "⟳ In Progress";
+        statusClass = "in-progress";
+      }
+    } else {
+      statusLabel = "👁 Preview only";
+      statusClass = "preview";
     }
 
     // Format enrollment date
-    const enrolledDate = this.formatDate(course.enrolled_at);
+    const enrolledDate = course.is_enrolled ? this.formatDate(course.enrolled_at) : "Not enrolled";
 
     // Determine course link based on course_id
     const courseLinks = {
@@ -158,20 +188,21 @@ class StudentDashboard {
       <div class="port-num">Port ${course.port_number}</div>
       
       <h3>${this.escapeHtml(course.course_title)}</h3>
+      ${course.description ? `<p class="course-desc">${this.escapeHtml(course.description)}</p>` : ''}
       
       <div class="progress-section">
         <div class="progress-label">
           <span>${completedModules} of ${totalModules} modules complete</span>
-          <span class="progress-percentage">${progressPercent}%</span>
+          <span class="progress-percentage">${course.is_enrolled ? progressPercent + '%' : '—'}</span>
         </div>
         
         <div class="progress-bar">
-          <div class="progress-fill" style="width: ${progressPercent}%"></div>
+          <div class="progress-fill" style="width: ${course.is_enrolled ? progressPercent : 0}%"></div>
         </div>
       </div>
 
       <div class="enrollment-date">
-        Enrolled ${enrolledDate}
+        ${enrolledDate}
       </div>
 
       <div class="course-status ${statusClass}">
@@ -180,7 +211,7 @@ class StudentDashboard {
 
       <div class="course-actions">
         <a href="${courseLink}" class="btn-continue">
-          Continue Course →
+          ${course.is_enrolled ? 'Continue Course →' : 'Preview Course →'}
         </a>
       </div>
     `;

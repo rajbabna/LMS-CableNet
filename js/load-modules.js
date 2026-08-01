@@ -14,8 +14,23 @@ async function loadModulesForCourse(courseId) {
     return;
   }
 
+  // Wait for auth-guard to finish setting the enrollment flag
+  if (window.authGuardReady) {
+    try { await window.authGuardReady; } catch (err) { /* guard redirected; bail */ return; }
+  }
+
   // Tag the container so progress-tracker.js can read the course id
   moduleList.setAttribute('data-course-id', courseId);
+
+  // Preview mode = approved student who is NOT enrolled in this course.
+  // They can browse module titles/descriptions but resources + completion are locked.
+  const isPreview = document.body.dataset.enrolled !== 'true';
+
+  // Show the preview notice banner on the page when applicable
+  const previewBanner = document.getElementById('previewBanner');
+  if (previewBanner) {
+    previewBanner.style.display = isPreview ? 'block' : 'none';
+  }
 
   // Load the student's completed modules (if logged in) to pre-mark buttons
   let completedIds = new Set();
@@ -83,24 +98,33 @@ async function loadModulesForCourse(courseId) {
 
       const completed = completedIds.has(module.id);
 
+      // In preview mode the resource link + completion are replaced with a locked notice
+      const resourceHtml = isPreview
+        ? `<span class="preview-locked">🔒 Preview only — enroll to open resources</span>`
+        : `<a href="${module.content_url}" target="_blank">${contentLabel}</a>`;
+
+      const completionHtml = isPreview
+        ? `<div class="module-actions"><span class="preview-locked">🔒 Enrollment required</span></div>`
+        : `<div class="module-actions">
+            <button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
+              ${completed ? '✓ Completed' : 'Mark Complete'}
+            </button>
+          </div>`;
+
       li.innerHTML = `
         <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
         <span>
           <strong>${module.title}</strong>
           ${module.description ? `<br><span style="font-size: 0.9em; color: var(--ink-soft);">${module.description}</span>` : ''}
           <br>
-          <a href="${module.content_url}" target="_blank">${contentLabel}</a>
+          ${resourceHtml}
           <div class="module-progress">
             <div class="progress-bar">
               <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
             </div>
             <div class="progress-text">${completed ? '100%' : '0%'}</div>
           </div>
-          <div class="module-actions">
-            <button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
-              ${completed ? '✓ Completed' : 'Mark Complete'}
-            </button>
-          </div>
+          ${completionHtml}
         </span>
       `;
 

@@ -522,8 +522,11 @@
         <h2>✅ Quick Actions</h2>
 
         <button class="btn btn-primary btn-action" id="enrollBtn" onclick="openEnrollModal()">
-          ➕ Enroll New Student
+          ➕ Add Student / Account
         </button>
+        <small style="display:block; margin-top:0.4rem; color: var(--ink-soft);">
+          Enroll an existing student, or create a new account (no confirmation email needed).
+        </small>
 
         <div class="wire-divider" style="margin: 1.2rem 0; height: 4px;">
           <span></span><span></span><span></span><span></span>
@@ -572,15 +575,33 @@
     </div>
   </main>
 
-  <!-- Modal: Enroll Student -->
+  <!-- Modal: Add Student / Account -->
   <div id="enrollModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="enrollModalTitle">
     <div class="modal">
-      <h3 id="enrollModalTitle">➕ Enroll New Student</h3>
+      <h3 id="enrollModalTitle">➕ Add Student / Account</h3>
 
       <div class="field">
-        <label for="enrollStudentId">Student Email</label>
+        <label for="enrollRole">Role</label>
+        <select id="enrollRole">
+          <option value="student">Student</option>
+          <option value="instructor">Instructor</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="enrollStudentId">Email</label>
         <input type="email" id="enrollStudentId" placeholder="student@example.com" autocomplete="off">
-        <small>Copy the student's email from your enrollment list.</small>
+        <small>If an account exists with this email, they are enrolled directly. Otherwise a new account is created.</small>
+      </div>
+
+      <div class="field">
+        <label for="enrollFullName">Full Name <span style="color: var(--ink-soft);">(only used for new accounts)</span></label>
+        <input type="text" id="enrollFullName" placeholder="Jane Doe" autocomplete="off">
+      </div>
+
+      <div class="field" id="enrollPasswordField">
+        <label for="enrollPassword">Temporary Password <span style="color: var(--ink-soft);">(only used for new accounts)</span></label>
+        <input type="text" id="enrollPassword" placeholder="Temporary password to share with the user" autocomplete="off">
       </div>
 
       <div class="field">
@@ -594,7 +615,7 @@
 
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeEnrollModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitEnroll()">Enroll</button>
+        <button class="btn btn-primary" onclick="submitEnroll()">Add</button>
       </div>
     </div>
   </div>
@@ -682,6 +703,7 @@
     let currentStudentId   = null;
     let currentEnrollmentId = null;
     let currentCourseId    = null;
+    let currentUserRole    = null;
 
     // ============================================
     // INITIALISATION
@@ -730,6 +752,7 @@
         }
 
         // Show role badge
+        currentUserRole = profile.role;
         const roleBadge = document.getElementById('roleBadge');
         if (roleBadge) {
           roleBadge.textContent = profile.role === 'admin' ? 'Admin' : 'Instructor';
@@ -837,27 +860,81 @@
     // ============================================
     // ENROLL STUDENT
     // ============================================
-    function openEnrollModal()  { document.getElementById('enrollModal').classList.add('active'); }
+    function openEnrollModal() {
+      // Only admins can add instructors
+      const roleSelect = document.getElementById('enrollRole');
+      const isAdmin = currentUserRole === 'admin';
+      roleSelect.innerHTML = isAdmin
+        ? '<option value="student">Student</option><option value="instructor">Instructor</option>'
+        : '<option value="student">Student</option>';
+      document.getElementById('enrollModal').classList.add('active');
+    }
 
     function closeEnrollModal() {
       document.getElementById('enrollModal').classList.remove('active');
-      document.getElementById('enrollStudentId').value = '';
-      document.getElementById('enrollCourseId').value  = '';
+      document.getElementById('enrollRole').value       = 'student';
+      document.getElementById('enrollStudentId').value  = '';
+      document.getElementById('enrollFullName').value   = '';
+      document.getElementById('enrollPassword').value   = '';
+      document.getElementById('enrollCourseId').value   = '';
     }
 
     async function submitEnroll() {
-      const studentEmail = document.getElementById('enrollStudentId').value.trim();
-      const courseId     = document.getElementById('enrollCourseId').value;
+      const email    = document.getElementById('enrollStudentId').value.trim();
+      const fullName = document.getElementById('enrollFullName').value.trim();
+      const password = document.getElementById('enrollPassword').value.trim();
+      const role     = document.getElementById('enrollRole').value;
+      const courseId = document.getElementById('enrollCourseId').value;
 
-      if (!studentEmail || !courseId) {
-        showAlert('Please fill in all fields', 'error');
+      if (!email) {
+        showAlert('Please enter an email address', 'error');
         return;
       }
 
       try {
-        const { data, error } = await supabaseClient.rpc('enroll_student', {
-          p_email:     studentEmail,
-          p_course_id: courseId
+        let userId = null;
+        let isNewAccount = false;
+
+        // If a password was given, create the account via GoTrue so the
+        // password hash is valid (direct auth.users inserts can't log in).
+        if (password) {
+          // Save the admin's session first: with email confirmation off,
+          // signUp switches the active session to the new account.
+          const { data: sessData } = await supabaseClient.auth.getSession();
+          const adminSession = sessData.session;
+
+          const { data: su, error: suError } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { data: { role } }
+          });
+
+          if (suError) {
+            // Already-registered accounts are handled below by add_student.
+            if (!/already|registered/i.test(suError.message || '')) {
+              showAlert(`Sign-up error: ${suError.message}`, 'error');
+              return;
+            }
+          } else if (su.user) {
+            userId = su.user.id;
+            isNewAccount = true;
+          }
+
+          // Restore the admin's session (never log the admin out).
+          if (adminSession) {
+            await supabaseClient.auth.setSession({
+              access_token: adminSession.access_token,
+              refresh_token: adminSession.refresh_token
+            });
+          }
+        }
+
+        const { data, error } = await supabaseClient.rpc('add_student', {
+          p_email:     email,
+          p_role:      role,
+          p_full_name: fullName || null,
+          p_course_id: courseId || null,
+          p_user_id:   userId || null
         });
 
         if (error) {
@@ -865,15 +942,35 @@
           return;
         }
 
-        if (data === 'not_found') {
-          showAlert('No account found with that email.', 'error');
+        if (data === 'not_authorized') {
+          showAlert('You are not authorized to add this type of account.', 'error');
+          return;
+        }
+        if (data === 'bad_role') {
+          showAlert('Invalid role.', 'error');
+          return;
+        }
+        if (data === 'password_required') {
+          showAlert('No account exists for that email — enter a temporary password to create one.', 'error');
+          return;
+        }
+        if (data === 'user_not_found') {
+          showAlert('That account was not created. Check the email and try again.', 'error');
           return;
         }
 
-        showAlert('✓ Student approved and enrolled', 'success');
+        if (isNewAccount) {
+          showAlert('✓ New account created and enrolled. Share the temporary password with the user.', 'success');
+        } else {
+          showAlert('✓ Student approved and enrolled', 'success');
+        }
+
         closeEnrollModal();
         await loadDashboard();
         await loadAuditLog();
+        if (currentUserRole === 'admin') {
+          await loadAdminOverview();
+        }
       } catch (err) {
         showAlert(`Unexpected error: ${err.message}`, 'error');
       }
