@@ -247,6 +247,13 @@
       margin-bottom: 1rem;
       display: none;
       border: 1px solid transparent;
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      max-width: 90%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
     .alert-msg.show    { display: block; }
     .alert-success { background: #E4EEE1; border-color: var(--green); color: var(--green); }
@@ -344,6 +351,34 @@
       margin-left: 1rem;
     }
 
+    /* Admin overview stat cards */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .stat-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      text-align: center;
+    }
+    .stat-card strong {
+      display: block;
+      font-size: 1.6rem;
+      font-family: var(--font-mono);
+      color: var(--copper);
+      line-height: 1.2;
+    }
+    .stat-card span {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .dashboard-container { grid-template-columns: 1fr; }
@@ -381,6 +416,68 @@
 
     <!-- Alert -->
     <div id="alert" class="alert-msg" role="alert" aria-live="polite"></div>
+
+    <!-- Admin Overview (admin only) -->
+    <div id="adminOverviewSection" class="dashboard-section" style="display:none;">
+      <h2>🏗️ System Overview</h2>
+
+      <!-- Stat cards -->
+      <div class="stat-cards">
+        <div class="stat-card"><strong id="statCourses">0</strong><span>Courses</span></div>
+        <div class="stat-card"><strong id="statStudents">0</strong><span>Students</span></div>
+        <div class="stat-card"><strong id="statInstructors">0</strong><span>Instructors</span></div>
+        <div class="stat-card"><strong id="statEnrollments">0</strong><span>Enrollments</span></div>
+        <div class="stat-card"><strong id="statActive">0</strong><span>Active</span></div>
+      </div>
+
+      <h3 style="margin-top:1.5rem;">📚 Courses</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Port</th>
+            <th>Enrolled</th>
+          </tr>
+        </thead>
+        <tbody id="adminCoursesBody">
+          <tr><td colspan="3" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:1.5rem;">🎓 Students</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Email</th>
+            <th>Courses</th>
+            <th>Approved</th>
+          </tr>
+        </thead>
+        <tbody id="adminStudentsBody">
+          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:1.5rem;">🧑‍🏫 Instructors</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Instructor</th>
+            <th>Email</th>
+            <th>Approved</th>
+          </tr>
+        </thead>
+        <tbody id="adminInstructorsBody">
+          <tr><td colspan="3" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="wire-divider" style="margin: 1.5rem 0; height: 4px;">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
 
     <!-- Dashboard Grid -->
     <div class="dashboard-container">
@@ -647,6 +744,7 @@
         await loadDashboard();
         await loadAuditLog();
         if (profile.role === 'admin') {
+          await loadAdminOverview();
           await loadPendingInstructors();
         }
 
@@ -900,6 +998,65 @@
     function closeHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
     // ============================================
+    // ADMIN OVERVIEW (admin only)
+    // ============================================
+    async function loadAdminOverview() {
+      const section = document.getElementById('adminOverviewSection');
+      if (!section) return;
+      section.style.display = '';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_admin_overview');
+        if (error) {
+          console.error('Admin overview error:', error.message);
+          showAlert(`Error loading overview: ${error.message}`, 'error');
+          return;
+        }
+        if (!data) return;
+
+        const s = data.stats || {};
+        document.getElementById('statCourses').textContent     = s.total_courses || 0;
+        document.getElementById('statStudents').textContent    = s.total_students || 0;
+        document.getElementById('statInstructors').textContent = s.total_instructors || 0;
+        document.getElementById('statEnrollments').textContent = s.total_enrollments || 0;
+        document.getElementById('statActive').textContent      = s.active_enrollments || 0;
+
+        const coursesBody = document.getElementById('adminCoursesBody');
+        const courseRows = (data.courses || []).map(c => `
+          <tr>
+            <td>${c.title}</td>
+            <td>${c.port_number}</td>
+            <td>${c.enrolled_count}</td>
+          </tr>
+        `).join('');
+        coursesBody.innerHTML = courseRows || '<tr><td colspan="3" class="empty-state">No courses.</td></tr>';
+
+        const studentsBody = document.getElementById('adminStudentsBody');
+        const studentRows = (data.students || []).map(p => `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.email}</td>
+            <td>${p.courses_count}</td>
+            <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
+          </tr>
+        `).join('');
+        studentsBody.innerHTML = studentRows || '<tr><td colspan="4" class="empty-state">No students yet.</td></tr>';
+
+        const instructorsBody = document.getElementById('adminInstructorsBody');
+        const instructorRows = (data.instructors || []).map(p => `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.email}</td>
+            <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
+          </tr>
+        `).join('');
+        instructorsBody.innerHTML = instructorRows || '<tr><td colspan="3" class="empty-state">No instructors yet.</td></tr>';
+
+      } catch (err) {
+        console.error('Admin overview load error:', err);
+      }
+    }
+
     // PENDING INSTRUCTOR REQUESTS (admin only)
     // ============================================
     async function loadPendingInstructors() {

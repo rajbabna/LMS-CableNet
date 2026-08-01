@@ -31,6 +31,15 @@
     }
 
     // User is approved student - allow access
+
+    // Wire up any [data-action="logout"] links on the page
+    document.querySelectorAll('[data-action="logout"]').forEach(link => {
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
+      });
+    });
   } catch (err) {
     console.error('Auth guard error:', err);
     window.location.href = 'login.html';
