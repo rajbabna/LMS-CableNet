@@ -30,6 +30,9 @@ Supabase — no hardcoding.
   (`student-profile.html` + `mentor_sessions` table): topic, notes, outcome, and an
   open/resolved follow-up action. Instructor-only working notes; co-instructors get
   read-only access.
+- **AI Mentor (Ask the Mentor)** — a floating chat widget on the course pages powered by
+  Puter's keyless AI layer (`js/ai-mentor.js`). Course-aware study buddy that explains and
+  guides; clearly labeled as an AI assistant; requires connectivity and a free Puter sign-in.
 
 ## Tech
 

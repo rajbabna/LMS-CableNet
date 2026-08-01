@@ -50,6 +50,11 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
 - ✅ **AI Mentor feasibility validated** (`tools/puter-ai-test.html`) — Puter's keyless
   `puter.ai.chat()` works in-browser (streaming, system prompts, testMode, themed
   markdown rendering). Confirms the Step 15 path; build starts next.
+- ✅ **AI Mentor widget built** (`js/ai-mentor.js`, on `course-cabling.html` +
+  `course-networking.html`) — floating "Ask the Mentor" chat: course-aware persona
+  (context from live `modules` table), streaming themed-markdown replies, Puter sign-in
+  prompt, offline notice, clearly labeled AI (not a human instructor). Session-only
+  conversation; topic-summary logging still pending.
 - ✅ SQL/RPCs — schema through `sql/27`; RPCs: `add_student` (now with `p_expires_at`),
   `get_my_courses`, `get_course_instructors`, `assign_instructor`, `get_admin_overview`,
   `get_instructor_dashboard` (returns `expires_at`), `log_mentor_session`,

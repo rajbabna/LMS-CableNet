@@ -143,6 +143,14 @@ Two independent decisions, not required together:
 - [x] Choose integration path → **Puter keyless AI (validated via `tools/puter-ai-test.html` — `puter.ai.chat()` works in-browser with streaming, system prompts, and testMode; first use requires a free Puter sign-in popup)**
 - [x] Decide whether the assistant receives course/module context → **Yes, with course context (locked)**
 - [x] Decide whether conversations are logged, and at what granularity → **Topic summary, opt-in (locked); no raw transcripts**
-- [ ] Write the mentor persona system prompt (guidance style, subject scope, tone, refusal boundaries)
-- [ ] Label the widget clearly as an AI assistant, distinct from instructor mentor sessions
-- [x] Confirm no offline mode is promised for this feature (requires connectivity)
+- [x] Write the mentor persona system prompt (guidance style, subject scope, tone, refusal boundaries) → **in `js/ai-mentor.js`**
+- [x] Label the widget clearly as an AI assistant, distinct from instructor mentor sessions → **header label "AI assistant — not a human instructor"**
+- [x] Confirm no offline mode is promised for this feature (requires connectivity) → **offline notice shown**
+
+## Build Status
+
+**BUILT (core): `js/ai-mentor.js`** — floating "Ask the Mentor" chat on both course pages
+(course context from the live `modules` table, streaming themed-markdown replies, Puter
+sign-in prompt, offline/error notices, session-only conversation). Widget labels itself as
+an AI assistant. **Pending:** opt-in topic-summary logging + instructor aggregate view
+(decision locked: topic summary, no raw transcripts).
