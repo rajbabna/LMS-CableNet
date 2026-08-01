@@ -1,6 +1,6 @@
 // ===========================================================
 // js/puter-quiz.js
-// Embeds the Puter-hosted flashcard quiz on the landing page
+// Embeds the Puter-hosted practice quiz on the landing page
 // (Step 13 satellite tool). Reads window.PUTER_QUIZ_URL from
 // config.js. When unset, the section shows a "coming soon"
 // placeholder so the page still renders cleanly.
