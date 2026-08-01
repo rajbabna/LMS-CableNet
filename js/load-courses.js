@@ -73,7 +73,7 @@ async function loadCoursesOnLanding() {
 
       if (!user) {
         statusHtml = '<span class="status">● Registration open</span>';
-        if (link) actionHtml = `<a class="btn btn-primary" href="login.html">Log in to access</a>`;
+        // No per-card button for guests - they use the single login CTA in the header/hero
       } else if (profile && profile.role === 'admin') {
         statusHtml = '<span class="status" style="color: var(--green);">● Staff access</span>';
         if (link) actionHtml = `<a class="btn btn-primary" href="instructor-dashboard.html">Open dashboard</a>`;
@@ -97,7 +97,7 @@ async function loadCoursesOnLanding() {
         <h3>${escapeHtml(course.title)}</h3>
         <p>${escapeHtml(course.description)}</p>
         ${statusHtml}
-        <div style="margin-top:1.1rem;">${actionHtml}</div>
+        ${actionHtml ? `<div style="margin-top:1.1rem;">${actionHtml}</div>` : ''}
       `;
       portsContainer.appendChild(article);
     });
