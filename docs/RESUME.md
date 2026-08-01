@@ -47,6 +47,9 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   outcome, optional follow-up) with open/resolved tracking. Instructor-only notes;
   co-instructors read-only; students never see them. Reached via a "Mentor" button on
   each row of the instructor dashboard.
+- ✅ **AI Mentor feasibility validated** (`tools/puter-ai-test.html`) — Puter's keyless
+  `puter.ai.chat()` works in-browser (streaming, system prompts, testMode, themed
+  markdown rendering). Confirms the Step 15 path; build starts next.
 - ✅ SQL/RPCs — schema through `sql/27`; RPCs: `add_student` (now with `p_expires_at`),
   `get_my_courses`, `get_course_instructors`, `assign_instructor`, `get_admin_overview`,
   `get_instructor_dashboard` (returns `expires_at`), `log_mentor_session`,

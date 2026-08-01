@@ -140,7 +140,7 @@ Two independent decisions, not required together:
 
 ## Checklist
 
-- [x] Choose integration path → **Puter keyless AI (locked; validate AI layer with a test page first)**
+- [x] Choose integration path → **Puter keyless AI (validated via `tools/puter-ai-test.html` — `puter.ai.chat()` works in-browser with streaming, system prompts, and testMode; first use requires a free Puter sign-in popup)**
 - [x] Decide whether the assistant receives course/module context → **Yes, with course context (locked)**
 - [x] Decide whether conversations are logged, and at what granularity → **Topic summary, opt-in (locked); no raw transcripts**
 - [ ] Write the mentor persona system prompt (guidance style, subject scope, tone, refusal boundaries)
