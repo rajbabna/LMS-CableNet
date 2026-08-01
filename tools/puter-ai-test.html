@@ -137,7 +137,6 @@
     border-radius: 10px;
     padding: 1rem 1.1rem;
     min-height: 120px;
-    white-space: pre-wrap;
     font-size: 0.95rem;
   }
   .output .pending { color: var(--ink-soft); font-style: italic; }
@@ -146,7 +145,29 @@
     font-size: 0.72rem;
     color: var(--ink-soft);
     margin-bottom: 0.6rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
   }
+  .output p { margin: 0.4rem 0; }
+  .output h3, .output h4 {
+    font-family: var(--font-display);
+    margin: 0.9rem 0 0.3rem;
+    color: var(--ink);
+  }
+  .output h3 { font-size: 1.2rem; }
+  .output h4 { font-size: 1.05rem; }
+  .output ul, .output ol { margin: 0.4rem 0; padding-left: 1.4rem; }
+  .output li { margin: 0.2rem 0; }
+  .output code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--line);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    color: var(--ink);
+  }
+  .output strong { color: var(--ink); }
+  .output em { color: var(--ink-soft); }
   .statusline {
     font-family: var(--font-mono);
     font-size: 0.75rem;
@@ -348,14 +369,14 @@
 
       let text = '';
       const start = Date.now();
-      el.output.innerHTML = '<div class="meta">' + (MODES[mode].label) + ' · ' + el.modelSel.value + (el.testMode.checked ? ' · testMode' : '') + '</div>';
+      el.output.innerHTML = '<div class="meta">' + MODES[mode].label + ' · ' + el.modelSel.value + (el.testMode.checked ? ' · testMode' : '') + '</div>';
 
       for await (const part of resp) {
         if (myId !== requestId) return;
         if (part && part.text) {
           text += part.text;
           el.output.innerHTML = '<div class="meta">' + MODES[mode].label + ' · ' + el.modelSel.value + '</div>' +
-            escapeHtml(text);
+            renderMarkdown(text);
         }
       }
 
@@ -376,6 +397,69 @@
   function escapeHtml(text) {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return String(text || '').replace(/[&<>"']/g, m => map[m]);
+  }
+
+  // Lightweight markdown → themed HTML (bold, italics, inline code,
+  // headings, bullet + numbered lists). Input is escaped first.
+  function renderMarkdown(text) {
+    const lines = escapeHtml(text).split('\n');
+    const out = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      if (!line.trim()) { i++; continue; }
+
+      const heading = line.match(/^(#{1,4})\s+(.*)$/);
+      if (heading) {
+        const level = Math.min(heading[1].length + 1, 5);
+        out.push('<' + 'h' + level + '>' + inlineFormat(heading[2]) + '</h' + level + '>');
+        i++;
+        continue;
+      }
+
+      if (/^\s*[-*]\s+/.test(line)) {
+        const items = [];
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+          items.push('<li>' + inlineFormat(lines[i].replace(/^\s*[-*]\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if (/^\s*\d+\.\s+/.test(line)) {
+        const items = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+          items.push('<li>' + inlineFormat(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ol>' + items.join('') + '</ol>');
+        continue;
+      }
+
+      const para = [];
+      while (
+        i < lines.length && lines[i].trim() &&
+        !/^(#{1,4})\s+/.test(lines[i]) &&
+        !/^\s*[-*]\s+/.test(lines[i]) &&
+        !/^\s*\d+\.\s+/.test(lines[i])
+      ) {
+        para.push(inlineFormat(lines[i]));
+        i++;
+      }
+      out.push('<p>' + para.join('<br>') + '</p>');
+    }
+
+    return out.join('');
+  }
+
+  function inlineFormat(s) {
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
   }
 
   el.askBtn.addEventListener('click', ask);
