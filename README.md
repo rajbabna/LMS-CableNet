@@ -1,1 +1,64 @@
-"# LMS-CableNet" 
+# Cable&Net Courses — LMS
+
+A live, database-driven learning management system for cable & networking training.
+Course content, modules, students, instructors, and progress are all managed through
+Supabase — no hardcoding.
+
+**Live site:** https://rajbabna.github.io/LMS-CableNet
+
+---
+
+## Features
+
+- **Dynamic landing page** — course cards load from Supabase with login-aware status
+  (Registration open / Awaiting approval / Preview available / Enrolled / Staff access)
+  and a single "Log in to access" CTA.
+- **Auth (email/password)** — sign-in only; the **admin creates all accounts** from the
+  dashboard (no self-signup, no `pending.html`).
+- **Roles** — admin, instructor, student. Instructors see only their assigned courses;
+  admins get the full account/enrollment/assignment UI.
+- **Preview mode** — students can view any course (module titles/descriptions) but
+  resources and "Mark Complete" stay locked unless they're enrolled.
+- **Progress tracking** — `module_completions` + `course_progress_view` drive student
+  progress bars.
+- **Course assignment** — admin assigns instructors to courses via `assign_instructor`;
+  dropdowns/filters populate from `get_my_courses()`.
+
+## Tech
+
+- Static HTML/CSS/JS served on **GitHub Pages**
+- **Supabase** (PostgreSQL + Auth) via the UMD `supabase-js` client (`js/config.js`)
+- RPCs in `sql/` (run `01` → `24` in the Supabase SQL Editor in order)
+
+## Project layout
+
+```
+index.html                  dynamic landing page
+login.html                  sign-in only
+student-dashboard.html      student dashboard (all courses + progress)
+instructor-dashboard.html   instructor/admin dashboard
+course-cabling.html         course page (preview-locked)
+course-networking.html      course page (preview-locked)
+js/                         config, client, loaders, auth-guard, progress
+css/                        design system + progress styles
+sql/                        01–24: schema, RPCs, triggers, cleanup scripts
+docs/                       documentation + future interactive-content plan
+```
+
+## Accounts (dev)
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | REDACTED | REDACTED |
+| Instructor | REDACTED | REDACTED |
+| Student | REDACTED | REDACTED |
+| Student | REDACTED | REDACTED |
+
+## Deploy
+
+The site auto-deploys on push to `main` (GitHub Pages, ~1–3 min rebuild).
+Three local copies must stay in sync — `LMS - V2.0` is the git source of truth;
+mirrors live in `Sites\WEB` and `Sites\GitHub Web\cable-net-courses`.
+
+See `docs/RESUME.md` and `docs/START-HERE.md` for the current project state and
+parked future work (course content, certificates, admin module manager).

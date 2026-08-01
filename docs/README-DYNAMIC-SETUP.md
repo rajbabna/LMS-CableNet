@@ -41,8 +41,8 @@ Your folder structure should now be:
 └── js/
     ├── supabase-client.js
     ├── load-courses.js (NEW)
-    ├── auth-form.js
-    └── auth-guard.js
+    ├── auth-guard.js
+    └── load-modules.js
 ```
 
 ---

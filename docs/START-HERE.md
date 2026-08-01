@@ -6,12 +6,15 @@
 
 ## ✅ What's Done
 
-You now have a **completely dynamic course management system** with:
+The platform is **live and fully functional** — dynamic content, working auth, preview mode, progress tracking, and instructor/admin dashboards.
 
-- ✅ Courses loaded from Supabase (not hardcoded)
-- ✅ Modules loaded from Supabase (not hardcoded)
-- ✅ Full documentation
-- ✅ Ready to deploy
+- ✅ Courses + modules loaded from Supabase (not hardcoded)
+- ✅ Supabase project connected — `js/supabase-client.js` has real project URL + publishable key wired in
+- ✅ Role-based auth (admin / instructor / student) — email/password, confirmation OFF
+- ✅ Preview mode — students see all courses; resources + completion locked unless enrolled
+- ✅ Instructor/admin dashboard — enrollment, course assignment, account creation
+- ✅ Progress tracking — `module_completions` + `course_progress_view`
+- ✅ Self-signup removed — admin is the only account creator (no `pending.html`)
 
 ![Workflow Diagram](./workflow-diagram.png)
 
@@ -19,16 +22,12 @@ You now have a **completely dynamic course management system** with:
 
 ## 📌 Current Project Status
 
-Live tracking of where this specific deployment actually stands (not just the generic template above):
-
-- ✅ Supabase project connected — `js/supabase-client.js` has real project URL + publishable key wired in
-- ✅ `ARCHITECTURE.md` and `IMPLEMENTATION-GUIDE.md` now written
-- ✅ `css/style.css` received — full design system already built (colors, type, layout, `h1`–`h3` styling included)
-- ⏳ `css/progress-tracking-styles.css` received — confirmed to be a later-stage feature (progress bars, complete button, toasts), not core theming
-- ⚠️ No HTML files exist yet (`index.html`, `course-*.html`, `login.html`, `pending.html`) — these will be built fresh against `style.css`, not adapted from prior versions
-- ⚠️ Live Supabase project has more tables than documented (`profiles`, `enrollments`, `instructor_enrollments`, `course_progress`, `module_completions`, `student_progress`, `instructor_student_progress`, `stalled_overrides`, `student_audit_log`) — see [ARCHITECTURE.md](./ARCHITECTURE.md) "Known Gap" section
-- ⏳ `h1` — whether this means style or literal text is still to be clarified, deferred for now
-- ⏳ Known console error ("Supabase client not initialized" / ES-version related) — investigation deferred until remaining files are in hand
+- ✅ Live on GitHub Pages: https://rajbabna.github.io/LMS-CableNet (repo `rajbabna/LMS-CableNet`)
+- ✅ **Three local copies** must stay in sync: `LMS - V2.0` (git source of truth), `Sites\WEB`, `Sites\GitHub Web\cable-net-courses`
+- ✅ Schema + RPCs built out through `sql/24` (see `sql/` folder; `01`–`24`)
+- ✅ Accounts: admin `REDACTED`, instructor `REDACTED`, students `REDACTED` + `REDACTED`
+- ⏳ **Course content** is a separate project — module materials (PDF/video/interactive) come later; plan in `docs/content/`
+- ⏳ Certificates, admin module manager, stalled-student reports — not yet built
 
 ---
 
@@ -69,26 +68,27 @@ Read in this order:
 
 ### HTML Files (Updated)
 ```
-index.html                   ← Dynamic landing page (built directly as index.html)
-course-cabling.html          ← Built fresh (no old file to replace)
-course-networking.html       ← Built fresh (no old file to replace)
-login.html                   ← Same as before (no changes)
-pending.html                 ← Same as before (no changes)
+index.html                   ← Dynamic landing page (login-aware status + single CTA)
+course-cabling.html          ← Course page with preview-mode locking
+course-networking.html       ← Course page with preview-mode locking
+login.html                   ← Sign-in only (no self-signup)
+student-dashboard.html       ← Student dashboard (all courses + progress)
+instructor-dashboard.html    ← Instructor/admin dashboard
 ```
 
 ### JavaScript Files (New)
 ```
 js/load-courses.js           ← NEW - loads courses on landing page
 js/load-modules.js           ← NEW - loads modules on course pages
+js/auth-guard.js             ← Session + course enrollment guard
+js/progress/student-dashboard.js ← Student dashboard logic
 js/supabase-client.js        ← ✅ Configured with live project URL + key
-js/auth-form.js              ← Same as before (no changes)
-js/auth-guard.js             ← Same as before (no changes)
 ```
 
 ### Database Schema (SQL)
 ```
-01-supabase-schema.sql       ← Run this in Supabase SQL Editor
-                              (creates courses & modules tables with sample data)
+sql/01-supabase-schema.sql .. sql/24-restamp-admin-and-guard-role.sql
+                              ← Run in order in Supabase SQL Editor
 ```
 
 ### Documentation — all in `/docs`
@@ -147,19 +147,26 @@ Replace these files on your server:
 Your folder structure should look like:
 ```
 /
-├── index.html (updated)
-├── login.html (unchanged)
-├── course-cabling.html (updated)
-├── course-networking.html (updated)
-├── pending.html (unchanged)
+├── index.html (dynamic landing)
+├── login.html (sign-in only)
+├── student-dashboard.html
+├── instructor-dashboard.html
+├── course-cabling.html
+├── course-networking.html
 ├── css/
-│   └── style.css (unchanged)
-└── js/
-    ├── supabase-client.js (configured ✅)
-    ├── auth-form.js (unchanged)
-    ├── auth-guard.js (unchanged)
-    ├── load-courses.js (NEW)
-    └── load-modules.js (NEW)
+│   ├── style.css
+│   └── progress-tracking-styles.css
+├── js/
+│   ├── config.js
+│   ├── supabase-client.js
+│   ├── auth-guard.js
+│   ├── load-courses.js
+│   ├── load-modules.js
+│   └── progress/
+│       └── student-dashboard.js
+└── sql/
+    ├── 01-supabase-schema.sql
+    └── ... (through 24-restamp-admin-and-guard-role.sql)
 ```
 
 ### Step 4: Test It Works (5 minutes)
@@ -248,7 +255,7 @@ No code editing required.
 **A:** Yes:
 - Login/password → Supabase Auth (encrypted)
 - Course access → gated by approval flag
-- Student progress → not tracked yet (but easy to add)
+- Student progress → tracked via `module_completions` + `course_progress_view`
 
 ### Q: What if my site goes down?
 **A:** Supabase is cloud-hosted and highly available. But you could also:

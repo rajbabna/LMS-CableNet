@@ -2,32 +2,64 @@
 
 # 🔖 Resume Point — Read This First When You're Back
 
-**Repo:** https://github.com/rajbabna/LMS-CableNet
-**Last confirmed push:** `main → main`, commit `3084a43..3a1ebc6` — clean, all docs + `supabase-client.js` + both CSS files pushed.
+**Repo:** https://github.com/rajbabna/LMS-CableNet (GitHub Pages live site)
+**Last confirmed push:** `main`, commit `9288079` — clean tree, all synced.
 
 ---
 
-## Where we left off
+## Where we are now
 
-We were working through a step-by-step plan, one step at a time. **Step 1 (git baseline) is done.** Next up is **Step 2**.
+The platform is **live and fully functional** on GitHub Pages. Supabase project
+`mantjzpfhikezztonrga` (email/password auth, email confirmation OFF) is wired in.
 
-## The Plan
+**Roles & access:**
+- **Admin** — `REDACTED` — creates accounts, enrolls students, assigns
+  instructors to courses, approves nothing (self-signup is removed).
+- **Instructor** — `REDACTED` — sees only assigned courses; enrolls
+  students in them.
+- **Students** — `REDACTED`, `REDACTED` — see enrolled courses for
+  full access; unenrolled courses in **Preview mode** (module list visible, resources +
+  completion locked).
 
-1. ✅ **Git repo baseline** — committed & pushed
-2. ⏳ **Build HTML files** — none exist yet (`index.html`, `course-cabling.html`, `course-networking.html`, `login.html`, `pending.html`). These will be built fresh against `css/style.css`, not adapted from old versions.
-3. ⏳ **Fix the console error** — "Supabase client not initialized" / suspected ES-version issue. Deferred until HTML files exist to test against.
-4. ⏳ **`h1` clarification** — still unresolved whether "edit the h1" meant the visual style (already done in `style.css`) or the literal text content (e.g. "CABLE&NET COURSES"). Ask before touching this.
-5. ⏳ **Schema documentation gap** — live Supabase project has 9 tables; only `courses`, `modules`, and `profiles` (partially) are documented. Need column-level detail on: `enrollments`, `instructor_enrollments`, `course_progress`, `module_completions`, `student_progress`, `instructor_student_progress`, `stalled_overrides`, `student_audit_log`.
+## What's built (all working)
 
-## Known, not yet resolved
+- ✅ Dynamic landing page (`index.html` + `js/load-courses.js`) — login-aware status
+  (Registration open / Awaiting approval / Preview available / Enrolled / Staff access),
+  single "Log in to access" CTA.
+- ✅ Auth (`login.html` + `js/auth-guard.js`) — sign-in only; admin creates all accounts
+  via the dashboard (GoTrue `signUp` + `add_student` RPC, approved immediately).
+- ✅ Instructor/admin dashboard (`instructor-dashboard.html`) — course filter from
+  `get_my_courses()`, student enrollment, admin-only course-assignment UI, add-account
+  form (hidden for instructors).
+- ✅ Student dashboard (`student-dashboard.html` + `js/progress/student-dashboard.js`) —
+  all courses with "Preview only" badges + progress tracking.
+- ✅ Course pages (`course-cabling.html`, `course-networking.html`) — module loading,
+  preview locking (`<body data-course>`, `authGuardReady`, `data-enrolled`),
+  `deriveCourseFromUrl()` fallback.
+- ✅ SQL/RPCs — schema through `sql/24`; RPCs: `add_student`, `get_my_courses`,
+  `get_course_instructors`, `assign_instructor`, `get_admin_overview`,
+  `approve_instructor`, `set_profile_role` (demotion-guarded), etc.
+- ✅ Progress tracking — `module_completions` + `course_progress_view`; orphaned rows
+  cleaned.
 
-- `css/progress-tracking-styles.css` is a **later-stage feature** (progress bars, "Mark Complete" button, toast notifications) tied to the progress-tracking tables above — not part of core theming. Don't confuse it with `style.css`, which is the actual done theme.
-- `sql/01-supabase-schema.sql` exists in the repo but its contents haven't been reviewed against the 9 live tables yet.
+## Important gotchas
 
-## What to say when you resume
+- **Three local copies** must stay in sync: `LMS - V2.0` (git source of truth),
+  `Sites\WEB`, `Sites\GitHub Web\cable-net-courses`. Push → GitHub Pages rebuilds in
+  ~1–3 min; hard-refresh/incognito to beat browser cache.
+- **Email confirmation is OFF** to avoid `429 over_email_send_rate_limit`. `confirmed_at`
+  is a generated column; only `email_confirmed_at` is updatable.
+- **No self-signup** — `pending.html` was deleted; unapproved users land on `index.html`.
+- **`set_profile_role` cannot demote** an existing admin/instructor (sql/24 guard).
 
-Something like: *"Continuing from RESUME.md — let's do Step 2, building the HTML files."*
+## Future work (parked)
+
+- **Course content** — real module materials (PDF/video/interactive) for the
+  `modules` table; see `docs/content/` for the interactive-content plan
+  (quizzes, simulators, scenarios — steps 07–11).
+- Certificates, admin module manager, stalled-student reports.
 
 ---
 
-**First file to open:** [START-HERE.md](./START-HERE.md) — it's the full index. This file just tells you where in the plan you stopped.
+**First file to open:** [START-HERE.md](./START-HERE.md) — full index. This file just
+tells you where things stand.

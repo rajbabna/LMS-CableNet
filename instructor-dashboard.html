@@ -561,24 +561,6 @@
           <span></span><span></span><span></span><span></span>
         </div>
 
-        <div id="pendingInstructorsSection" class="divider-section" style="display:none;">
-          <h3>👥 Pending Instructor Requests</h3>
-          <table class="audit-log">
-            <thead>
-              <tr>
-                <th>Instructor</th>
-                <th>Signed up</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="pendingInstructorsBody">
-              <tr>
-                <td colspan="3" class="empty-state">No pending requests.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
         <div class="divider-section">
           <h3>Recent Audit Log</h3>
           <table class="audit-log">
@@ -803,7 +785,6 @@
         await loadAuditLog();
         if (profile.role === 'admin') {
           await loadAdminOverview();
-          await loadPendingInstructors();
           await loadAssignments();
         }
 
@@ -1187,63 +1168,6 @@
 
       } catch (err) {
         console.error('Admin overview load error:', err);
-      }
-    }
-
-    // PENDING INSTRUCTOR REQUESTS (admin only)
-    // ============================================
-    async function loadPendingInstructors() {
-      const section = document.getElementById('pendingInstructorsSection');
-      if (!section) return;
-      section.style.display = '';
-
-      try {
-        const { data, error } = await supabaseClient.rpc('get_pending_instructors');
-        if (error) {
-          console.error('Pending instructors error:', error.message);
-          return;
-        }
-
-        const tbody = document.getElementById('pendingInstructorsBody');
-        if (!data || data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No pending requests.</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = data.map(row => `
-          <tr>
-            <td>
-              <strong>${row.full_name || row.email}</strong>
-              <div style="font-size: 0.75rem; color: var(--ink-soft);">${row.email}</div>
-            </td>
-            <td style="font-size: 0.8rem; color: var(--ink-soft);">${new Date(row.created_at).toLocaleDateString()}</td>
-            <td>
-              <button class="btn btn-table btn-primary"
-                onclick="approveInstructor('${row.user_id}')">
-                Approve
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        console.error('Pending instructors load error:', err);
-      }
-    }
-
-    async function approveInstructor(userId) {
-      try {
-        const { data, error } = await supabaseClient.rpc('approve_instructor', {
-          p_user_id: userId
-        });
-
-        if (error) { showAlert(`Error: ${error.message}`, 'error'); return; }
-        if (data === 'not_found') { showAlert('Instructor not found.', 'error'); return; }
-
-        showAlert('✓ Instructor approved', 'success');
-        await loadPendingInstructors();
-        await loadAuditLog();
-      } catch (err) {
-        showAlert(`Unexpected error: ${err.message}`, 'error');
       }
     }
 

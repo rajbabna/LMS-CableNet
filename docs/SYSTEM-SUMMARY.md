@@ -345,10 +345,8 @@ js/supabase-client.js  ✅ live project URL + publishable key set
 
 **No changes needed:**
 ```
-login.html
-pending.html
-css/style.css   (theme files pending — see START-HERE.md status)
-js/auth-form.js
+css/style.css
+css/progress-tracking-styles.css
 js/auth-guard.js
 ```
 

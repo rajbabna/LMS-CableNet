@@ -73,15 +73,24 @@ A live look at the Supabase Table Editor for this project (`cablenet`) shows mor
 ├── docs/                       ← all documentation (this folder)
 ├── css/
 │   ├── style.css                        ← full design system (colors, type, layout) — done
-│   └── progress-tracking-styles.css     ← progress bars, complete button, toasts — in progress
+│   └── progress-tracking-styles.css     ← progress bars, preview locks, toasts — done
 ├── js/
-│   ├── supabase-client.js      ← configured ✅
-│   ├── load-courses.js
-│   └── load-modules.js
+│   ├── config.js              ← Supabase project URL + publishable key
+│   ├── supabase-client.js      ← client setup
+│   ├── load-courses.js         ← landing page course cards
+│   ├── load-modules.js         ← course page module lists + preview locking
+│   ├── auth-guard.js           ← session + enrollment guard
+│   └── progress/
+│       └── student-dashboard.js ← student dashboard logic
 ├── sql/
-│   └── 01-supabase-schema.sql
-└── (no HTML files yet — index.html, course-*.html, login.html, pending.html
-     will be built fresh, not adapted from prior versions)
+│   ├── 01-supabase-schema.sql
+│   └── ... (02–24: RPCs, triggers, cleanup)
+├── index.html                  ← dynamic landing (login-aware)
+├── login.html                  ← sign-in only
+├── student-dashboard.html      ← student dashboard
+├── instructor-dashboard.html   ← instructor/admin dashboard
+├── course-cabling.html         ← cabling course
+└── course-networking.html      ← networking course
 ```
 
 ---
