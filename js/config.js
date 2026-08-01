@@ -29,4 +29,4 @@ window.SUPABASE_CONFIG = {
 // Puter-hosted flashcard quiz (Step 13 satellite tool).
 // After publishing tools/basic-network-quiz.html to a *.puter.site
 // subdomain, set this to its URL. Used by index.html for the iframe embed.
-window.PUTER_QUIZ_URL = "";
+window.PUTER_QUIZ_URL = "https://cablenet-quiz.puter.site/basic-network-quiz.html";
