@@ -147,11 +147,12 @@
           <article class="mentor-entry" data-entry="${i}">
             <div class="mentor-entry-head">
               <span class="port-num">SESSION</span>
+              ${s.course_title ? `<span class="mentor-course">${escapeHtml(s.course_title)}</span>` : ''}
               <span class="mentor-date">${dateStr}</span>
             </div>
             <h3>${escapeHtml(s.topic)}</h3>
             <p class="mentor-meta">
-              with ${escapeHtml(s.instructor_name)}${s.course_title ? ' · ' + escapeHtml(s.course_title) : ''}
+              with ${escapeHtml(s.instructor_name)}
               ${createdStr ? ' · logged ' + createdStr : ''}
             </p>
             ${s.notes ? `<p><strong>Notes:</strong> ${escapeHtml(s.notes)}</p>` : ''}
