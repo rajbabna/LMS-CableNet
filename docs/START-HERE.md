@@ -16,6 +16,7 @@ The platform is **live and fully functional** — dynamic content, working auth,
 - ✅ Progress tracking — `module_completions` + `course_progress_view`
 - ✅ Self-signup removed — admin is the only account creator (no `pending.html`)
 - ✅ Time-limited enrollment — admin/instructor sets an access window (24h–180d/lifetime); expired students downgrade to preview automatically
+- ✅ Mentor sessions — instructors log per-student check-ins from `student-profile.html` (timeline + follow-up tracking); instructor-only notes, co-instructors read-only
 
 ![Workflow Diagram](./workflow-diagram.png)
 
@@ -25,7 +26,7 @@ The platform is **live and fully functional** — dynamic content, working auth,
 
 - ✅ Live on GitHub Pages: https://rajbabna.github.io/LMS-CableNet (repo `rajbabna/LMS-CableNet`)
 - ✅ **Three local copies** must stay in sync: `LMS - V2.0` (git source of truth), `Sites\WEB`, `Sites\GitHub Web\cable-net-courses`
-- ✅ Schema + RPCs built out through `sql/26` (see `sql/` folder; `01`–`26`)
+- ✅ Schema + RPCs built out through `sql/27` (see `sql/` folder; `01`–`27`)
 - ✅ Accounts: admin `REDACTED`, instructor `REDACTED`, students `REDACTED` + `REDACTED`
 - ⏳ **Course content** is a separate project — module materials (PDF/video/interactive) come later; plan in `docs/content/`
 - ⏳ Certificates, admin module manager, stalled-student reports — not yet built
@@ -75,6 +76,7 @@ course-networking.html       ← Course page with preview-mode locking
 login.html                   ← Sign-in only (no self-signup)
 student-dashboard.html       ← Student dashboard (all courses + progress)
 instructor-dashboard.html    ← Instructor/admin dashboard
+student-profile.html         ← Instructor mentor log for one student (timeline + form)
 ```
 
 ### JavaScript Files (New)
@@ -82,6 +84,7 @@ instructor-dashboard.html    ← Instructor/admin dashboard
 js/load-courses.js           ← NEW - loads courses on landing page
 js/load-modules.js           ← NEW - loads modules on course pages
 js/auth-guard.js             ← Session + course enrollment guard
+js/mentor-sessions.js        ← NEW - student-profile mentor log logic
 js/progress/student-dashboard.js ← Student dashboard logic
 js/supabase-client.js        ← ✅ Configured with live project URL + key
 ```

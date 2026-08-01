@@ -137,6 +137,10 @@ Keeping these as separate tables (rather than merging mentor notes into the prog
 
 - [x] Decide whether mentor session notes are visible to the student or instructor-only → **Instructor-only (locked)**
 - [x] Confirm whether co-teaching instructors need read access to each other's session notes → **Yes, read-only (locked)**
-- [x] Keep mentor sessions in their own table, separate from quiz/progress data
-- [x] Support an optional "follow-up" flag so open items are trackable across sessions
+- [x] Keep mentor sessions in their own table, separate from quiz/progress data → **`mentor_sessions` (sql/27)**
+- [x] Support an optional "follow-up" flag so open items are trackable across sessions → **`follow_up` + `follow_up_status` open/resolved (sql/27)**
 - [x] Always write directly to Supabase (no offline/local-storage path needed for this workflow)
+
+## Build Status
+
+**BUILT (sql/27 + `student-profile.html` + `js/mentor-sessions.js` + dashboard "Mentor" link).** To go live: run `sql/27-mentor-sessions.sql` in the Supabase SQL Editor, then open the instructor dashboard → "Mentor" on any student row.

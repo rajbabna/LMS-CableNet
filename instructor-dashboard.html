@@ -188,6 +188,13 @@
     }
     .btn-history:hover { background: #1F4A52; border-color: #1F4A52; }
 
+    .btn-mentor {
+      background: transparent;
+      color: var(--teal);
+      border: 1px solid var(--teal);
+    }
+    .btn-mentor:hover { background: var(--teal); color: #fff; }
+
     .btn-stalled {
       background: transparent;
       color: var(--copper-dark);
@@ -891,6 +898,10 @@
                   onclick="openStalledModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                   Stalled
                 </button>
+                <a class="btn btn-table btn-mentor"
+                  href="student-profile.html?student_id=${row.student_id}&name=${encodeURIComponent(row.student_name)}">
+                  Mentor
+                </a>
               </div>
             </td>
           </tr>

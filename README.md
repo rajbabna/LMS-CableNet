@@ -26,12 +26,16 @@ Supabase — no hardcoding.
   progress bars.
 - **Course assignment** — admin assigns instructors to courses via `assign_instructor`;
   dropdowns/filters populate from `get_my_courses()`.
+- **Mentor sessions** — instructors log one-on-one check-ins per student
+  (`student-profile.html` + `mentor_sessions` table): topic, notes, outcome, and an
+  open/resolved follow-up action. Instructor-only working notes; co-instructors get
+  read-only access.
 
 ## Tech
 
 - Static HTML/CSS/JS served on **GitHub Pages**
 - **Supabase** (PostgreSQL + Auth) via the UMD `supabase-js` client (`js/config.js`)
-- RPCs in `sql/` (run `01` → `26` in the Supabase SQL Editor in order)
+- RPCs in `sql/` (run `01` → `27` in the Supabase SQL Editor in order)
 
 ## Project layout
 
@@ -40,11 +44,12 @@ index.html                  dynamic landing page
 login.html                  sign-in only
 student-dashboard.html      student dashboard (all courses + progress)
 instructor-dashboard.html   instructor/admin dashboard
+student-profile.html        instructor mentor log for one student (timeline + form)
 course-cabling.html         course page (preview-locked)
 course-networking.html      course page (preview-locked)
-js/                         config, client, loaders, auth-guard, progress
+js/                         config, client, loaders, auth-guard, progress, mentor-sessions
 css/                        design system + progress styles
-sql/                        01–26: schema, RPCs, triggers, cleanup scripts
+sql/                        01–27: schema, RPCs, triggers, cleanup scripts
 docs/                       documentation + future interactive-content plan
 ```
 
