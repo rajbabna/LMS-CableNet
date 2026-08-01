@@ -11,14 +11,17 @@ Supabase — no hardcoding.
 ## Features
 
 - **Dynamic landing page** — course cards load from Supabase with login-aware status
-  (Registration open / Awaiting approval / Preview available / Enrolled / Staff access)
-  and a single "Log in to access" CTA.
+  (Access by invitation / Awaiting approval / Preview available / Enrolled / Access expired /
+  Staff access) and a single "Log in to access" CTA.
 - **Auth (email/password)** — sign-in only; the **admin creates all accounts** from the
   dashboard (no self-signup, no `pending.html`).
 - **Roles** — admin, instructor, student. Instructors see only their assigned courses;
   admins get the full account/enrollment/assignment UI.
 - **Preview mode** — students can view any course (module titles/descriptions) but
   resources and "Mark Complete" stay locked unless they're enrolled.
+- **Time-limited enrollment** — the admin picks an access window per student
+  (24h / 7 / 30 / 90 / 180 days / lifetime). When `enrollments.expires_at` passes, the
+  student is downgraded to preview/expired automatically across the site.
 - **Progress tracking** — `module_completions` + `course_progress_view` drive student
   progress bars.
 - **Course assignment** — admin assigns instructors to courses via `assign_instructor`;
@@ -28,7 +31,7 @@ Supabase — no hardcoding.
 
 - Static HTML/CSS/JS served on **GitHub Pages**
 - **Supabase** (PostgreSQL + Auth) via the UMD `supabase-js` client (`js/config.js`)
-- RPCs in `sql/` (run `01` → `24` in the Supabase SQL Editor in order)
+- RPCs in `sql/` (run `01` → `26` in the Supabase SQL Editor in order)
 
 ## Project layout
 
@@ -41,7 +44,7 @@ course-cabling.html         course page (preview-locked)
 course-networking.html      course page (preview-locked)
 js/                         config, client, loaders, auth-guard, progress
 css/                        design system + progress styles
-sql/                        01–24: schema, RPCs, triggers, cleanup scripts
+sql/                        01–26: schema, RPCs, triggers, cleanup scripts
 docs/                       documentation + future interactive-content plan
 ```
 

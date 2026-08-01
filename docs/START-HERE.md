@@ -15,6 +15,7 @@ The platform is **live and fully functional** — dynamic content, working auth,
 - ✅ Instructor/admin dashboard — enrollment, course assignment, account creation
 - ✅ Progress tracking — `module_completions` + `course_progress_view`
 - ✅ Self-signup removed — admin is the only account creator (no `pending.html`)
+- ✅ Time-limited enrollment — admin/instructor sets an access window (24h–180d/lifetime); expired students downgrade to preview automatically
 
 ![Workflow Diagram](./workflow-diagram.png)
 
@@ -24,7 +25,7 @@ The platform is **live and fully functional** — dynamic content, working auth,
 
 - ✅ Live on GitHub Pages: https://rajbabna.github.io/LMS-CableNet (repo `rajbabna/LMS-CableNet`)
 - ✅ **Three local copies** must stay in sync: `LMS - V2.0` (git source of truth), `Sites\WEB`, `Sites\GitHub Web\cable-net-courses`
-- ✅ Schema + RPCs built out through `sql/24` (see `sql/` folder; `01`–`24`)
+- ✅ Schema + RPCs built out through `sql/26` (see `sql/` folder; `01`–`26`)
 - ✅ Accounts: admin `REDACTED`, instructor `REDACTED`, students `REDACTED` + `REDACTED`
 - ⏳ **Course content** is a separate project — module materials (PDF/video/interactive) come later; plan in `docs/content/`
 - ⏳ Certificates, admin module manager, stalled-student reports — not yet built
@@ -87,7 +88,7 @@ js/supabase-client.js        ← ✅ Configured with live project URL + key
 
 ### Database Schema (SQL)
 ```
-sql/01-supabase-schema.sql .. sql/24-restamp-admin-and-guard-role.sql
+sql/01-supabase-schema.sql .. sql/26-time-limited-enrollment-and-guests.sql
                               ← Run in order in Supabase SQL Editor
 ```
 
@@ -166,7 +167,7 @@ Your folder structure should look like:
 │       └── student-dashboard.js
 └── sql/
     ├── 01-supabase-schema.sql
-    └── ... (through 24-restamp-admin-and-guard-role.sql)
+    └── ... (through 26-time-limited-enrollment-and-guests.sql)
 ```
 
 ### Step 4: Test It Works (5 minutes)
