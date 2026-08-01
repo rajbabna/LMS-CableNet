@@ -22,30 +22,49 @@ async function loadModulesForCourse(courseId) {
   // Tag the container so progress-tracker.js can read the course id
   moduleList.setAttribute('data-course-id', courseId);
 
-  // Preview mode = approved student who is NOT enrolled in this course.
-  // They can browse module titles/descriptions but resources + completion are locked.
+  const isExpired = document.body.dataset.enrollmentExpired === 'true';
+  // Preview = approved student who is NOT enrolled (or whose enrollment lapsed).
   const isPreview = document.body.dataset.enrolled !== 'true';
 
-  // Show the preview notice banner on the page when applicable
-  const previewBanner = document.getElementById('previewBanner');
-  if (previewBanner) {
-    previewBanner.style.display = isPreview ? 'block' : 'none';
+  // Show the appropriate notice banner
+  const banner = document.getElementById('previewBanner');
+  if (banner) {
+    if (isExpired) {
+      banner.className = 'preview-banner expired-banner';
+      banner.style.display = 'block';
+      banner.innerHTML = `
+        <strong>Access expired</strong> — Your enrollment period has ended.
+        <a href="student-dashboard.html">Back to dashboard</a>
+      `;
+    } else {
+      banner.className = 'preview-banner';
+      banner.style.display = isPreview ? 'block' : 'none';
+      if (isPreview) {
+        banner.innerHTML = `
+          <strong>Preview mode</strong> — You're not enrolled in this course yet.
+          You can browse the module list, but resources and progress tracking are locked.
+          <a href="student-dashboard.html">Back to dashboard</a>
+        `;
+      }
+    }
   }
 
-  // Load the student's completed modules (if logged in) to pre-mark buttons
+  // Load completed modules for this student from the DB.
   let completedIds = new Set();
-  try {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (user) {
-      const { data: completions } = await supabaseClient
-        .from('module_completions')
-        .select('module_id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed');
-      completedIds = new Set((completions || []).map(c => c.module_id));
+  if (!isPreview) {
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        const { data: completions } = await supabaseClient
+          .from('module_completions')
+          .select('module_id')
+          .eq('user_id', user.id)
+          .eq('status', 'completed');
+        completedIds = new Set((completions || []).map(c => c.module_id));
+      }
+    } catch (err) {
+      console.error('Could not load completions:', err);
     }
-  } catch (err) {
-    console.error('Could not load completions:', err);
   }
 
   try {
@@ -96,9 +115,8 @@ async function loadModulesForCourse(courseId) {
           contentLabel = 'open lesson';
       }
 
-      const completed = completedIds.has(module.id);
+      const completed = completedIds.has(String(module.id)) || completedIds.has(module.id);
 
-      // In preview mode the resource link + completion are replaced with a locked notice
       const resourceHtml = isPreview
         ? `<span class="preview-locked">🔒 Preview only — enroll to open resources</span>`
         : `<a href="${module.content_url}" target="_blank">${contentLabel}</a>`;

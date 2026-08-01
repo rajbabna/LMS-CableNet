@@ -97,6 +97,16 @@
   text-decoration: underline;
 }
 
+/* Expired enrollment banner */
+.preview-banner.expired-banner {
+  background: #fbeef0;
+  border-color: #e0a3ad;
+}
+
+.preview-banner.expired-banner a {
+  color: var(--copper-dark);
+}
+
 .preview-locked {
   display: inline-block;
   font-family: var(--font-mono);

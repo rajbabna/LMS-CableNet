@@ -73,13 +73,21 @@ class StudentDashboard {
         throw coursesError;
       }
 
-      // Fetch this student's enrollments
+      // Fetch this student's enrollments (incl. expiry)
       const { data: enrollments } = await this.supabase
         .from("enrollments")
-        .select("course_id")
+        .select("course_id, expires_at")
         .eq("user_id", this.currentUser.id);
 
-      const enrolledSet = new Set((enrollments || []).map(e => e.course_id));
+      const now = Date.now();
+      const enrolledMap = {};
+      (enrollments || []).forEach(e => {
+        enrolledMap[e.course_id] = {
+          is_expired: !!(e.expires_at && new Date(e.expires_at).getTime() <= now),
+          expires_at: e.expires_at
+        };
+      });
+      const enrolledSet = new Set(Object.keys(enrolledMap));
 
       // Fetch progress rows (enrolled courses only)
       const { data: progressRows } = await this.supabase
@@ -95,12 +103,15 @@ class StudentDashboard {
       // Merge: every course gets a card; enrolled ones carry progress data
       this.courses = (allCourses || []).map(course => {
         const progress = progressByCourse[course.id];
+        const enrollment = enrolledMap[course.id] || null;
         return {
           course_id: course.id,
           course_title: course.title,
           description: course.description,
           port_number: course.port_number,
           is_enrolled: enrolledSet.has(course.id),
+          is_expired: enrollment ? enrollment.is_expired : false,
+          expires_at: enrollment ? enrollment.expires_at : null,
           total_modules: progress ? progress.total_modules : 0,
           completed_modules: progress ? progress.completed_modules : 0,
           progress_percentage: progress ? progress.progress_percentage : 0,
@@ -147,7 +158,7 @@ class StudentDashboard {
   createCourseCard(course) {
     const card = document.createElement("div");
     card.className = "course-card";
-    if (!course.is_enrolled) {
+    if (!course.is_enrolled || course.is_expired) {
       card.classList.add("course-preview");
     }
 
@@ -160,7 +171,10 @@ class StudentDashboard {
     let statusLabel = "○ Not Started";
     let statusClass = "not-started";
 
-    if (course.is_enrolled) {
+    if (course.is_enrolled && course.is_expired) {
+      statusLabel = "⏰ Access expired";
+      statusClass = "expired";
+    } else if (course.is_enrolled) {
       if (progressPercent === 100) {
         statusLabel = "✓ Completed";
         statusClass = "completed";
@@ -175,6 +189,16 @@ class StudentDashboard {
 
     // Format enrollment date
     const enrolledDate = course.is_enrolled ? this.formatDate(course.enrolled_at) : "Not enrolled";
+
+    // Expiry line (enrolled but limited-time)
+    let expiryLine = "";
+    if (course.is_enrolled && course.expires_at) {
+      if (course.is_expired) {
+        expiryLine = `<span class="expiry expired">Expired ${this.formatDate(course.expires_at)}</span>`;
+      } else {
+        expiryLine = `<span class="expiry">Access until ${this.formatDate(course.expires_at)}</span>`;
+      }
+    }
 
     // Determine course link based on course_id
     const courseLinks = {
@@ -193,11 +217,11 @@ class StudentDashboard {
       <div class="progress-section">
         <div class="progress-label">
           <span>${completedModules} of ${totalModules} modules complete</span>
-          <span class="progress-percentage">${course.is_enrolled ? progressPercent + '%' : '—'}</span>
+          <span class="progress-percentage">${course.is_enrolled && !course.is_expired ? progressPercent + '%' : '—'}</span>
         </div>
         
         <div class="progress-bar">
-          <div class="progress-fill" style="width: ${course.is_enrolled ? progressPercent : 0}%"></div>
+          <div class="progress-fill" style="width: ${course.is_enrolled && !course.is_expired ? progressPercent : 0}%"></div>
         </div>
       </div>
 
@@ -205,13 +229,15 @@ class StudentDashboard {
         ${enrolledDate}
       </div>
 
+      ${expiryLine}
+
       <div class="course-status ${statusClass}">
         ${statusLabel}
       </div>
 
       <div class="course-actions">
         <a href="${courseLink}" class="btn-continue">
-          ${course.is_enrolled ? 'Continue Course →' : 'Preview Course →'}
+          ${course.is_enrolled && !course.is_expired ? 'Continue Course →' : 'Preview Course →'}
         </a>
       </div>
     `;

@@ -30,6 +30,7 @@ async function loadCoursesOnLanding() {
     let user = null;
     let profile = null;
     let enrolledCourses = new Set();
+    let expiredCourses = new Set();
 
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -45,9 +46,16 @@ async function loadCoursesOnLanding() {
         if (profile && profile.role === 'student') {
           const { data: enr } = await supabaseClient
             .from('enrollments')
-            .select('course_id')
+            .select('course_id, expires_at')
             .eq('user_id', user.id);
-          enrolledCourses = new Set((enr || []).map(e => e.course_id));
+          const now = Date.now();
+          (enr || []).forEach(e => {
+            if (e.expires_at && new Date(e.expires_at).getTime() <= now) {
+              expiredCourses.add(e.course_id);
+            } else {
+              enrolledCourses.add(e.course_id);
+            }
+          });
         }
       }
     } catch (err) {
@@ -72,8 +80,7 @@ async function loadCoursesOnLanding() {
       let actionHtml = '';
 
       if (!user) {
-        statusHtml = '<span class="status">● Registration open</span>';
-        // No per-card button for guests - they use the single login CTA in the header/hero
+        statusHtml = '<span class="status">● Access by invitation</span>';
       } else if (profile && profile.role === 'admin') {
         statusHtml = '<span class="status" style="color: var(--green);">● Staff access</span>';
         if (link) actionHtml = `<a class="btn btn-primary" href="instructor-dashboard.html">Open dashboard</a>`;
@@ -82,12 +89,15 @@ async function loadCoursesOnLanding() {
         if (link) actionHtml = `<a class="btn btn-primary" href="instructor-dashboard.html">Open dashboard</a>`;
       } else if (profile && !profile.approved) {
         statusHtml = '<span class="status">● Awaiting approval</span>';
+      } else if (expiredCourses.has(course.id)) {
+        statusHtml = '<span class="status" style="color: var(--copper-dark);">● Access expired</span>';
+        if (link) actionHtml = `<a class="btn btn-ghost" href="student-dashboard.html">View dashboard</a>`;
       } else if (enrolledCourses.has(course.id)) {
         statusHtml = '<span class="status" style="color: var(--green);">● Enrolled</span>';
         if (link) actionHtml = `<a class="btn btn-primary" href="${link}">Continue course →</a>`;
       } else {
         statusHtml = '<span class="status" style="color: var(--copper-dark);">● Preview available</span>';
-        if (link) actionHtml = `<a class="btn btn-primary" href="${link}">Preview course →</a>`;
+        // No per-card button: the two courses are already listed on this page.
       }
 
       const article = document.createElement('article');

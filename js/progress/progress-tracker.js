@@ -17,11 +17,11 @@ class ProgressTracker {
     
     if (!user) {
       console.log('ProgressTracker: No authenticated user');
-      return;
+      this.currentUserId = null;
+    } else {
+      this.currentUserId = user.id;
+      console.log('ProgressTracker: Initialized for user', this.currentUserId);
     }
-
-    this.currentUserId = user.id;
-    console.log('ProgressTracker: Initialized for user', this.currentUserId);
     
     // Use event delegation to listen for button clicks
     this.setupEventDelegation();

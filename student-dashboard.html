@@ -104,6 +104,19 @@
   .course-status.in-progress  { background: #FBE8DC; color: var(--copper-dark); }
   .course-status.completed    { background: #E4EEE1; color: var(--green); }
   .course-status.preview      { background: #E3EAF7; color: #3B5B92; }
+  .course-status.expired      { background: #FBE8EE; color: #B03A5B; }
+
+  .expiry {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  .expiry.expired {
+    color: #B03A5B;
+  }
 
   /* Preview (not enrolled) card styling */
   .course-card.course-preview {

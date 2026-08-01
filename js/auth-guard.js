@@ -1,8 +1,9 @@
 // js/auth-guard.js
-// Protects course pages - ensures only approved, ENROLLED students can access
-// Requires js/supabase-client.js to be loaded first (sets window.supabaseClient)
+// Protects course pages - ensures only approved, ENROLLED students can access.
+// Requires js/supabase-client.js to be loaded first (sets window.supabaseClient).
 // Sets document.body.dataset.enrolled = "true"|"false" and resolves
 // window.authGuardReady (Promise) so later scripts can await the guard.
+// Also sets dataset.enrollmentExpired = "true" when an enrollment has lapsed.
 
 // Derives the course slug from the page URL as a fallback for cached HTML
 // that lacks <body data-course="...">.
@@ -15,7 +16,10 @@ function deriveCourseFromUrl() {
 
 window.authGuardReady = (async () => {
   try {
-    // Check for active session
+    const pageCourse = document.body.dataset.course || deriveCourseFromUrl();
+
+    // ---- Require a session (guests are enrolled by the admin with an
+    // account + expiry; there is no self-serve trial) ----
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
       window.location.href = 'login.html';
@@ -44,34 +48,42 @@ window.authGuardReady = (async () => {
     // ---- Course preview flag ----
     // The page's course is declared via <body data-course="cabling"> etc.
     // Students can VIEW any course (preview) but only interact when enrolled.
-    // Preview mode is communicated via <body data-enrolled="true|false"> so
-    // load-modules.js / progress-tracker.js can disable resources + completion.
-    // Fallback: derive the course from the URL so a cached page without the
-    // data-course attribute can never unlock a course the student owns.
-    const pageCourse = document.body.dataset.course || deriveCourseFromUrl();
+    // Enrollment with an elapsed expires_at counts as NOT enrolled (expired).
     if (pageCourse) {
       const { data: enrollment } = await supabaseClient
         .from('enrollments')
-        .select('course_id')
+        .select('course_id, expires_at')
         .eq('user_id', session.user.id);
 
-      const enrolledCourses = new Set((enrollment || []).map(e => e.course_id));
+      const enrolledCourses = new Set();
+      const expiredCourses = new Set();
+      const now = Date.now();
+      (enrollment || []).forEach(e => {
+        if (e.expires_at && new Date(e.expires_at).getTime() <= now) {
+          expiredCourses.add(e.course_id);
+        } else {
+          enrolledCourses.add(e.course_id);
+        }
+      });
+
       const isEnrolled = enrolledCourses.has(pageCourse);
+      const isExpired = expiredCourses.has(pageCourse);
 
       document.body.dataset.enrolled = isEnrolled ? 'true' : 'false';
+      document.body.dataset.enrollmentExpired = isExpired ? 'true' : 'false';
       document.body.dataset.course = pageCourse;
-      console.log(`Auth guard: course=${pageCourse} enrolled=${isEnrolled}`);
+      console.log(`Auth guard: course=${pageCourse} enrolled=${isEnrolled} expired=${isExpired}`);
 
       // Nav links to other courses stay visible so students can preview them
       document.querySelectorAll('[data-target-course]').forEach(link => {
         const targetEnrolled = enrolledCourses.has(link.dataset.targetCourse);
+        const targetExpired = expiredCourses.has(link.dataset.targetCourse);
         link.dataset.targetEnrolled = targetEnrolled ? 'true' : 'false';
+        link.dataset.targetExpired = targetExpired ? 'true' : 'false';
       });
     } else {
       document.body.dataset.enrolled = 'true';
     }
-
-    // User is approved student - allow access
 
     // Wire up any [data-action="logout"] links on the page
     document.querySelectorAll('[data-action="logout"]').forEach(link => {
