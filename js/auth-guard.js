@@ -4,6 +4,15 @@
 // Sets document.body.dataset.enrolled = "true"|"false" and resolves
 // window.authGuardReady (Promise) so later scripts can await the guard.
 
+// Derives the course slug from the page URL as a fallback for cached HTML
+// that lacks <body data-course="...">.
+function deriveCourseFromUrl() {
+  const fileName = (window.location.pathname.split('/').pop() || '').toLowerCase();
+  if (fileName.indexOf('cabling') !== -1) return 'cabling';
+  if (fileName.indexOf('networking') !== -1) return 'networking';
+  return null;
+}
+
 window.authGuardReady = (async () => {
   try {
     // Check for active session
@@ -37,7 +46,9 @@ window.authGuardReady = (async () => {
     // Students can VIEW any course (preview) but only interact when enrolled.
     // Preview mode is communicated via <body data-enrolled="true|false"> so
     // load-modules.js / progress-tracker.js can disable resources + completion.
-    const pageCourse = document.body.dataset.course;
+    // Fallback: derive the course from the URL so a cached page without the
+    // data-course attribute can never unlock a course the student owns.
+    const pageCourse = document.body.dataset.course || deriveCourseFromUrl();
     if (pageCourse) {
       const { data: enrollment } = await supabaseClient
         .from('enrollments')
@@ -48,6 +59,7 @@ window.authGuardReady = (async () => {
       const isEnrolled = enrolledCourses.has(pageCourse);
 
       document.body.dataset.enrolled = isEnrolled ? 'true' : 'false';
+      document.body.dataset.course = pageCourse;
       console.log(`Auth guard: course=${pageCourse} enrolled=${isEnrolled}`);
 
       // Nav links to other courses stay visible so students can preview them
