@@ -169,6 +169,32 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 }
 
 /* ===========================================================
+   Practice quiz CTA — a single compact bar placed directly
+   under the "Test your networking basics" heading.
+   =========================================================== */
+.quiz-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.4rem 1.6rem;
+  margin-top: 1.6rem;
+}
+.quiz-cta .port-num { margin-bottom: 0.6rem; }
+.quiz-cta-meta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ===========================================================
    Buttons & forms
    =========================================================== */
 .btn {

@@ -112,21 +112,6 @@ async function loadCoursesOnLanding() {
       portsContainer.appendChild(article);
     });
 
-    // Append the practice quiz as a third card (PING 01) in the same
-    // port style. Opens the Puter-hosted quiz full screen in a new tab.
-    const quizUrl = window.PUTER_QUIZ_URL || '';
-    const quizCard = document.createElement('article');
-    quizCard.className = 'port';
-    quizCard.innerHTML = `
-      <span class="port-num">PING 01</span>
-      <h3>Test your networking basics</h3>
-      <p>Five quick multiple-choice questions to check your signal before you enroll. No account needed — your best score is saved on your device.</p>
-      ${quizUrl
-        ? '<span class="status">● Practice · open to all</span><div style="margin-top:1.1rem;"><a class="btn btn-ghost" href="' + quizUrl + '" target="_blank" rel="noopener">Take the quiz ↗</a></div>'
-        : '<span class="status">● Being prepared — check back soon</span>'}
-    `;
-    portsContainer.appendChild(quizCard);
-
   } catch (err) {
     console.error('Exception loading courses:', err);
   }
