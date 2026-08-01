@@ -110,10 +110,12 @@ This mirrors the existing `instructor_enrollments` / `student_audit_log` pattern
 | Who | Can see | Can create/edit |
 |---|---|---|
 | The instructor who logged it | Yes | Yes |
-| Other instructors (if course is co-taught) | Yes, read-only (recommended) | No, unless explicitly given access |
-| The student themselves | Only if the platform is designed to expose mentor notes to students (decision to be made — see below) | No |
+| Other instructors (if course is co-taught) | Yes, read-only | No |
+| The student themselves | No — instructor-only working notes (decision locked) | No |
 
 **Open decision:** Should students see their own mentor session notes, or are these instructor-only working notes? This affects the RLS policy design — instructor-only notes need stricter row-level security than notes meant to be shared back with the student.
+
+> **DECISION (locked):** Mentor session notes are **instructor-only working notes** — not visible to students. RLS restricts reads to the instructor who logged them (plus read-only co-instructors). A student-visible view can be added later if desired.
 
 ---
 
@@ -133,8 +135,8 @@ Keeping these as separate tables (rather than merging mentor notes into the prog
 
 ## Checklist
 
-- [ ] Decide whether mentor session notes are visible to the student or instructor-only
-- [ ] Confirm whether co-teaching instructors need read access to each other's session notes
-- [ ] Keep mentor sessions in their own table, separate from quiz/progress data
-- [ ] Support an optional "follow-up" flag so open items are trackable across sessions
-- [ ] Always write directly to Supabase (no offline/local-storage path needed for this workflow)
+- [x] Decide whether mentor session notes are visible to the student or instructor-only → **Instructor-only (locked)**
+- [x] Confirm whether co-teaching instructors need read access to each other's session notes → **Yes, read-only (locked)**
+- [x] Keep mentor sessions in their own table, separate from quiz/progress data
+- [x] Support an optional "follow-up" flag so open items are trackable across sessions
+- [x] Always write directly to Supabase (no offline/local-storage path needed for this workflow)
