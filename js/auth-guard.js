@@ -37,7 +37,7 @@ window.authGuardReady = (async () => {
 
     // Validate user role and approval
     if (profile.role !== 'student' || !profile.approved) {
-      window.location.href = profile.approved ? 'index.html' : 'pending.html';
+      window.location.href = 'index.html';
       return;
     }
 

@@ -29,34 +29,6 @@
       max-width: 420px;
     }
 
-    /* Tab bar (Sign In / Create Account) */
-    .tab-bar {
-      display: flex;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 1.4rem;
-    }
-
-    .tab-bar button {
-      flex: 1;
-      padding: 0.7em 0.5em;
-      background: none;
-      border: none;
-      border-bottom: 3px solid transparent;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--ink-soft);
-      cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .tab-bar button:hover { color: var(--ink); }
-    .tab-bar button.active {
-      color: var(--copper-dark);
-      border-bottom-color: var(--copper);
-    }
-
     /* Message styling */
     .msg {
       border-left: 4px solid transparent;
@@ -69,34 +41,6 @@
     .field input:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-    }
-
-    /* Role selection */
-    .role-options {
-      display: flex;
-      gap: 0.8rem;
-    }
-    .role-option {
-      flex: 1;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0.8rem 0.6rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--ink);
-    }
-    .role-option:hover { border-color: var(--copper); }
-    .role-option input { display: none; }
-    .role-option input:checked + span {
-      color: var(--copper-dark);
-      font-weight: 600;
-    }
-    .role-option:has(input:checked) {
-      border-color: var(--copper);
-      background: #FBF4EF;
     }
 
     /* Smooth button transitions */
@@ -154,12 +98,6 @@
       <h1>Log In</h1>
       <p>Access your courses</p>
 
-      <!-- Tab bar -->
-      <div class="tab-bar" role="tablist">
-        <button type="button" id="tab-signin" class="active" role="tab" aria-selected="true" onclick="switchTab('signin')">Sign In</button>
-        <button type="button" id="tab-signup" role="tab" aria-selected="false" onclick="switchTab('signup')">Create Account</button>
-      </div>
-
       <div id="alert" class="msg" role="alert"></div>
 
       <!-- Sign In form -->
@@ -193,64 +131,6 @@
         </button>
       </form>
 
-      <!-- Create Account form -->
-      <form id="signupForm" onsubmit="handleSignup(event)" novalidate style="display:none;">
-        <div class="field">
-          <label for="signup-email">Email</label>
-          <input
-            type="email"
-            id="signup-email"
-            placeholder="your@email.com"
-            required
-            autocomplete="email"
-            aria-label="Email address"
-          >
-        </div>
-
-        <div class="field">
-          <label for="signup-password">Password</label>
-          <input
-            type="password"
-            id="signup-password"
-            placeholder="At least 6 characters"
-            required
-            minlength="6"
-            autocomplete="new-password"
-            aria-label="Create password"
-          >
-        </div>
-
-        <div class="field">
-          <label for="signup-confirm">Confirm Password</label>
-          <input
-            type="password"
-            id="signup-confirm"
-            placeholder="Repeat your password"
-            required
-            autocomplete="new-password"
-            aria-label="Confirm password"
-          >
-        </div>
-
-        <div class="field">
-          <label>I am a...</label>
-          <div class="role-options">
-            <label class="role-option">
-              <input type="radio" name="signup-role" value="student" checked>
-              <span>🎓 Student</span>
-            </label>
-            <label class="role-option">
-              <input type="radio" name="signup-role" value="instructor">
-              <span>🧑‍🏫 Instructor</span>
-            </label>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="signupBtn">
-          <span id="signupBtnText">Create Account</span>
-        </button>
-      </form>
-
       <p class="back-link"><a href="index.html">&larr; Back to Courses</a></p>
 
     </div>
@@ -266,20 +146,6 @@
   <script src="js/supabase-client.js"></script>
 
   <script>
-    // ============================================
-    // TAB SWITCHING
-    // ============================================
-    function switchTab(tab) {
-      const isSignin = tab === 'signin';
-      document.getElementById('tab-signin').className = isSignin ? 'active' : '';
-      document.getElementById('tab-signup').className = isSignin ? '' : 'active';
-      document.getElementById('tab-signin').setAttribute('aria-selected', isSignin);
-      document.getElementById('tab-signup').setAttribute('aria-selected', !isSignin);
-      document.getElementById('loginForm').style.display = isSignin ? '' : 'none';
-      document.getElementById('signupForm').style.display = isSignin ? 'none' : '';
-      clearAlert();
-    }
-
     // ============================================
     // ROLE-BASED ROUTING
     // ============================================
@@ -316,16 +182,16 @@
 
     function routeByRole(profile) {
       if (!profile) {
-        window.location.replace('pending.html');
+        window.location.replace('index.html');
         return;
       }
 
       const role = profile.role;
       if (role === 'admin' || role === 'instructor') {
         // Instructors must be approved too (admin approves them)
-        window.location.replace(profile.approved ? 'instructor-dashboard.html' : 'pending.html');
+        window.location.replace(profile.approved ? 'instructor-dashboard.html' : 'index.html');
       } else if (role === 'student') {
-        window.location.replace(profile.approved ? 'student-dashboard.html' : 'pending.html');
+        window.location.replace(profile.approved ? 'student-dashboard.html' : 'index.html');
       } else {
         window.location.replace('index.html');
       }
@@ -387,77 +253,6 @@
         showAlert(`Error: ${err.message}`, 'error');
         loginBtn.disabled = false;
         btnText.textContent = 'Sign In';
-      }
-    }
-
-    // ============================================
-    // CREATE ACCOUNT HANDLER
-    // ============================================
-    async function handleSignup(event) {
-      event.preventDefault();
-
-      const email = document.getElementById('signup-email').value.trim();
-      const password = document.getElementById('signup-password').value;
-      const confirm = document.getElementById('signup-confirm').value;
-      const role = document.querySelector('input[name="signup-role"]:checked')?.value || 'student';
-
-      if (!email || !password || !confirm) {
-        showAlert('Please fill in all fields', 'error');
-        return;
-      }
-
-      if (password.length < 6) {
-        showAlert('Password must be at least 6 characters', 'error');
-        return;
-      }
-
-      if (password !== confirm) {
-        showAlert('Passwords do not match', 'error');
-        return;
-      }
-
-      const signupBtn = document.getElementById('signupBtn');
-      const signupBtnText = document.getElementById('signupBtnText');
-
-      signupBtn.disabled = true;
-      signupBtnText.innerHTML = '<span class="spinner"></span> Creating account...';
-
-      try {
-        const { data, error } = await supabaseClient.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { role }
-          }
-        });
-
-        if (error) {
-          showAlert(`Sign up failed: ${error.message}`, 'error');
-          signupBtn.disabled = false;
-          signupBtnText.textContent = 'Create Account';
-          return;
-        }
-
-        if (data.user) {
-          // If a session exists (email confirmation off), stamp the role now.
-          // Otherwise it's synced from user_metadata on first login.
-          if (data.session) {
-            await supabaseClient.rpc('set_profile_role', { p_role: role });
-          }
-
-          const isStaff = role === 'instructor' || role === 'admin';
-          showAlert(
-            isStaff
-              ? 'Account created — awaiting instructor approval.'
-              : 'Account created — waiting for approval.',
-            'success'
-          );
-          setTimeout(() => window.location.replace('pending.html'), 1200);
-        }
-      } catch (err) {
-        showAlert(`Error: ${err.message}`, 'error');
-        signupBtn.disabled = false;
-        signupBtnText.textContent = 'Create Account';
       }
     }
 

@@ -36,7 +36,7 @@ class StudentDashboard {
       }
 
       if (!profile.approved) {
-        window.location.href = "pending.html";
+        window.location.href = "index.html";
         return;
       }
 
