@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic Network Quiz — Flashcards</title>
+<style>
+  :root {
+    --bg: #EEEBE3;
+    --paper: #F7F5EF;
+    --ink: #1C2430;
+    --ink-soft: #4A5261;
+    --line: #D8D3C7;
+    --copper: #C2622D;
+    --copper-dark: #A24F22;
+    --teal: #2C6B75;
+    --brown: #6B4A3A;
+    --green: #4A7A52;
+    --blue: #34576B;
+    --font-display: "Archivo Narrow", "Arial Narrow", sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .quiz-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 2.5rem;
+  }
+  .quiz-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.4rem;
+  }
+  .quiz-head h1 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--copper-dark);
+    display: block;
+    margin-bottom: 0.5em;
+  }
+  .quiz-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .quiz-meta .pill {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.2em 0.7em;
+  }
+  .card-stage {
+    perspective: 1200px;
+    margin: 1.2rem 0;
+  }
+  .flashcard {
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(28, 36, 48, 0.10);
+    padding: 2rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 260px;
+  }
+  .flashcard-back {
+    transform: rotateY(180deg);
+    border-color: var(--teal);
+  }
+  .flashcard-face .face-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--copper-dark);
+    margin-bottom: 0.8rem;
+  }
+  .flashcard-back .face-label { color: var(--teal); }
+  .flashcard-face p {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .flashcard-face p.answer {
+    font-size: 1.02rem;
+    color: var(--ink);
+  }
+  .flip-hint {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    text-align: center;
+    font-family: var(--font-mono);
+  }
+  .controls {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7em 1.1em;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  button:active { transform: translateY(1px); }
+  .btn-primary { background: var(--copper); color: #fff; }
+  .btn-primary:hover { background: var(--copper-dark); }
+  .btn-ghost { background: var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: #cfcbbd; }
+  .btn-good { background: var(--green); color: #fff; }
+  .btn-good:hover { background: #3b6142; }
+  .btn-hard { background: var(--brown); color: #fff; }
+  .btn-hard:hover { background: #553a2d; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .progress-track {
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0.4rem 0 1.6rem;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--teal);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .score-line {
+    text-align: center;
+    margin-top: 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+  .results {
+    display: none;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .results h2 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    margin: 0 0 0.6rem;
+  }
+  .results .big-score {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--teal);
+    margin: 0.6rem 0;
+  }
+  .results p { color: var(--ink-soft); }
+  .best-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 999px;
+    padding: 0.25em 0.8em;
+    margin-top: 0.5rem;
+  }
+  .sync-note {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-top: 1.2rem;
+  }
+  .start-screen {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+  }
+  .start-screen p { color: var(--ink-soft); max-width: 46ch; margin: 0 auto 1.2rem; }
+  @media (max-width: 520px) {
+    .flashcard-face { padding: 1.4rem 1.2rem; }
+    .controls button { flex: 1 1 45%; }
+  }
+</style>
+</head>
+<body>
+<div class="quiz-wrap" id="app">
+  <div class="quiz-head">
+    <div>
+      <span class="eyebrow">Practice · before you enroll</span>
+      <h1>Basic Network Quiz</h1>
+    </div>
+    <span class="quiz-meta"><span class="pill" id="cardCount">0 / 0</span></span>
+  </div>
+  <div class="quiz-meta">
+    <span id="scorePill">Score: —</span>
+    <span id="bestPill">Best: —</span>
+  </div>
+
+  <!-- Start screen -->
+  <div class="start-screen" id="startScreen">
+    <p>Test yourself on basic cabling &amp; networking questions before enrolling. Flip each card, rate yourself honestly, then see your score. No account needed.</p>
+    <button class="btn-primary" id="startBtn">Start Quiz</button>
+  </div>
+
+  <!-- Quiz screen -->
+  <div id="quizScreen" style="display:none;">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="card-stage">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-face flashcard-front">
+          <span class="face-label">Question</span>
+          <p id="questionText"></p>
+        </div>
+        <div class="flashcard-face flashcard-back">
+          <span class="face-label">Answer</span>
+          <p class="answer" id="answerText"></p>
+        </div>
+      </div>
+    </div>
+    <div class="flip-hint">Click the card to flip it</div>
+
+    <div class="controls">
+      <button class="btn-hard" id="hardBtn">Didn't Know</button>
+      <button class="btn-good" id="goodBtn">Got It</button>
+    </div>
+
+    <div class="score-line" id="scoreLine"></div>
+  </div>
+
+  <!-- Results screen -->
+  <div class="results" id="resultsScreen">
+    <h2>Quiz Complete</h2>
+    <div class="big-score" id="finalScore">0%</div>
+    <p id="finalDetail"></p>
+    <div id="bestBadge"></div>
+    <div class="sync-note" id="syncNote"></div>
+    <div style="margin-top:1.4rem; display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap;">
+      <button class="btn-primary" id="retryBtn">Try Again</button>
+      <button class="btn-ghost" id="shuffleBtn">Shuffle &amp; Retry</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ---- Question deck (basic cabling + networking) ----
+  var DECK = [
+    { q: "What does RJ45 refer to?", a: "The 8-position modular connector (8P8C) used for Ethernet patch cables." },
+    { q: "Which wire is pin 1 in T568B?", a: "White/Orange. T568B order: W/O, O, W/G, B, W/B, G, W/BR, BR." },
+    { q: "Which pair occupies pins 4 and 5 in T568B?", a: "The Blue pair. Pin 4 = Blue, pin 5 = White/Blue." },
+    { q: "What is the maximum recommended run length for a copper Ethernet cable (Cat5e/6)?", a: "100 metres (328 ft) — about 90 m of permanent link plus 10 m of patch cords." },
+    { q: "What does the 'Cat' in Cat6 stand for?", a: "Category — it defines a performance rating for the cable (e.g. Cat5e, Cat6, Cat6a)." },
+    { q: "Which wire is pin 1 in T568A?", a: "White/Green. T568A swaps the green and orange pairs vs T568B." },
+    { q: "What device connects two different networks and routes traffic between them?", a: "A router. Routers operate at Layer 3 (Network)." },
+    { q: "What does a switch do on a LAN?", a: "Connects devices on the same network and forwards frames only to the destination port (Layer 2)." },
+    { q: "What is the difference between a hub and a switch?", a: "A hub broadcasts every packet to all ports; a switch forwards packets only to the correct destination port." },
+    { q: "What does the IP address 192.168.1.0/24 represent?", a: "The network address of a /24 subnet (255.255.255.0 mask), which allows 254 usable host addresses." },
+    { q: "What is a subnet mask used for?", a: "It separates the network portion of an IP address from the host portion." },
+    { q: "What does DHCP do?", a: "Dynamically assigns IP addresses (and other settings like gateway/DNS) to devices on a network." },
+    { q: "What is the purpose of DNS?", a: "Translates human-friendly domain names (e.g. google.com) into IP addresses." },
+    { q: "What is a crossover cable used for?", a: "Connecting two similar devices directly (e.g. computer to computer) without a switch. Modern NICs auto-negotiate, so it's rarely needed now." },
+    { q: "Which layer of the OSI model is responsible for routing?", a: "Layer 3 — the Network layer (packets, logical addressing, routing)." },
+    { q: "What does a firewall do?", a: "Filters incoming/outgoing traffic based on rules to block unwanted connections." },
+    { q: "What is latency in networking?", a: "The time delay between sending a packet and receiving it at the destination." },
+    { q: "What is a VLAN?", a: "A virtual LAN — a logical segmentation of a network so devices on separate VLANs can't talk to each other at Layer 2." }
+  ];
+
+  var STORE_KEY = 'cn_basic_quiz_best';
+  var PUTER_KV_KEY = 'cn_basic_quiz_best_score';
+
+  var currentDeck = [];
+  var currentIndex = 0;
+  var good = 0;
+  var hard = 0;
+
+  var el = {
+    startScreen: document.getElementById('startScreen'),
+    quizScreen: document.getElementById('quizScreen'),
+    resultsScreen: document.getElementById('resultsScreen'),
+    startBtn: document.getElementById('startBtn'),
+    retryBtn: document.getElementById('retryBtn'),
+    shuffleBtn: document.getElementById('shuffleBtn'),
+    flashcard: document.getElementById('flashcard'),
+    questionText: document.getElementById('questionText'),
+    answerText: document.getElementById('answerText'),
+    hardBtn: document.getElementById('hardBtn'),
+    goodBtn: document.getElementById('goodBtn'),
+    cardCount: document.getElementById('cardCount'),
+    scorePill: document.getElementById('scorePill'),
+    bestPill: document.getElementById('bestPill'),
+    progressFill: document.getElementById('progressFill'),
+    scoreLine: document.getElementById('scoreLine'),
+    finalScore: document.getElementById('finalScore'),
+    finalDetail: document.getElementById('finalDetail'),
+    bestBadge: document.getElementById('bestBadge'),
+    syncNote: document.getElementById('syncNote')
+  };
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // ---- Best score: localStorage first, then Puter KV (per user) ----
+  function localBest() {
+    try { return parseInt(localStorage.getItem(STORE_KEY) || '0', 10); }
+    catch (e) { return 0; }
+  }
+  function setLocalBest(v) {
+    try { localStorage.setItem(STORE_KEY, String(v)); } catch (e) {}
+  }
+
+  function saveBest(score) {
+    setLocalBest(score);
+    // Try Puter KV (silent; only works for signed-in Puter users)
+    if (window.puter && puter.kv && puter.isSignedIn()) {
+      puter.kv.set(PUTER_KV_KEY, score).catch(function () {});
+    }
+  }
+
+  function loadBest(cb) {
+    var local = localBest();
+    if (window.puter && puter.kv && puter.isSignedIn()) {
+      puter.kv.get(PUTER_KV_KEY)
+        .then(function (v) {
+          var cloud = parseInt(v || '0', 10);
+          var best = Math.max(local, cloud);
+          cb(best);
+        })
+        .catch(function () { cb(local); });
+    } else {
+      cb(local);
+    }
+  }
+
+  function bestScore() {
+    var s = localBest();
+    return s;
+  }
+
+  function updateBestPill() {
+    el.bestPill.textContent = 'Best: ' + bestScore() + '%';
+  }
+
+  function startQuiz(deck) {
+    currentDeck = deck;
+    currentIndex = 0;
+    good = 0;
+    hard = 0;
+    el.startScreen.style.display = 'none';
+    el.resultsScreen.style.display = 'none';
+    el.quizScreen.style.display = 'block';
+    renderCard();
+    updateScoreLine();
+  }
+
+  function renderCard() {
+    if (currentIndex >= currentDeck.length) {
+      showResults();
+      return;
+    }
+    var card = currentDeck[currentIndex];
+    el.questionText.textContent = card.q;
+    el.answerText.textContent = card.a;
+    el.flashcard.classList.remove('flipped');
+    el.cardCount.textContent = (currentIndex + 1) + ' / ' + currentDeck.length;
+    el.progressFill.style.width = ((currentIndex / currentDeck.length) * 100) + '%';
+    el.hardBtn.disabled = false;
+    el.goodBtn.disabled = false;
+  }
+
+  function updateScoreLine() {
+    el.scoreLine.textContent = 'Got it: ' + good + " \u00B7 Didn't know: " + hard;
+  }
+
+  function answer(goodAnswer) {
+    if (goodAnswer) good++; else hard++;
+    currentIndex++;
+    updateScoreLine();
+    renderCard();
+  }
+
+  function showResults() {
+    el.quizScreen.style.display = 'none';
+    el.resultsScreen.style.display = 'block';
+
+    var total = currentDeck.length;
+    var score = Math.round((good / total) * 100);
+    el.finalScore.textContent = score + '%';
+    el.finalDetail.textContent = 'You got ' + good + ' of ' + total + ' correct.';
+
+    var best = Math.max(bestScore(), score);
+    saveBest(best);
+    updateBestPill();
+
+    if (score === 100) {
+      el.bestBadge.innerHTML = '<span class="best-badge">★ Perfect — ready to enroll!</span>';
+    } else if (best === score && score > 0) {
+      el.bestBadge.innerHTML = '<span class="best-badge">New best score</span>';
+    } else {
+      el.bestBadge.innerHTML = '';
+    }
+
+    var sync = '';
+    if (window.puter && puter.isSignedIn()) {
+      sync = 'Saved to your Puter account.';
+    } else {
+      sync = 'Saved on this device. Log in with Puter to keep your best score on any device.';
+    }
+    el.syncNote.textContent = sync;
+  }
+
+  // ---- Wire up ----
+  el.startBtn.addEventListener('click', function () {
+    startQuiz(shuffle(DECK));
+  });
+  el.retryBtn.addEventListener('click', function () {
+    startQuiz(shuffle(DECK));
+  });
+  el.shuffleBtn.addEventListener('click', function () {
+    startQuiz(shuffle(DECK));
+  });
+  el.flashcard.addEventListener('click', function () {
+    el.flashcard.classList.toggle('flipped');
+  });
+  el.goodBtn.addEventListener('click', function () { answer(true); });
+  el.hardBtn.addEventListener('click', function () { answer(false); });
+
+  // Init
+  updateBestPill();
+  loadBest(function (best) {
+    if (best > 0) setLocalBest(best);
+    updateBestPill();
+  });
+})();
+</script>
+</body>
+</html>

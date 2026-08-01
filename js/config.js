@@ -25,3 +25,8 @@ window.SUPABASE_CONFIG = {
   url: "https://mantjzpfhikezztonrga.supabase.co",
   key: "sb_publishable_t5GiOxBzTlWkRDR0pS0f0g_L1JhYfI0",
 };
+
+// Puter-hosted flashcard quiz (Step 13 satellite tool).
+// After publishing tools/basic-network-quiz.html to a *.puter.site
+// subdomain, set this to its URL. Used by index.html for the iframe embed.
+window.PUTER_QUIZ_URL = "";
