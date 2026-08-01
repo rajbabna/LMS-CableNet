@@ -136,9 +136,14 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   color: #fff;
 }
 .role-badge--instructor {
-  background: transparent;
+  background: var(--teal);
   border-color: var(--teal);
-  color: var(--teal);
+  color: #fff;
+}
+.role-badge--student {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
 }
 
 main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
