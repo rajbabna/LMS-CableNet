@@ -61,14 +61,15 @@ The flagship recent feature — a course-aware AI study buddy inside the course 
   - Streaming replies rendered as themed markdown; clearly labelled
     "AI assistant — not a human instructor"; no grading authority.
   - Sign-in bar, offline notice, error handling; conversation lives in memory only.
-- **Instructor visibility (sharing boost, combination of three approaches):**
-  1. **Toggle defaults ON** (opt-out) — students who don't touch it get shared.
-  2. **Usage always logged** — any real chat records course, time, message count;
-     `topic_summary` stays empty when nothing is shared.
-  3. **End-of-chat share prompt** — if a student turned sharing off but had a real
-     chat, a "Share / Not now" prompt appears on close.
-  - Stored in `mentor_ai_sessions` (sql/28 + sql/28b) — **topic summaries only, never
-    raw messages**; students can only read/write their own rows (RLS).
+- **Instructor visibility (final: always-on capture):**
+  - Every real AI mentor chat is saved to `mentor_ai_sessions` (sql/28 + sql/28b) with
+    course, time, message count, and a **one-sentence topic summary** — so the instructor
+    can improve course delivery. **Topic summaries only, never raw messages.**
+  - The widget discloses this to students: *"Chat topics are summarized for your
+    instructor so they can improve the course. No raw messages are kept."*
+  - Earlier sharing models (opt-in toggle → default-ON opt-out + end-of-chat prompt) were
+    iterated and replaced by this always-on decision; `topic_summary` is nullable only as
+    a safety net for legacy rows.
   - Instructors see results in two places: the **AI Mentor Chats** timeline on the
     student's profile page (`get_ai_mentor_sessions_for_student`) and the **AI Mentor
     Activity** panel on the instructor dashboard (`get_ai_mentor_topic_overview`,

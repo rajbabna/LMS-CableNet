@@ -155,15 +155,16 @@ sign-in prompt, offline/error notices, session-only conversation). Widget labels
 an AI assistant.
 
 **BUILT (logging, `sql/28` + `sql/28b` + client + dashboards):**
-- Per-chat **share toggle** in the widget — **now defaults ON (opt-out)**; students who want
-  privacy can untick it.
-- **Usage is always logged**: any real AI mentor chat upserts a `mentor_ai_sessions` row
-  (course, time, message count) — `topic_summary` is NULL when nothing is shared.
-- If sharing is **off** but the student had a real chat, an **end-of-chat prompt** offers to
-  share the summary on close ("Share / Not now").
-- When shared, the AI writes a one-sentence **topic summary** (never raw messages).
+- **Capture is always on** (owner decision, final): every real AI mentor chat upserts a
+  `mentor_ai_sessions` row with course, time, message count AND a one-sentence topic
+  summary. There is no opt-out toggle; the widget tells students up front:
+  "Chat topics are summarized for your instructor so they can improve the course.
+  No raw messages are kept." (Summaries only — never raw messages.)
+- Earlier iterations (opt-in toggle, then default-ON + end-of-chat prompt) were replaced
+  by this always-on decision; `sql/28b` keeps `topic_summary` nullable purely as a safety
+  net for older rows.
 - Instructors see them: **AI Mentor Chats** timeline on `student-profile.html`
   (`get_ai_mentor_sessions_for_student`) + **AI Mentor Activity** panel on
   `instructor-dashboard.html` (`get_ai_mentor_topic_overview`, per-course counts + latest
-  summary, with a "no summary shared" fallback).
+  summary).
 - Co-teaching scoping: admins see all; instructors see only chats for their assigned courses.

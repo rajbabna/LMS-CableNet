@@ -32,16 +32,13 @@
     input: null,
     sendBtn: null,
     status: null,
-    authBar: null,
-    optIn: null
+    authBar: null
   };
 
   const conversation = [];
   let courseContext = null;
   let busy = false;
-  let optIn = true;
   let aiSessionId = null;
-  let promptShown = false;
   let savedThisChat = false;
 
   // ============================================================
@@ -230,7 +227,7 @@
         color: #fff;
       }
       .ai-mentor-inputbar button:disabled { opacity: 0.45; cursor: not-allowed; }
-      .ai-mentor-optin {
+      .ai-mentor-note {
         display: flex;
         align-items: flex-start;
         gap: 0.5rem;
@@ -238,48 +235,11 @@
         border-top: 1px solid var(--line);
         background: #fff;
         font-family: var(--font-body);
-        font-size: 0.78rem;
+        font-size: 0.76rem;
+        line-height: 1.4;
         color: var(--ink-soft);
       }
-      .ai-mentor-optin label { cursor: pointer; }
-      .ai-mentor-optin input { margin-top: 0.15rem; accent-color: var(--teal); }
-      .ai-mentor-share {
-        position: fixed;
-        right: 1.25rem;
-        bottom: 5.2rem;
-        z-index: 902;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        max-width: 360px;
-        padding: 0.7rem 0.9rem;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        box-shadow: 0 12px 32px rgba(28, 36, 48, 0.18);
-        font-family: var(--font-body);
-        font-size: 0.82rem;
-        color: var(--ink);
-      }
-      .ai-mentor-share button {
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        border-radius: 999px;
-        padding: 0.35em 0.8em;
-        cursor: pointer;
-        white-space: nowrap;
-      }
-      .ai-mentor-share .share-yes { background: var(--teal); color: #fff; border: 1px solid var(--teal); }
-      .ai-mentor-share .share-no { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
       @media (max-width: 480px) {
-        .ai-mentor-share {
-          right: 0.5rem;
-          left: 0.5rem;
-          bottom: 4.6rem;
-          width: auto;
-          max-width: none;
-        }
-      }
       .ai-mentor-auth {
         padding: 0.7rem 1rem;
         background: #fff;
@@ -347,9 +307,8 @@
         <input type="text" id="aiMentorInput" placeholder="Ask about cabling, networking, the internet..." autocomplete="off">
         <button type="button" id="aiMentorSend">Send</button>
       </div>
-      <div class="ai-mentor-optin">
-        <input type="checkbox" id="aiMentorOptIn" checked>
-        <label for="aiMentorOptIn">Share a topic summary of this chat with my instructor (recommended)</label>
+      <div class="ai-mentor-note">
+        Chat topics are summarized for your instructor so they can improve the course. No raw messages are kept.
       </div>
     `;
 
@@ -363,14 +322,10 @@
     el.input = document.getElementById('aiMentorInput');
     el.sendBtn = document.getElementById('aiMentorSend');
     el.authBar = document.getElementById('aiMentorAuth');
-    el.optIn = document.getElementById('aiMentorOptIn');
 
     el.sendBtn.addEventListener('click', send);
     el.input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') send();
-    });
-    el.optIn.addEventListener('change', function () {
-      optIn = el.optIn.checked;
     });
   }
 
@@ -498,13 +453,9 @@
   }
 
   // ============================================================
-  // Sharing (owner decision — combination of all three):
-  //   * toggle defaults ON (opt-out);
-  //   * usage is ALWAYS logged (course, time, message count) even
-  //     when no summary is shared (topic_summary stays NULL);
-  //   * if sharing is off but the student had a real chat, an
-  //     end-of-chat prompt offers to share on close.
-  //   Summaries only — never raw messages.
+  // Capture (owner decision): the topic summary is ALWAYS saved so
+  // the instructor can improve course delivery. Summaries only —
+  // never raw messages. The widget tells students this up front.
   // ============================================================
   function userMessageCount() {
     return conversation.filter(function (m) { return m.role === 'user'; }).length;
@@ -528,20 +479,17 @@
     return null;
   }
 
-  async function syncSession(withSummary) {
-    if (!window.supabaseClient || userMessageCount() === 0) return false;
+  async function syncSession() {
+    if (!window.supabaseClient || userMessageCount() === 0) return;
 
-    let summary = null;
-    if (withSummary) {
-      summary = await generateSummary();
-      if (!summary) {
-        summary = 'Student asked about: ' + String(conversation[0].content || 'the course').slice(0, 160);
-      }
+    let summary = await generateSummary();
+    if (!summary) {
+      summary = 'Student asked about: ' + String(conversation[0].content || 'the course').slice(0, 160);
     }
 
     try {
       const { data: authData } = await supabaseClient.auth.getSession();
-      if (!authData.session) return false;
+      if (!authData.session) return;
 
       const { data, error } = await supabaseClient.rpc('log_ai_mentor_summary', {
         p_session_id: aiSessionId,
@@ -551,50 +499,15 @@
       });
       if (error) throw error;
       if (data) aiSessionId = data;
-      return true;
     } catch (err) {
       console.error('AI mentor: could not save chat', err);
-      return false;
     }
   }
 
   async function handleConversationEnd() {
     if (userMessageCount() === 0 || savedThisChat) return;
-
-    if (optIn) {
-      savedThisChat = true;
-      await syncSession(true);
-    } else if (!promptShown) {
-      promptShown = true;
-      showSharePrompt();
-    } else {
-      savedThisChat = true;
-      await syncSession(false);
-    }
-  }
-
-  function showSharePrompt() {
-    if (document.getElementById('aiMentorSharePrompt')) return;
-
-    const bar = document.createElement('div');
-    bar.className = 'ai-mentor-share';
-    bar.id = 'aiMentorSharePrompt';
-    bar.innerHTML =
-      '<span>Share a summary of this chat with your instructor?</span>' +
-      '<button type="button" class="share-yes">Share</button>' +
-      '<button type="button" class="share-no">Not now</button>';
-    document.body.appendChild(bar);
-
-    bar.querySelector('.share-yes').addEventListener('click', async function () {
-      savedThisChat = true;
-      bar.remove();
-      await syncSession(true);
-    });
-    bar.querySelector('.share-no').addEventListener('click', async function () {
-      savedThisChat = true;
-      bar.remove();
-      await syncSession(false);
-    });
+    savedThisChat = true;
+    await syncSession();
   }
 
   // ============================================================
@@ -680,7 +593,7 @@
 
     window.addEventListener('beforeunload', function () {
       if (!savedThisChat && userMessageCount() > 0) {
-        syncSession(optIn);
+        syncSession();
       }
     });
   });

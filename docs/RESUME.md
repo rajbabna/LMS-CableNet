@@ -60,11 +60,11 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   "AI Mentor Activity" panel) — per-chat **opt-in** topic summaries only (never raw
   messages), upserted to `mentor_ai_sessions`; admin sees all, instructors see chats for
   their assigned courses. SQL not yet applied to live DB.
-- ✅ **AI Mentor sharing boost** (`sql/28b`, not yet applied live) — toggle defaults ON
-  (opt-out), usage is **always logged** (course/time/message count; `topic_summary` NULL
-  if not shared), and an end-of-chat "Share / Not now" prompt appears when a student
-  turned sharing off but still had a real chat. Instructor views show a "no summary
-  shared" fallback.
+- ✅ **AI Mentor sharing boost** (`sql/28b`) — superseded by the final owner decision:
+  **capture is always on**. Every real AI chat is saved with course, time, message count
+  AND a one-sentence topic summary; the widget discloses this to students ("topics are
+  summarized for your instructor… no raw messages kept"). The opt-in toggle, default-ON
+  opt-out, and end-of-chat prompt were all removed in favour of always-on capture.
 - ✅ SQL/RPCs — schema through `sql/27`; RPCs: `add_student` (now with `p_expires_at`),
   `get_my_courses`, `get_course_instructors`, `assign_instructor`, `get_admin_overview`,
   `get_instructor_dashboard` (returns `expires_at`), `log_mentor_session`,
