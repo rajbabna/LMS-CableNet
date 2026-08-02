@@ -965,7 +965,7 @@
           <div class="ai-overview-row">
             <strong>${escapeHtml(row.course_title)}</strong>
             <span class="ai-overview-count">${row.session_count} chat${row.session_count === 1 ? '' : 's'}</span>
-            <span class="ai-overview-summary">${escapeHtml(row.latest_summary)}</span>
+            <span class="ai-overview-summary">${row.latest_summary ? escapeHtml(row.latest_summary) : '<em style="color:var(--ink-soft)">No summary shared</em>'}</span>
             <span class="ai-overview-time">${new Date(row.latest_at).toLocaleString()}</span>
           </div>`).join('');
       } catch (err) {

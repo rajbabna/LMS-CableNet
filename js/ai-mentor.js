@@ -39,8 +39,10 @@
   const conversation = [];
   let courseContext = null;
   let busy = false;
-  let optIn = false;
+  let optIn = true;
   let aiSessionId = null;
+  let promptShown = false;
+  let savedThisChat = false;
 
   // ============================================================
   // Course context (grounds answers in the curriculum)
@@ -241,6 +243,43 @@
       }
       .ai-mentor-optin label { cursor: pointer; }
       .ai-mentor-optin input { margin-top: 0.15rem; accent-color: var(--teal); }
+      .ai-mentor-share {
+        position: fixed;
+        right: 1.25rem;
+        bottom: 5.2rem;
+        z-index: 902;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 360px;
+        padding: 0.7rem 0.9rem;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: 0 12px 32px rgba(28, 36, 48, 0.18);
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        color: var(--ink);
+      }
+      .ai-mentor-share button {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        border-radius: 999px;
+        padding: 0.35em 0.8em;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .ai-mentor-share .share-yes { background: var(--teal); color: #fff; border: 1px solid var(--teal); }
+      .ai-mentor-share .share-no { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+      @media (max-width: 480px) {
+        .ai-mentor-share {
+          right: 0.5rem;
+          left: 0.5rem;
+          bottom: 4.6rem;
+          width: auto;
+          max-width: none;
+        }
+      }
       .ai-mentor-auth {
         padding: 0.7rem 1rem;
         background: #fff;
@@ -309,8 +348,8 @@
         <button type="button" id="aiMentorSend">Send</button>
       </div>
       <div class="ai-mentor-optin">
-        <input type="checkbox" id="aiMentorOptIn">
-        <label for="aiMentorOptIn">Share a topic summary of this chat with my instructor</label>
+        <input type="checkbox" id="aiMentorOptIn" checked>
+        <label for="aiMentorOptIn">Share a topic summary of this chat with my instructor (recommended)</label>
       </div>
     `;
 
@@ -346,7 +385,7 @@
   function closePanel() {
     el.panel.classList.remove('open');
     el.launcher.style.display = '';
-    saveSummary();
+    handleConversationEnd();
   }
 
   // ============================================================
@@ -459,52 +498,103 @@
   }
 
   // ============================================================
-  // Opt-in topic-summary logging (Step 15, decision locked:
-  // summary only — never raw messages; student must opt in).
+  // Sharing (owner decision — combination of all three):
+  //   * toggle defaults ON (opt-out);
+  //   * usage is ALWAYS logged (course, time, message count) even
+  //     when no summary is shared (topic_summary stays NULL);
+  //   * if sharing is off but the student had a real chat, an
+  //     end-of-chat prompt offers to share on close.
+  //   Summaries only — never raw messages.
   // ============================================================
-  async function saveSummary() {
-    if (!optIn) return;
-    if (!window.supabaseClient) return;
+  function userMessageCount() {
+    return conversation.filter(function (m) { return m.role === 'user'; }).length;
+  }
 
-    const userMsgs = conversation.filter(function (m) { return m.role === 'user'; });
-    if (userMsgs.length === 0) return;
+  async function generateSummary() {
+    if (!window.puter || !puter.ai) return null;
+    try {
+      const prompt = [
+        { role: 'system', content: 'You write ONE short sentence summarizing the topic a student asked a tutor about. Do not include personal details, do not quote any messages, and stay general.' },
+        { role: 'user', content: 'Summarize this student\'s questions: ' + JSON.stringify(conversation.slice(-8).map(function (m) {
+          return (m.role === 'user' ? 'Q: ' : 'A: ') + m.content;
+        }).join('\n')) }
+      ];
+      const resp = await puter.ai.chat(prompt, { model: MODEL });
+      const s = typeof resp === 'string' ? resp : (resp && resp.message && resp.message.content);
+      if (s && s.trim()) return s.trim().slice(0, 500);
+    } catch (err) {
+      console.log('AI mentor: summary generation failed', err);
+    }
+    return null;
+  }
+
+  async function syncSession(withSummary) {
+    if (!window.supabaseClient || userMessageCount() === 0) return false;
 
     let summary = null;
-    if (window.puter && puter.ai) {
-      try {
-        const prompt = [
-          { role: 'system', content: 'You write ONE short sentence summarizing the topic a student asked a tutor about. Do not include personal details, do not quote any messages, and stay general.' },
-          { role: 'user', content: 'Summarize this student\'s questions: ' + JSON.stringify(conversation.slice(-8).map(function (m) {
-            return (m.role === 'user' ? 'Q: ' : 'A: ') + m.content;
-          }).join('\n')) }
-        ];
-        const resp = await puter.ai.chat(prompt, { model: MODEL });
-        summary = typeof resp === 'string' ? resp : (resp && resp.message && resp.message.content);
-      } catch (err) {
-        console.log('AI mentor: summary generation failed', err);
+    if (withSummary) {
+      summary = await generateSummary();
+      if (!summary) {
+        summary = 'Student asked about: ' + String(conversation[0].content || 'the course').slice(0, 160);
       }
     }
 
-    if (!summary || !summary.trim()) {
-      summary = 'Student asked about: ' + String(userMsgs[0].content || 'the course').slice(0, 160);
-    }
-    if (summary.length > 500) summary = summary.slice(0, 497) + '…';
-
     try {
       const { data: authData } = await supabaseClient.auth.getSession();
-      if (!authData.session) return;
+      if (!authData.session) return false;
 
       const { data, error } = await supabaseClient.rpc('log_ai_mentor_summary', {
         p_session_id: aiSessionId,
         p_course_id: COURSE_ID,
         p_topic_summary: summary,
-        p_message_count: userMsgs.length
+        p_message_count: userMessageCount()
       });
       if (error) throw error;
       if (data) aiSessionId = data;
+      return true;
     } catch (err) {
-      console.error('AI mentor: could not save summary', err);
+      console.error('AI mentor: could not save chat', err);
+      return false;
     }
+  }
+
+  async function handleConversationEnd() {
+    if (userMessageCount() === 0 || savedThisChat) return;
+
+    if (optIn) {
+      savedThisChat = true;
+      await syncSession(true);
+    } else if (!promptShown) {
+      promptShown = true;
+      showSharePrompt();
+    } else {
+      savedThisChat = true;
+      await syncSession(false);
+    }
+  }
+
+  function showSharePrompt() {
+    if (document.getElementById('aiMentorSharePrompt')) return;
+
+    const bar = document.createElement('div');
+    bar.className = 'ai-mentor-share';
+    bar.id = 'aiMentorSharePrompt';
+    bar.innerHTML =
+      '<span>Share a summary of this chat with your instructor?</span>' +
+      '<button type="button" class="share-yes">Share</button>' +
+      '<button type="button" class="share-no">Not now</button>';
+    document.body.appendChild(bar);
+
+    bar.querySelector('.share-yes').addEventListener('click', async function () {
+      savedThisChat = true;
+      bar.remove();
+      await syncSession(true);
+    });
+    bar.querySelector('.share-no').addEventListener('click', async function () {
+      savedThisChat = true;
+      bar.remove();
+      await syncSession(false);
+    });
   }
 
   // ============================================================
@@ -589,7 +679,9 @@
     courseContext = await buildContext();
 
     window.addEventListener('beforeunload', function () {
-      saveSummary();
+      if (!savedThisChat && userMessageCount() > 0) {
+        syncSession(optIn);
+      }
     });
   });
 })();

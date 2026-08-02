@@ -55,11 +55,16 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   (context from live `modules` table), streaming themed-markdown replies, Puter sign-in
   prompt, offline notice, clearly labeled AI (not a human instructor). Session-only
   conversation; topic-summary logging still pending.
-- ✅ **AI Mentor logging built** (`sql/28-ai-mentor-logging.sql` + widget opt-in toggle +
+- ✅ **AI Mentor logging built** (`sql/28` + `sql/28b` + widget toggle +
   `student-profile.html` "AI Mentor Chats" timeline + `instructor-dashboard.html`
   "AI Mentor Activity" panel) — per-chat **opt-in** topic summaries only (never raw
   messages), upserted to `mentor_ai_sessions`; admin sees all, instructors see chats for
   their assigned courses. SQL not yet applied to live DB.
+- ✅ **AI Mentor sharing boost** (`sql/28b`, not yet applied live) — toggle defaults ON
+  (opt-out), usage is **always logged** (course/time/message count; `topic_summary` NULL
+  if not shared), and an end-of-chat "Share / Not now" prompt appears when a student
+  turned sharing off but still had a real chat. Instructor views show a "no summary
+  shared" fallback.
 - ✅ SQL/RPCs — schema through `sql/27`; RPCs: `add_student` (now with `p_expires_at`),
   `get_my_courses`, `get_course_instructors`, `assign_instructor`, `get_admin_overview`,
   `get_instructor_dashboard` (returns `expires_at`), `log_mentor_session`,

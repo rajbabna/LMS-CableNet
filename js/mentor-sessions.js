@@ -104,7 +104,9 @@
               ${chat.course_title ? `<span class="mentor-course">${escapeHtml(chat.course_title)}</span>` : ''}
               <span class="mentor-date">${when}</span>
             </div>
-            <p style="margin:0 0 0.5rem;">${escapeHtml(chat.topic_summary)}</p>
+            <p style="margin:0 0 0.5rem;">${chat.topic_summary
+              ? escapeHtml(chat.topic_summary)
+              : '<em style="color:var(--ink-soft);">Used the AI mentor — no summary shared.</em>'}</p>
             <span class="ai-count">${chat.message_count} ${chat.message_count === 1 ? 'message' : 'messages'}</span>
           </article>`;
       }).join('');
