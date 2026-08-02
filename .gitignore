@@ -26,3 +26,7 @@ Desktop.ini
 sql/
 old/
 scrrencap/
+
+# Internal docs that contain real account emails / beta-test details
+docs/content/separate-account-checklist.md
+docs/content/beta-test-kit.md

@@ -13,6 +13,85 @@
 
 <style>
   /* Dashboard-specific styles (restored from old/student-dashboard.html) */
+
+  /* Feedback modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(28, 36, 48, 0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+  .modal h3 { font-size: 1.2rem; margin-bottom: 1.4rem; color: var(--ink); }
+
+  .field { margin-bottom: 1.2rem; }
+  .field label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.5em;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 0.7em 0.8em;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus { outline: 2px solid var(--copper); outline-offset: 1px; }
+  .field small { display: block; font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.3em; }
+
+  .modal-footer {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: flex-end;
+    margin-top: 1.8rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+  .modal-footer .btn { flex: 0 1 auto; }
+
+  .star-row { display: flex; gap: 0.4rem; }
+  .star-row .star {
+    font-size: 1.6rem;
+    background: none;
+    border: none;
+    color: var(--line);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s ease;
+  }
+  .star-row .star.selected { color: var(--copper); }
+
   .courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -202,6 +281,7 @@
   <nav class="nav-actions">
     <span data-user-name style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <span data-user-role class="role-badge">Student</span>
+    <a href="#" id="feedback-link" style="margin-left:1.4rem;">Give Feedback</a>
     <a href="#" data-action="logout" id="logout-link" style="margin-left:1.4rem;">Log out</a>
   </nav>
 </header>
@@ -223,6 +303,37 @@
 <div class="wire-divider"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
 <footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<!-- Feedback modal -->
+<div id="feedbackModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
+  <div class="modal">
+    <h3 id="feedbackModalTitle">Give Feedback</h3>
+    <div class="field">
+      <label for="feedbackRating">How was your experience?</label>
+      <div id="feedbackRating" class="star-row" role="radiogroup" aria-label="Rating">
+        <button type="button" class="star" data-value="1" aria-label="1 star">&#9733;</button>
+        <button type="button" class="star" data-value="2" aria-label="2 stars">&#9733;</button>
+        <button type="button" class="star" data-value="3" aria-label="3 stars">&#9733;</button>
+        <button type="button" class="star" data-value="4" aria-label="4 stars">&#9733;</button>
+        <button type="button" class="star" data-value="5" aria-label="5 stars">&#9733;</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="feedbackCourse">Course (optional)</label>
+      <select id="feedbackCourse">
+        <option value="">-- Overall / no specific course --</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="feedbackComment">Comment</label>
+      <textarea id="feedbackComment" placeholder="What worked well? What was confusing or broken?"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn" id="feedbackCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="feedbackSubmitBtn">Submit Feedback</button>
+    </div>
+  </div>
+</div>
 
 <!-- Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -302,6 +413,109 @@
         window.location.replace("index.html");
       });
     }
+  })();
+</script>
+
+<!-- Give Feedback modal logic -->
+<script>
+  (function () {
+    const modal = document.getElementById("feedbackModal");
+    const openBtn = document.getElementById("feedback-link");
+    const cancelBtn = document.getElementById("feedbackCancelBtn");
+    const submitBtn = document.getElementById("feedbackSubmitBtn");
+    const ratingRow = document.getElementById("feedbackRating");
+    const courseSel = document.getElementById("feedbackCourse");
+    const commentEl = document.getElementById("feedbackComment");
+    let selectedRating = 0;
+
+    function renderStars() {
+      ratingRow.querySelectorAll(".star").forEach(function (btn) {
+        btn.classList.toggle("selected", Number(btn.dataset.value) <= selectedRating);
+      });
+    }
+
+    function openModal() {
+      selectedRating = 0;
+      renderStars();
+      commentEl.value = "";
+      modal.classList.add("active");
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+    }
+
+    if (openBtn) {
+      openBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openModal();
+      });
+    }
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", closeModal);
+    }
+    ratingRow.querySelectorAll(".star").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        selectedRating = Number(btn.dataset.value);
+        renderStars();
+      });
+    });
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) closeModal();
+    });
+
+    async function populateCourses() {
+      try {
+        const user = (await supabaseClient.auth.getUser()).data.user;
+        const [{ data: enrollments }, { data: allCourses }] = await Promise.all([
+          supabaseClient.from("enrollments").select("course_id").eq("user_id", user.id),
+          supabaseClient.from("courses").select("id, title").order("port_number", { ascending: true })
+        ]);
+        const enrolledIds = new Set((enrollments || []).map(e => e.course_id));
+        (allCourses || []).filter(c => enrolledIds.has(c.id)).forEach(function (c) {
+          const opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.title;
+          courseSel.appendChild(opt);
+        });
+      } catch (err) {
+        console.error("Feedback course load error:", err);
+      }
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener("click", async function () {
+        if (selectedRating === 0) {
+          alert("Please pick a rating (1-5 stars).");
+          return;
+        }
+        const comment = commentEl.value.trim();
+        if (!comment) {
+          alert("Please add a short comment so we know what to fix.");
+          return;
+        }
+        submitBtn.disabled = true;
+        try {
+          const { error } = await supabaseClient.rpc("submit_feedback", {
+            p_rating: selectedRating,
+            p_comment: comment,
+            p_course_id: courseSel.value || null
+          });
+          if (error) {
+            alert("Could not submit feedback: " + error.message);
+            submitBtn.disabled = false;
+            return;
+          }
+          closeModal();
+          alert("Thanks! Your feedback has been sent.");
+        } catch (err) {
+          alert("Unexpected error: " + err.message);
+          submitBtn.disabled = false;
+        }
+      });
+    }
+
+    populateCourses();
   })();
 </script>
 
