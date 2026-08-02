@@ -220,11 +220,13 @@
   <div class="quiz-meta">
     <span class="pill" id="cardCount">5 of 15 per round</span>
     <span class="pill" id="bestPill">Best: —</span>
+    <span class="pill" id="puterPill">Puter: off</span>
   </div>
 
   <!-- Start screen -->
   <div class="start-screen" id="startScreen">
     <p>Each attempt deals you 5 random questions from a pool of 15, so you get a fresh mix every time. No account needed — your best score is saved on your device (and to your Puter account if you sign in).</p>
+    <button class="btn-ghost" id="signInBtn">Sign in with Puter</button>
     <button class="btn-primary" id="startBtn">Start Quiz</button>
   </div>
 
@@ -384,6 +386,8 @@
     progressFill: document.getElementById('progressFill'),
     cardCount: document.getElementById('cardCount'),
     bestPill: document.getElementById('bestPill'),
+    puterPill: document.getElementById('puterPill'),
+    signInBtn: document.getElementById('signInBtn'),
     finalScore: document.getElementById('finalScore'),
     finalDetail: document.getElementById('finalDetail'),
     bestBadge: document.getElementById('bestBadge'),
@@ -407,16 +411,20 @@
     try { localStorage.setItem(STORE_KEY, String(v)); } catch (e) {}
   }
 
+  function puterSignedIn() {
+    return !!(window.puter && puter.auth && puter.auth.isSignedIn());
+  }
+
   function saveBest(score) {
     setLocalBest(score);
-    if (window.puter && puter.kv && puter.isSignedIn()) {
+    if (window.puter && puter.kv && puterSignedIn()) {
       puter.kv.set(PUTER_KV_KEY, score).catch(function () {});
     }
   }
 
   function loadBest(cb) {
     var local = localBest();
-    if (window.puter && puter.kv && puter.isSignedIn()) {
+    if (window.puter && puter.kv && puterSignedIn()) {
       puter.kv.get(PUTER_KV_KEY)
         .then(function (v) {
           var cloud = parseInt(v || '0', 10);
@@ -515,9 +523,23 @@
       el.bestBadge.innerHTML = '';
     }
 
-    el.syncNote.textContent = (window.puter && puter.isSignedIn())
+    el.syncNote.textContent = puterSignedIn()
       ? 'Saved to your Puter account.'
-      : 'Saved on this device. Log in with Puter to keep your best score on any device.';
+      : 'Saved on this device. Sign in with Puter to keep your best score on any device.';
+  }
+
+  function refreshAuth() {
+    var signedIn = puterSignedIn();
+    el.puterPill.textContent = signedIn ? 'Puter: connected' : 'Puter: off';
+    el.signInBtn.style.display = signedIn ? 'none' : 'inline-block';
+    el.syncNote.textContent = signedIn
+      ? 'Saved to your Puter account.'
+      : 'Saved on this device. Sign in with Puter to keep your best score on any device.';
+    if (signedIn) {
+      loadBest(function (best) {
+        if (best > 0) { setLocalBest(best); updateBestPill(); }
+      });
+    }
   }
 
   // ---- Wire up ----
@@ -527,8 +549,14 @@
     currentIndex++;
     renderQuestion();
   });
+  el.signInBtn.addEventListener('click', function () {
+    if (window.puter && puter.auth) {
+      puter.auth.signIn().then(refreshAuth).catch(function () {});
+    }
+  });
 
   // Init
+  refreshAuth();
   updateBestPill();
   loadBest(function (best) {
     if (best > 0) setLocalBest(best);

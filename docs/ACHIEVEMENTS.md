@@ -31,8 +31,9 @@ Live at: **https://rajbabna.github.io/LMS-CableNet/** (GitHub Pages, `main` bran
 ## 2. Networking quiz
 
 - A themed **15-question MCQ pool**; each attempt deals **5 random questions**.
-- Hosted on Puter and embedded/CTA-linked from the landing page
-  (`https://cablenet-quiz.puter.site/basic-network-quiz.html`).
+- Hosted **same-origin** on GitHub Pages (`tools/basic-network-quiz.html`) and
+  CTA-linked from the landing page — one Puter sign-in covers both the quiz and the
+  AI Mentor widget (origin-scoped sessions don't carry across domains).
 - Score persistence via Puter KV when the student is signed in; per-attempt feedback
   with explanations. Landing page shows a compact "Test your networking basics" card.
 
