@@ -257,6 +257,7 @@
     <div class="sync-note" id="syncNote"></div>
     <div style="margin-top:1.4rem; display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap;">
       <button class="btn-primary" id="retryBtn">Try Again</button>
+      <button class="btn-ghost" id="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -371,6 +372,7 @@
   var currentDeck = [];
   var currentIndex = 0;
   var correctCount = 0;
+  var currentOrder = [];
 
   var el = {
     startScreen: document.getElementById('startScreen'),
@@ -378,6 +380,7 @@
     resultsScreen: document.getElementById('resultsScreen'),
     startBtn: document.getElementById('startBtn'),
     retryBtn: document.getElementById('retryBtn'),
+    closeBtn: document.getElementById('closeBtn'),
     nextBtn: document.getElementById('nextBtn'),
     questionNum: document.getElementById('questionNum'),
     questionText: document.getElementById('questionText'),
@@ -401,6 +404,18 @@
       var t = a[i]; a[i] = a[j]; a[j] = t;
     }
     return a;
+  }
+
+  // Returns a shuffled list of option indices, so the correct answer
+  // isn't always in the same position (most pool answers were index 0).
+  function shuffleOptions(item) {
+    var order = [];
+    for (var i = 0; i < item.options.length; i++) order.push(i);
+    for (var i = order.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = order[i]; order[i] = order[j]; order[j] = t;
+    }
+    return order;
   }
 
   function localBest() {
@@ -466,31 +481,34 @@
     el.feedback.innerHTML = '';
     el.nextBtn.style.display = 'none';
 
+    // Shuffle the options so the correct answer isn't always first.
+    currentOrder = shuffleOptions(item);
+
     var letters = ['A', 'B', 'C', 'D'];
     el.options.innerHTML = '';
-    item.options.forEach(function (opt, i) {
+    currentOrder.forEach(function (origIndex, position) {
       var btn = document.createElement('button');
       btn.className = 'option';
       btn.type = 'button';
-      btn.innerHTML = '<span class="letter">' + letters[i] + '</span><span>' + opt + '</span>';
-      btn.addEventListener('click', function () { selectAnswer(i, btn); });
+      btn.innerHTML = '<span class="letter">' + letters[position] + '</span><span>' + item.options[origIndex] + '</span>';
+      btn.addEventListener('click', function () { selectAnswer(origIndex, position, btn); });
       el.options.appendChild(btn);
     });
   }
 
-  function selectAnswer(index, btn) {
+  function selectAnswer(origIndex, position, btn) {
     var item = currentDeck[currentIndex];
     var allBtns = el.options.querySelectorAll('.option');
 
     // Lock all options
     allBtns.forEach(function (b) { b.disabled = true; });
 
-    var isCorrect = index === item.correct;
+    var isCorrect = origIndex === item.correct;
 
-    // Highlight correct + wrong
+    // Highlight correct + wrong (map back through the shuffled order)
     allBtns.forEach(function (b, i) {
-      if (i === item.correct) b.classList.add('correct');
-      if (i === index && !isCorrect) b.classList.add('wrong');
+      if (currentOrder[i] === item.correct) b.classList.add('correct');
+      if (i === position && !isCorrect) b.classList.add('wrong');
     });
 
     if (isCorrect) correctCount++;
@@ -548,6 +566,9 @@
   el.nextBtn.addEventListener('click', function () {
     currentIndex++;
     renderQuestion();
+  });
+  el.closeBtn.addEventListener('click', function () {
+    window.close();
   });
   el.signInBtn.addEventListener('click', function () {
     if (window.puter && puter.auth) {
