@@ -1,0 +1,28 @@
+# Secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Dependencies / build
+node_modules/
+*.log
+
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.code-workspace
+
+# Tooling
+.claude/
+
+# Not published / not needed in the repo
+# (migrations + screenshots + legacy pages are intentionally excluded
+#  from the public repo; still on disk and in git history)
+sql/
+old/
+scrrencap/
