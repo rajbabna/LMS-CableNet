@@ -239,7 +239,6 @@
         line-height: 1.4;
         color: var(--ink-soft);
       }
-      @media (max-width: 480px) {
       .ai-mentor-auth {
         padding: 0.7rem 1rem;
         background: #fff;
