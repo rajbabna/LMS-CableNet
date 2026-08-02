@@ -25,6 +25,13 @@ Live at: **https://rajbabna.github.io/LMS-CableNet/** (GitHub Pages, `main` bran
 - **Dashboards** — student dashboard (enrolled courses + progress) and instructor/admin
   dashboard (per-course students, progress bars, access status, stalled flag, enrollment
   management, course-instructor assignments, admin system overview, audit log).
+- **Co-teaching RLS hardening (`sql/29`)** — tightened the base-table staff SELECT policies
+  (`enrollments`, `stalled_overrides`, `student_audit_log`, `course_instructors`,
+  `mentor_ai_sessions`) from blanket `role IN ('admin','instructor')` to **course-scoped**:
+  admins see all; instructors see only rows for assigned courses (own-row student policies
+  unchanged). This closes a real cross-course data exposure that only becomes visible with
+  genuinely separate instructor accounts; dashboard RPCs already applied the scoping, so no
+  UI behaviour changed.
 - **Deployment** — static site pushed to GitHub Pages; Supabase (Postgres + RLS + RPCs)
   is the data layer, accessed with a publishable (client-safe) key only.
 

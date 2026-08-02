@@ -35,6 +35,27 @@ The table and RPCs are kept in the database, but the UI now opens AI Mentor Chat
 **Testing accounts are all personal-email variants**
 Admin, instructor, and both student test accounts are on close variants of the same personal Gmail address. Reasonable for early solo testing, but before real students are onboarded, it's worth testing at least one flow (e.g. co-teaching scoping, or a second real instructor account) with genuinely separate accounts — some permission edge cases only show up when the accounts aren't all controlled by the same person.
 
+**Status (code review, Aug 2, 2026): a real bug found and fixed.**
+- The blanket staff SELECT policies on `enrollments`, `stalled_overrides`,
+  `student_audit_log`, `course_instructors`, and `mentor_ai_sessions` used
+  `role IN ('admin','instructor')` — with the publishable key, ANY instructor could
+  read every row (all courses) through the REST API, and the dashboard's "Recent
+  Activity" panel showed audit entries for students outside the instructor's courses.
+- Fixed by `sql/29-scope-staff-rls.sql` (course-scoped: admin all, instructors only
+  assigned courses, students own-row). Apply it in the Supabase SQL editor, then run
+  this checklist with a genuinely separate instructor account:
+  1. Create a second instructor via the admin dashboard's add-account form; approve
+     and assign them to ONE course (`assign_instructor`).
+  2. Log in as that instructor: the dashboard must list only that course's students;
+     the Recent Activity panel must only show that course's entries.
+  3. In the browser console as that instructor, try
+     `supabase.from('enrollments').select('*')` and
+     `supabase.from('mentor_ai_sessions').select('*')` — both must return only the
+     assigned course's rows (students' own rows only for students).
+  4. Assign the second instructor to the SAME course as the first → both must see the
+     same students (co-teaching).
+  5. Verify the admin still sees everything after the policy change.
+
 ---
 
 ## Engineering Notes Worth Preserving

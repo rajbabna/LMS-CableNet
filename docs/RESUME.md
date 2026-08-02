@@ -73,6 +73,14 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   (sql/25) — the pending-instructor flow was removed.
 - ✅ Progress tracking — `module_completions` + `course_progress_view`; orphaned rows
   cleaned.
+- ✅ **Co-teaching RLS hardening** (`sql/29`, not yet applied live) — the blanket
+  `role IN ('admin','instructor')` SELECT policies on `enrollments`,
+  `stalled_overrides`, `student_audit_log`, `course_instructors`, and
+  `mentor_ai_sessions` let any instructor read ALL rows (all courses) via the REST
+  API. Now course-scoped: admin sees all, instructors see only assigned courses
+  (students keep own-row). Same scoping the dashboard RPCs already apply — so no UI
+  change, just the direct-read path closed. Do the **separate-account test** from
+  `docs/content/cablenet-lms-issues-to-flag.md` after applying.
 
 ## Important gotchas
 
