@@ -30,3 +30,8 @@ scrrencap/
 # Internal docs that contain real account emails / beta-test details
 docs/content/separate-account-checklist.md
 docs/content/beta-test-kit.md
+
+# Project-state docs scrubbed of account emails, kept local only
+docs/ACHIEVEMENTS.md
+docs/RESUME.md
+docs/START-HERE.md

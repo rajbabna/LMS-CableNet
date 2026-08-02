@@ -60,12 +60,8 @@ docs/                       documentation + future interactive-content plan
 
 ## Accounts (dev)
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | REDACTED | REDACTED |
-| Instructor | REDACTED | REDACTED |
-| Student | REDACTED | REDACTED |
-| Student | REDACTED | REDACTED |
+Test-account emails and passwords are kept out of this public repo — see the internal
+beta-test kit on the owner's machine for credentials.
 
 ## Deploy
 
