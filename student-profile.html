@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Mentor Log — Cable&Net Courses</title>
-  <meta name="description" content="Instructor mentor log for a student — session timeline and follow-up tracking.">
+  <title>Student AI Chats — Cable&Net Courses</title>
+  <meta name="description" content="Topic summaries a student shared from the AI Mentor, for instructor review.">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,35 +63,6 @@
       font-style: italic;
     }
 
-    .field { margin-bottom: 1.1rem; }
-    .field label {
-      display: block;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--ink-soft);
-      margin-bottom: 0.4em;
-    }
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      padding: 0.7em 0.8em;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      color: var(--ink);
-    }
-    .field textarea { resize: vertical; min-height: 90px; }
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus { outline: 2px solid var(--copper); outline-offset: 1px; }
-
-    .btn-action { width: 100%; }
-
     .mentor-timeline { display: grid; gap: 1rem; }
     .mentor-entry {
       background: #fff;
@@ -124,29 +95,10 @@
     }
     .mentor-entry h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
     .mentor-entry p { margin: 0.4rem 0; font-size: 0.9rem; color: var(--ink); }
-    .mentor-meta {
-      font-family: var(--font-mono);
-      font-size: 0.75rem !important;
-      color: var(--ink-soft) !important;
-    }
-    .mentor-followup {
-      margin-top: 0.8rem;
-      padding: 0.7rem 0.9rem;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      border: 1px solid var(--line);
-    }
-    .mentor-followup.open { background: #FEF3E0; border-color: var(--brown); color: #5a3c2a; }
-    .mentor-followup.resolved { background: #E4EEE1; border-color: var(--green); color: #335a3a; }
     .ai-entry .mentor-entry-head .port-num {
       background: var(--teal);
       color: #fff;
       border: 1px solid var(--teal);
-    }
-    .ai-meta {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--ink-soft);
     }
     .ai-count {
       font-family: var(--font-mono);
@@ -157,13 +109,6 @@
       color: var(--ink-soft);
       background: var(--bg);
     }
-    .btn-table {
-      padding: 0.35em 0.7em;
-      font-size: 0.7rem;
-      white-space: nowrap;
-    }
-    .btn-status { background: var(--copper); color: #fff; border: 1px solid var(--copper); }
-    .btn-status:hover { background: var(--copper-dark); border-color: var(--copper-dark); }
 
     .spinner {
       display: inline-block;
@@ -202,7 +147,7 @@
 
   <main>
     <div class="hero">
-      <span class="eyebrow">🧑‍🏫 Mentor Sessions</span>
+      <span class="eyebrow">🤖 AI Mentor Chats</span>
       <h1 id="studentName">Student</h1>
       <p class="lede" id="studentId"></p>
     </div>
@@ -210,17 +155,6 @@
     <div id="alert" class="alert-msg" role="alert" aria-live="polite"></div>
 
     <div class="profile-container">
-
-      <!-- Timeline -->
-      <div class="profile-section">
-        <h2>📜 Session Timeline</h2>
-        <div class="mentor-timeline" id="mentorTimeline">
-          <div class="empty-state"><span class="spinner"></span> Loading mentor sessions...</div>
-        </div>
-        <div class="empty-state" id="mentorEmpty" style="display:none;">
-          No mentor sessions logged yet. Use the form to log the first one.
-        </div>
-      </div>
 
       <!-- AI Mentor chats -->
       <div class="profile-section">
@@ -234,51 +168,6 @@
         <div class="empty-state" id="aiEmpty" style="display:none;">
           No shared AI mentor chats yet.
         </div>
-      </div>
-
-      <!-- Log a session -->
-      <div class="profile-section" id="logSessionSection">
-        <h2>➕ Log Mentor Session</h2>
-        <p style="font-size:0.85rem; color: var(--ink-soft); margin-top: -0.4rem; margin-bottom: 1.2rem;">
-          Instructor-only working notes — students never see these.
-        </p>
-
-        <form id="logSessionForm">
-          <div class="field">
-            <label for="sessionCourse">Course</label>
-            <select id="sessionCourse"></select>
-          </div>
-
-          <div class="field">
-            <label for="sessionDate">Session Date</label>
-            <input type="date" id="sessionDate">
-          </div>
-
-          <div class="field">
-            <label for="sessionTopic">Topic <span style="color: var(--ink-soft);">(required)</span></label>
-            <input type="text" id="sessionTopic" placeholder="e.g., Cabling practical review, T568B practice" autocomplete="off">
-          </div>
-
-          <div class="field">
-            <label for="sessionNotes">Notes</label>
-            <textarea id="sessionNotes" placeholder="What was discussed..."></textarea>
-          </div>
-
-          <div class="field">
-            <label for="sessionOutcome">Outcome</label>
-            <input type="text" id="sessionOutcome" placeholder="e.g., Student can now terminate a jack unaided" autocomplete="off">
-          </div>
-
-          <div class="field">
-            <label for="sessionFollowUp">Follow-up Action</label>
-            <input type="text" id="sessionFollowUp" placeholder="e.g., Redo the patch panel lab by Friday" autocomplete="off">
-            <small style="display:block; font-size:0.75rem; color: var(--ink-soft); margin-top:0.3em;">
-              Optional — if set, it appears as an open item you can mark resolved later.
-            </small>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-action">Save Session</button>
-        </form>
       </div>
 
     </div>

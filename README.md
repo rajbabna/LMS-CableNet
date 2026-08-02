@@ -26,10 +26,9 @@ Supabase — no hardcoding.
   progress bars.
 - **Course assignment** — admin assigns instructors to courses via `assign_instructor`;
   dropdowns/filters populate from `get_my_courses()`.
-- **Mentor sessions** — instructors log one-on-one check-ins per student
-  (`student-profile.html` + `mentor_sessions` table): topic, notes, outcome, and an
-  open/resolved follow-up action. Instructor-only working notes; co-instructors get
-  read-only access.
+- **Mentor sessions** — (retired from UI, schema kept for optional future use) the
+  `mentor_sessions` table + RPCs still exist but there is no logging form or timeline
+  shown anymore; the instructor dashboard button now opens the student's **AI Chats** view.
 - **AI Mentor (Ask the Mentor)** — a floating chat widget on the course pages powered by
   Puter's keyless AI layer (`js/ai-mentor.js`). Course-aware study buddy that explains and
   guides; clearly labeled as an AI assistant; requires connectivity and a free Puter sign-in.

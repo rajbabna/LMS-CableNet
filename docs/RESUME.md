@@ -42,11 +42,11 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   picks 24h/7/30/90/180d/lifetime per student; expiry downgrades access site-wide
   (dashboard, landing, course pages). Guests are onboarded manually as student accounts
   with a 24-hour window — no self-serve trial.
-- ✅ **Mentor sessions** (`mentor_sessions` table, sql/27, `student-profile.html` +
-  `js/mentor-sessions.js`) — instructors log per-student check-ins (topic, notes,
-  outcome, optional follow-up) with open/resolved tracking. Instructor-only notes;
-  co-instructors read-only; students never see them. Reached via a "Mentor" button on
-  each row of the instructor dashboard.
+- ✅ **Mentor sessions** (`mentor_sessions` table + RPCs, sql/27) — **UI retired** (per
+  owner decision: AI Mentor chat summaries give the instructor what they need). The
+  timeline + log form on `student-profile.html` and the dashboard "Mentor" button were
+  removed; schema, RLS and RPCs remain for optional future use. The dashboard button is
+  now "AI Chats" and opens the student's shared AI summaries.
 - ✅ **AI Mentor feasibility validated** (`tools/puter-ai-test.html`) — Puter's keyless
   `puter.ai.chat()` works in-browser (streaming, system prompts, testMode, themed
   markdown rendering). Confirms the Step 15 path; build starts next.

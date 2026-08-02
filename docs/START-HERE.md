@@ -16,7 +16,7 @@ The platform is **live and fully functional** — dynamic content, working auth,
 - ✅ Progress tracking — `module_completions` + `course_progress_view`
 - ✅ Self-signup removed — admin is the only account creator (no `pending.html`)
 - ✅ Time-limited enrollment — admin/instructor sets an access window (24h–180d/lifetime); expired students downgrade to preview automatically
-- ✅ Mentor sessions — instructors log per-student check-ins from `student-profile.html` (timeline + follow-up tracking); instructor-only notes, co-instructors read-only
+- ✅ Mentor sessions — schema + RPCs kept (`mentor_sessions`); UI retired. The instructor dashboard button ("AI Chats") now opens the student's shared AI Mentor chat summaries
 
 ![Workflow Diagram](./workflow-diagram.png)
 
