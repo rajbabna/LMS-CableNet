@@ -12,22 +12,18 @@ These were open questions in earlier reviews and are now settled by design decis
 - **Summary vs. full transcript for AI Mentor visibility** — resolved as topic-summary-only, never raw messages, disclosed to students in the widget.
 - **Whether the AI Mentor chat logic was functional** — resolved; sql/28b completing the sharing boost implies the full chat → summary → dashboard pipeline is live and tested.
 - **Two separate Puter sign-ins (quiz vs. AI Mentor)?** — resolved by consolidating: the quiz is no longer hosted standalone on `cablenet-quiz.puter.site`; it's served **same-origin** on GitHub Pages (`tools/basic-network-quiz.html`). Because Puter sessions are origin-scoped (localStorage), one sign-in now covers both the quiz's KV score-sync and the AI Mentor widget. The quiz also gained an explicit "Sign in with Puter" button (the GitHub Pages origin has no platform auto-login) and its sign-in checks now use `puter.auth.isSignedIn()` (the legacy `puter.isSignedIn()` was not reliable in puter.js v2). Note: score history on the old puter-site app doesn't carry over (KV is app-scoped).
+- **Access-duration "downgrade to preview" behavior** — resolved: it is a **deliberate, documented design**, not an unexamined default. Confirmed in `README.md` ("student is downgraded to preview/expired automatically"), `START-HERE.md`, `RESUME.md`, `ACHIEVEMENTS.md`, the admin UI copy ("After it expires the student's access downgrades to preview", `instructor-dashboard.html`), and the code path (`js/auth-guard.js` sets `data-enrollmentExpired`; `js/load-modules.js` renders the expired banner + preview-locked resources/completion). Rationale: students can still review module titles/descriptions after access lapses, which is friendlier than a hard lock-out and keeps the preview as an upsell path.
+- **GitHub Pages cache reliance** — resolved: added `tools/bump-cache-version.ps1` (content-hash `?v=<md5:8>` on every local JS/CSS asset in all pages; idempotent; externals untouched). Run it before pushing and a stale cache can no longer be mistaken for a real bug. Hard-refresh is no longer required for JS/CSS to update (HTML pages are revalidated by GitHub Pages).
 
 ---
 
 ## Still Worth Confirming
-
-**Access-duration "downgrade to preview" behavior**
-Expired student access falls back to preview content rather than a full lock-out. Not addressed in the achievements doc — still worth a deliberate check that this is the intended behavior rather than an unexamined default, especially once real enrollment expirations start happening.
 
 **Add Student/Account modal — repeated fields in screenshot**
 Likely a scrolling-screenshot capture artifact (fixed-position modal + full-page screenshot tool), not a real bug — but worth opening the modal directly once to confirm it's a single clean form, not an unintended repeated-entry list.
 
 **`topic_summary` nullable safety net**
 Kept nullable "for legacy rows" from earlier iterations (opt-in → opt-out → always-on). Worth confirming the AI Mentor Activity panel and student AI Chats timeline handle a null summary gracefully (a sensible fallback line) rather than showing a blank or broken row for those older records.
-
-**GitHub Pages cache reliance**
-The live-URL note says to "hard-refresh after each push to bypass cache" — a manual step that depends on remembering to do it. Worth considering a lightweight cache-busting approach (versioned asset filenames, or a query-string cache buster on deploy) so a missed hard-refresh doesn't get mistaken for a real bug during future testing.
 
 **No UI path to historical `mentor_sessions` data**
 The table and RPCs are kept in the database, but the UI now opens AI Mentor Chats instead. If there's ever a need to reference an old human-logged session (e.g. the KrishB cable-testing and T568A/B sessions from earlier), there's currently no dashboard path to it — only direct database access. Worth confirming that's an acceptable trade-off rather than an oversight.

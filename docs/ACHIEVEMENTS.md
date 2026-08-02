@@ -2,7 +2,8 @@
 
 A summary of everything built, fixed, and shipped so far on the LMS project.
 Live at: **https://rajbabna.github.io/LMS-CableNet/** (GitHub Pages, `main` branch of
-`rajbabna/LMS-CableNet`; hard-refresh after each push to bypass cache).
+`rajbabna/LMS-CableNet`). Run `tools/bump-cache-version.ps1` before pushing to version
+JS/CSS assets (`?v=<hash>`) so updates don't need a hard-refresh.
 
 ---
 
@@ -32,6 +33,9 @@ Live at: **https://rajbabna.github.io/LMS-CableNet/** (GitHub Pages, `main` bran
   unchanged). This closes a real cross-course data exposure that only becomes visible with
   genuinely separate instructor accounts; dashboard RPCs already applied the scoping, so no
   UI behaviour changed.
+- **Cache-busting (`tools/bump-cache-version.ps1`)** — content-hash `?v=<md5:8>` on every
+  local JS/CSS asset across all pages; idempotent, externals untouched. Removes the
+  hard-refresh requirement after pushes during testing/beta.
 - **Deployment** — static site pushed to GitHub Pages; Supabase (Postgres + RLS + RPCs)
   is the data layer, accessed with a publishable (client-safe) key only.
 

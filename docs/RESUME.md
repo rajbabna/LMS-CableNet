@@ -81,12 +81,16 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   (students keep own-row). Same scoping the dashboard RPCs already apply — so no UI
   change, just the direct-read path closed. Do the **separate-account test** from
   `docs/content/cablenet-lms-issues-to-flag.md` after applying.
+- ✅ **Cache-busting** (`tools/bump-cache-version.ps1`) — content-hash `?v=<md5:8>`
+  on every local JS/CSS asset; idempotent; externals untouched. Run before pushing;
+  hard-refresh no longer needed for code updates.
 
 ## Important gotchas
 
 - **Three local copies** must stay in sync: `LMS - V2.0` (git source of truth),
   `Sites\WEB`, `Sites\GitHub Web\cable-net-courses`. Push → GitHub Pages rebuilds in
-  ~1–3 min; hard-refresh/incognito to beat browser cache.
+  ~1–3 min. Run `tools\bump-cache-version.ps1` before pushing — it versions JS/CSS
+  assets (`?v=<hash>`) so no hard-refresh is needed for code updates.
 - **Email confirmation is OFF** to avoid `429 over_email_send_rate_limit`. `confirmed_at`
   is a generated column; only `email_confirmed_at` is updatable.
 - **No self-signup** — `pending.html` was deleted; unapproved users land on `index.html`.
