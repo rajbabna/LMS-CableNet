@@ -152,5 +152,13 @@ Two independent decisions, not required together:
 **BUILT (core): `js/ai-mentor.js`** — floating "Ask the Mentor" chat on both course pages
 (course context from the live `modules` table, streaming themed-markdown replies, Puter
 sign-in prompt, offline/error notices, session-only conversation). Widget labels itself as
-an AI assistant. **Pending:** opt-in topic-summary logging + instructor aggregate view
-(decision locked: topic summary, no raw transcripts).
+an AI assistant.
+
+**BUILT (logging, `sql/28-ai-mentor-logging.sql` + client + dashboards):**
+- Per-chat **opt-in toggle** in the widget ("Share a topic summary of this chat with my instructor").
+- On close/leave, the AI writes a one-sentence **topic summary** (never raw messages) and it's
+  upserted to `mentor_ai_sessions` (`log_ai_mentor_summary` RPC, own-rows-only RLS).
+- Instructors see them: **AI Mentor Chats** timeline on `student-profile.html`
+  (`get_ai_mentor_sessions_for_student`) + **AI Mentor Activity** panel on
+  `instructor-dashboard.html` (`get_ai_mentor_topic_overview`, per-course counts + latest summary).
+- Co-teaching scoping: admins see all; instructors see only chats for their assigned courses.

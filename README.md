@@ -33,6 +33,9 @@ Supabase — no hardcoding.
 - **AI Mentor (Ask the Mentor)** — a floating chat widget on the course pages powered by
   Puter's keyless AI layer (`js/ai-mentor.js`). Course-aware study buddy that explains and
   guides; clearly labeled as an AI assistant; requires connectivity and a free Puter sign-in.
+  Students can **opt in** to share a topic summary of a chat (never raw messages); instructors
+  see them on the student profile and an aggregate activity panel on the instructor dashboard
+  (`mentor_ai_sessions`).
 
 ## Tech
 

@@ -138,6 +138,25 @@
     }
     .mentor-followup.open { background: #FEF3E0; border-color: var(--brown); color: #5a3c2a; }
     .mentor-followup.resolved { background: #E4EEE1; border-color: var(--green); color: #335a3a; }
+    .ai-entry .mentor-entry-head .port-num {
+      background: var(--teal);
+      color: #fff;
+      border: 1px solid var(--teal);
+    }
+    .ai-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+    }
+    .ai-count {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.2em 0.6em;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink-soft);
+      background: var(--bg);
+    }
     .btn-table {
       padding: 0.35em 0.7em;
       font-size: 0.7rem;
@@ -200,6 +219,20 @@
         </div>
         <div class="empty-state" id="mentorEmpty" style="display:none;">
           No mentor sessions logged yet. Use the form to log the first one.
+        </div>
+      </div>
+
+      <!-- AI Mentor chats -->
+      <div class="profile-section">
+        <h2>🤖 AI Mentor Chats</h2>
+        <p style="font-size:0.85rem; color: var(--ink-soft); margin-top: -0.4rem; margin-bottom: 1.2rem;">
+          Topic summaries the student chose to share from "Ask the Mentor". Summaries only — never raw chat messages.
+        </p>
+        <div class="mentor-timeline" id="aiTimeline">
+          <div class="empty-state"><span class="spinner"></span> Loading AI mentor chats...</div>
+        </div>
+        <div class="empty-state" id="aiEmpty" style="display:none;">
+          No shared AI mentor chats yet.
         </div>
       </div>
 

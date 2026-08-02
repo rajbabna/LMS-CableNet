@@ -55,6 +55,11 @@ The platform is **live and fully functional** on GitHub Pages. Supabase project
   (context from live `modules` table), streaming themed-markdown replies, Puter sign-in
   prompt, offline notice, clearly labeled AI (not a human instructor). Session-only
   conversation; topic-summary logging still pending.
+- ✅ **AI Mentor logging built** (`sql/28-ai-mentor-logging.sql` + widget opt-in toggle +
+  `student-profile.html` "AI Mentor Chats" timeline + `instructor-dashboard.html`
+  "AI Mentor Activity" panel) — per-chat **opt-in** topic summaries only (never raw
+  messages), upserted to `mentor_ai_sessions`; admin sees all, instructors see chats for
+  their assigned courses. SQL not yet applied to live DB.
 - ✅ SQL/RPCs — schema through `sql/27`; RPCs: `add_student` (now with `p_expires_at`),
   `get_my_courses`, `get_course_instructors`, `assign_instructor`, `get_admin_overview`,
   `get_instructor_dashboard` (returns `expires_at`), `log_mentor_session`,

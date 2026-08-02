@@ -23,6 +23,8 @@
     studentId: document.getElementById('studentId'),
     timeline: document.getElementById('mentorTimeline'),
     empty: document.getElementById('mentorEmpty'),
+    aiTimeline: document.getElementById('aiTimeline'),
+    aiEmpty: document.getElementById('aiEmpty'),
     logForm: document.getElementById('logSessionForm'),
     courseSelect: document.getElementById('sessionCourse'),
     dateInput: document.getElementById('sessionDate'),
@@ -172,6 +174,46 @@
     }
   }
 
+  // ============================================
+  // AI Mentor chats timeline
+  // ============================================
+  async function loadAiTimeline() {
+    el.aiTimeline.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading AI mentor chats...</div>';
+    el.aiEmpty.style.display = 'none';
+
+    try {
+      const { data, error } = await supabaseClient.rpc('get_ai_mentor_sessions_for_student', {
+        p_student_id: studentId
+      });
+
+      if (error) throw error;
+
+      const chats = data || [];
+      if (chats.length === 0) {
+        el.aiTimeline.innerHTML = '';
+        el.aiEmpty.style.display = 'block';
+        return;
+      }
+
+      el.aiTimeline.innerHTML = chats.map(chat => {
+        const when = new Date(chat.updated_at || chat.started_at).toLocaleString();
+        return `
+          <article class="mentor-entry ai-entry">
+            <div class="mentor-entry-head">
+              <span class="port-num">AI CHAT</span>
+              ${chat.course_title ? `<span class="mentor-course">${escapeHtml(chat.course_title)}</span>` : ''}
+              <span class="mentor-date">${when}</span>
+            </div>
+            <p style="margin:0 0 0.5rem;">${escapeHtml(chat.topic_summary)}</p>
+            <span class="ai-count">${chat.message_count} ${chat.message_count === 1 ? 'message' : 'messages'}</span>
+          </article>`;
+      }).join('');
+    } catch (err) {
+      console.error('loadAiTimeline error:', err);
+      el.aiTimeline.innerHTML = '<div class="empty-state">Could not load AI mentor chats.</div>';
+    }
+  }
+
   async function resolveFollowUp(sessionId, btn) {
     btn.disabled = true;
     try {
@@ -283,6 +325,7 @@
 
     await loadMyCourses();
     await loadTimeline();
+    await loadAiTimeline();
 
     el.logForm.addEventListener('submit', submitSession);
     document.getElementById('logoutLink').addEventListener('click', (e) => {

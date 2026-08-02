@@ -32,12 +32,15 @@
     input: null,
     sendBtn: null,
     status: null,
-    authBar: null
+    authBar: null,
+    optIn: null
   };
 
   const conversation = [];
   let courseContext = null;
   let busy = false;
+  let optIn = false;
+  let aiSessionId = null;
 
   // ============================================================
   // Course context (grounds answers in the curriculum)
@@ -225,6 +228,19 @@
         color: #fff;
       }
       .ai-mentor-inputbar button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .ai-mentor-optin {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.55rem 0.9rem;
+        border-top: 1px solid var(--line);
+        background: #fff;
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        color: var(--ink-soft);
+      }
+      .ai-mentor-optin label { cursor: pointer; }
+      .ai-mentor-optin input { margin-top: 0.15rem; accent-color: var(--teal); }
       .ai-mentor-auth {
         padding: 0.7rem 1rem;
         background: #fff;
@@ -292,6 +308,10 @@
         <input type="text" id="aiMentorInput" placeholder="Ask about cabling, networking, the internet..." autocomplete="off">
         <button type="button" id="aiMentorSend">Send</button>
       </div>
+      <div class="ai-mentor-optin">
+        <input type="checkbox" id="aiMentorOptIn">
+        <label for="aiMentorOptIn">Share a topic summary of this chat with my instructor</label>
+      </div>
     `;
 
     panel.querySelector('.ai-mentor-close').addEventListener('click', closePanel);
@@ -304,10 +324,14 @@
     el.input = document.getElementById('aiMentorInput');
     el.sendBtn = document.getElementById('aiMentorSend');
     el.authBar = document.getElementById('aiMentorAuth');
+    el.optIn = document.getElementById('aiMentorOptIn');
 
     el.sendBtn.addEventListener('click', send);
     el.input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') send();
+    });
+    el.optIn.addEventListener('change', function () {
+      optIn = el.optIn.checked;
     });
   }
 
@@ -322,6 +346,7 @@
   function closePanel() {
     el.panel.classList.remove('open');
     el.launcher.style.display = '';
+    saveSummary();
   }
 
   // ============================================================
@@ -434,6 +459,55 @@
   }
 
   // ============================================================
+  // Opt-in topic-summary logging (Step 15, decision locked:
+  // summary only — never raw messages; student must opt in).
+  // ============================================================
+  async function saveSummary() {
+    if (!optIn) return;
+    if (!window.supabaseClient) return;
+
+    const userMsgs = conversation.filter(function (m) { return m.role === 'user'; });
+    if (userMsgs.length === 0) return;
+
+    let summary = null;
+    if (window.puter && puter.ai) {
+      try {
+        const prompt = [
+          { role: 'system', content: 'You write ONE short sentence summarizing the topic a student asked a tutor about. Do not include personal details, do not quote any messages, and stay general.' },
+          { role: 'user', content: 'Summarize this student\'s questions: ' + JSON.stringify(conversation.slice(-8).map(function (m) {
+            return (m.role === 'user' ? 'Q: ' : 'A: ') + m.content;
+          }).join('\n')) }
+        ];
+        const resp = await puter.ai.chat(prompt, { model: MODEL });
+        summary = typeof resp === 'string' ? resp : (resp && resp.message && resp.message.content);
+      } catch (err) {
+        console.log('AI mentor: summary generation failed', err);
+      }
+    }
+
+    if (!summary || !summary.trim()) {
+      summary = 'Student asked about: ' + String(userMsgs[0].content || 'the course').slice(0, 160);
+    }
+    if (summary.length > 500) summary = summary.slice(0, 497) + '…';
+
+    try {
+      const { data: authData } = await supabaseClient.auth.getSession();
+      if (!authData.session) return;
+
+      const { data, error } = await supabaseClient.rpc('log_ai_mentor_summary', {
+        p_session_id: aiSessionId,
+        p_course_id: COURSE_ID,
+        p_topic_summary: summary,
+        p_message_count: userMsgs.length
+      });
+      if (error) throw error;
+      if (data) aiSessionId = data;
+    } catch (err) {
+      console.error('AI mentor: could not save summary', err);
+    }
+  }
+
+  // ============================================================
   // Lightweight markdown → themed HTML (same as the test page)
   // ============================================================
   function escapeHtml(text) {
@@ -513,5 +587,9 @@
     injectStyles();
     buildUI();
     courseContext = await buildContext();
+
+    window.addEventListener('beforeunload', function () {
+      saveSummary();
+    });
   });
 })();
