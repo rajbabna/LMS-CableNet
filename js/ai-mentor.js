@@ -384,6 +384,26 @@
     return div;
   }
 
+  // Puter's free tier is shared and can hit "request queue is full" (503)
+  // under load. Retry a few times with backoff before giving up so students
+  // rarely ever see the raw error.
+  async function chatWithRetry(messages, attempts) {
+    const delay = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+    let lastErr = null;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await puter.ai.chat(messages, { model: MODEL, stream: true });
+      } catch (err) {
+        lastErr = err;
+        const msg = (err && err.message) || String(err);
+        const isBusy = /503|queue is full|rate.?limit|too many|busy/i.test(msg);
+        if (!isBusy || i === attempts - 1) break;
+        await delay(700 * (i + 1));
+      }
+    }
+    throw lastErr;
+  }
+
   async function send() {
     const text = el.input.value.trim();
     if (!text || busy) return;
@@ -421,7 +441,7 @@
     messages.push.apply(messages, conversation.slice(-8));
 
     try {
-      const resp = await puter.ai.chat(messages, { model: MODEL, stream: true });
+      const resp = await chatWithRetry(messages, 3);
       let reply = '';
       typingEl.className = 'ai-mentor-msg assistant';
       typingEl.innerHTML = '';
@@ -442,7 +462,11 @@
     } catch (err) {
       console.error('AI mentor error:', err);
       typingEl.remove();
-      appendMessage('error', 'Could not reach the AI Mentor: ' + (err && err.message ? err.message : err));
+      const msg = (err && err.message) || String(err);
+      const busy = /503|queue is full|rate.?limit|too many|busy/i.test(msg);
+      appendMessage('error', busy
+        ? 'The AI Mentor is busy right now — try again in a few seconds.'
+        : 'Could not reach the AI Mentor: ' + msg);
       conversation.pop();
     }
 
