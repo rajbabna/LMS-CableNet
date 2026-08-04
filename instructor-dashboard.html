@@ -638,7 +638,7 @@
     <div id="feedbackSection" class="dashboard-section" style="margin-top:1.5rem;">
       <h2>💬 Student Feedback</h2>
       <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
-        Ratings and comments submitted by students via "Give Feedback" on their dashboard.
+        Ratings and comments submitted by students via "Give Feedback" on their dashboard. Newest first.
       </p>
       <div id="feedbackOverview">
         <div class="empty-state"><span class="spinner"></span> Loading...</div>
@@ -1033,12 +1033,16 @@
         const total = data.length;
         const avg = (data.reduce((s, r) => s + r.rating, 0) / total).toFixed(1);
 
+        const shown = data.slice(0, 20);
+
         container.innerHTML = `
-          <div style="display:flex; gap:1.5rem; align-items:baseline; padding:0.6rem 0 1rem; border-bottom:1px solid var(--line); margin-bottom:1rem; flex-wrap:wrap;">
+          <div style="display:flex; gap:1.5rem; align-items:baseline; padding:0.6rem 0 1rem; border-bottom:1px solid var(--line); margin-bottom:0.8rem; flex-wrap:wrap;">
             <span><strong style="font-size:1.4em;">${avg}</strong>/5 avg</span>
             <span>${total} submission${total === 1 ? '' : 's'}</span>
+            ${total > shown.length ? `<span style="color:var(--ink-soft);">Showing latest ${shown.length}</span>` : ''}
           </div>
-          ${data.map(row => `
+          <div style="max-height:360px; overflow-y:auto; padding-right:0.4rem;">
+            ${shown.map(row => `
             <div style="padding:0.8rem 0; border-bottom:1px solid var(--line);">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
                 <strong>${escapeHtml(row.student_name)}</strong>
@@ -1049,6 +1053,7 @@
               </div>
               <p style="margin:0.5rem 0 0; color:var(--ink);">${escapeHtml(row.comment || '<em style="color:var(--ink-soft)">No comment</em>')}</p>
             </div>`).join('')}
+          </div>
         `;
       } catch (err) {
         console.error('loadFeedback error:', err);
