@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Routing Fundamentals — Cable&Net Courses</title>
+  <meta name="description" content="Module 5: Routing Fundamentals. For enrolled students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9A932693">
+</head>
+<body data-course="networking">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course-networking.html">&larr; Back to Level 2</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="lesson">
+    <header class="lesson-header">
+      <span class="port-num">MOD 05</span>
+      <h1>Module 5: Routing Fundamentals</h1>
+      <p class="lesson-theme">Theme: Connecting Multiple Networks</p>
+    </header>
+
+    <section class="lesson-section">
+      <h2>Learning Objectives</h2>
+        <ul class="lesson-objectives">
+          <li>Explain what routing is and why it's needed between networks</li>
+          <li>Configure static routes in Packet Tracer</li>
+          <li>Read and interpret a router's routing table</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>DHCP Quiz (8:30–9:00)</h2>
+        <p>Quick recall check before moving into new material.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lecture Notes (9:00–10:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Routing moves traffic <strong>between</strong> different networks (switching only moves traffic within one network)</li>
+          <li>A <strong>routing table</strong> lists known destination networks and how to reach them</li>
+          <li><strong>Default gateway</strong> — where a device sends traffic when the destination isn't on its local network</li>
+          <li><strong>Next-hop routing</strong> — a route often just points to the next router in the path, not the final destination directly</li>
+        </ul>
+
+        <ul class="lesson-objectives">
+          <li><strong>Static</strong> — manually configured by an administrator; simple, predictable, but doesn't adapt automatically</li>
+          <li><strong>Dynamic</strong> — routers exchange information automatically using protocols like RIP, OSPF, or EIGRP (overview only in this course — not hands-on)</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 5A: Multi-Network Setup (10:45–11:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Load the pre-made &quot;Two networks, one router&quot; file:</li>
+          <li>Network A: <code>192.168.1.0/24</code> (5 PCs + switch)</li>
+          <li>Network B: <code>192.168.2.0/24</code> (5 PCs + switch)</li>
+          <li>A single router connects both</li>
+          <li>Discuss: can A talk to B yet? (Not yet!)</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 5B: Configure Static Routes (11:30–12:30)</h2>
+        <ul class="lesson-objectives">
+          <li>On the router, add a static route: &quot;to reach <code>192.168.2.0/24</code>, go via the router's port 1&quot;</li>
+          <li>Add the reverse route on the other side</li>
+          <li>Test: PCs in Network A can now ping PCs in Network B</li>
+          <li>Celebrate the first successful routing configuration</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 5C: Analyze Routing Tables (1:15–2:15)</h2>
+        <ul class="lesson-objectives">
+          <li>View the router's routing table and explain what each entry means</li>
+          <li>Discuss: &quot;How did the packet actually get there?&quot;</li>
+          <li>Add more routes and observe the table change</li>
+          <li>Experiment: remove a route and observe what breaks</li>
+        </ul>
+
+        <p>Watch a packet travel between networks — leaving Network A through the router, and arriving in Network B.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Wrap-Up (2:15–2:30)</h2>
+        <p>Routing is what enables the internet at scale — &quot;your data crosses many routers to reach a site like YouTube.&quot; Preview: troubleshooting these networks is next.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Check for Understanding</h2>
+        <ol class="lesson-questions">
+          <li>What's the difference between switching and routing?</li>
+          <li>What is a default gateway used for?</li>
+          <li>What breaks if a static route is missing or misconfigured?</li>
+        </ol>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Home Assignment</h2>
+        <ul class="lesson-objectives">
+          <li>Draw a 3-network topology on paper</li>
+          <li>Identify what static routes would be needed to connect them</li>
+          <li>Study: what happens to traffic if routing is misconfigured?</li>
+          <li>Prepare for troubleshooting next week</li>
+        </ul>
+    </section>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-ghost" href="lesson-networking-04.html">&larr; Mod 4</a>
+      <a class="btn btn-ghost" href="course-networking.html">Back to course</a>
+      <a class="btn btn-primary" href="lesson-networking-06.html">Mod 6 &rarr;</a>
+    </nav>
+  </article>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=38104837"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Troubleshooting Practicals — Broken Networks — Cable&Net Courses</title>
+  <meta name="description" content="Module 7: Troubleshooting Practicals — Broken Networks. For enrolled students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9A932693">
+</head>
+<body data-course="networking">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course-networking.html">&larr; Back to Level 2</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="lesson">
+    <header class="lesson-header">
+      <span class="port-num">MOD 07</span>
+      <h1>Module 7: Troubleshooting Practicals — Broken Networks</h1>
+      <p class="lesson-theme">Theme: Detective Work — Find &amp; Fix Problems</p>
+    </header>
+
+    <section class="lesson-section">
+      <h2>Learning Objectives</h2>
+        <ul class="lesson-objectives">
+          <li>Apply the troubleshooting framework to realistic broken-network scenarios</li>
+          <li>Diagnose and fix IP, gateway, routing, and DNS misconfigurations</li>
+          <li>Design a troubleshooting scenario for a peer to solve</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Setup (8:30–9:00)</h2>
+        <p>Review last week's tools, then load pre-made broken networks in Packet Tracer for the session's scenarios.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Scenario 1: Wrong IP Configuration (9:00–9:45)</h2>
+        <ul class="lesson-objectives">
+          <li>Network: 4 PCs, 1 switch</li>
+          <li>Problem: 2 PCs have IPs on the wrong subnet</li>
+          <li>Students must: identify the problem PC, determine the correct IP, fix it, and verify with ping</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Scenario 2: Missing Default Gateway (9:45–10:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Network: 2 switches, 1 router, 8 PCs</li>
+          <li>Symptom: some PCs can't reach the other network</li>
+          <li>Troubleshooting flow: 1. Ping local device — works 2. Ping remote device — fails 3. Check gateway configuration — missing! 4. Add the gateway, then verify</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Break (10:30–10:45)</h2>
+
+    </section>
+
+    <section class="lesson-section">
+      <h2>Scenario 3: Routing Issue (10:45–11:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Multi-network topology with misconfigured routes</li>
+          <li>Students analyze the routing table, identify the incorrect route, fix it, and verify with tracert</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Scenario 4: DNS Problem (11:30–12:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Network with a DNS server</li>
+          <li>Symptom: ping by IP works, ping by name fails</li>
+          <li>Students diagnose using nslookup, check DNS configuration, and reconfigure as needed</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lunch (12:30–1:15)</h2>
+
+    </section>
+
+    <section class="lesson-section">
+      <h2>Scenario 5: Student-Designed Challenge (1:15–2:15)</h2>
+        <ul class="lesson-objectives">
+          <li>Pairs build a broken network for another pair to solve</li>
+          <li>Add one &quot;intentional problem,&quot; then swap</li>
+          <li>The other pair must find and fix it — competitive but collaborative</li>
+          <li>Celebrate successful fixes</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Wrap-Up (2:15–2:30)</h2>
+        <p>Reinforce: &quot;Real networks have these exact issues — your skills are already valuable.&quot; Preview: security concepts next week.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Check for Understanding</h2>
+        <ol class="lesson-questions">
+          <li>If local pings work but remote pings fail, what should you check first?</li>
+          <li>How would you confirm a DNS problem vs. a routing problem?</li>
+          <li>Describe one intentional problem you'd design for a peer to solve.</li>
+        </ol>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Home Assignment</h2>
+        <ul class="lesson-objectives">
+          <li>Document one troubleshooting scenario: problem, steps taken, solution</li>
+          <li>Reflect: &quot;What was hardest to diagnose, and why?&quot;</li>
+          <li>Prepare for security concepts next week</li>
+        </ul>
+    </section>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-ghost" href="lesson-networking-06.html">&larr; Mod 6</a>
+      <a class="btn btn-ghost" href="course-networking.html">Back to course</a>
+      <a class="btn btn-primary" href="lesson-networking-08.html">Mod 8 &rarr;</a>
+    </nav>
+  </article>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=38104837"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

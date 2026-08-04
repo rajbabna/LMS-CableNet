@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certification Prep &amp; Final Practice — Cable&Net Courses</title>
+  <meta name="description" content="Module 8: Certification Prep &amp; Final Practice. For enrolled students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9A932693">
+</head>
+<body data-course="cabling">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course-cabling.html">&larr; Back to Level 1</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="lesson">
+    <header class="lesson-header">
+      <span class="port-num">MOD 08</span>
+      <h1>Module 8: Certification Prep &amp; Final Practice</h1>
+      <p class="lesson-theme">Theme: Ready for Assessment</p>
+    </header>
+
+    <section class="lesson-section">
+      <h2>Learning Objectives</h2>
+        <ul class="lesson-objectives">
+          <li>Consolidate all Part 1 concepts into a single review pass</li>
+          <li>Complete one final, unscored practice crimp under exam-like conditions</li>
+          <li>Enter the final assessment with clear expectations and reduced anxiety</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Arrival (8:30–9:00)</h2>
+        <p>Open space for students to voice nerves about the upcoming assessment — normalize the feeling before reviewing material.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Review Session (9:00–10:30)</h2>
+        <p>High-level recap across all modules:</p>
+
+        <ul class="lesson-objectives">
+          <li>OSI layers (recap from Module 1)</li>
+          <li>Cable standards overview (Module 2)</li>
+          <li>RJ45 pin order and crimping checklist (Modules 3–4)</li>
+          <li>Common mistakes recap (Module 6)</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Final Practice Lab (10:45–12:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Students crimp their final &quot;assessment-style&quot; cable</li>
+          <li><strong>Not graded</strong> — but run under the same process/conditions as the real exam</li>
+          <li>Instructor observes and gives final individual feedback</li>
+          <li>Test the cable and discuss results</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Final Q&amp;A + Expectations (1:15–2:15)</h2>
+        <ul class="lesson-objectives">
+          <li>What to expect on Saturday 9 (exam structure)</li>
+          <li>Grading criteria walkthrough</li>
+          <li>Time limits per exam section</li>
+          <li>Open floor for questions</li>
+          <li>Confidence-building discussion</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Wrap-Up (2:15–2:30)</h2>
+        <p>Encouragement and dismissal — no new material introduced.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Check for Understanding</h2>
+        <ol class="lesson-questions">
+          <li>Walk through the full crimping checklist from memory.</li>
+          <li>What are the 3 components of the Saturday 9 exam?</li>
+          <li>What's one common mistake you personally want to avoid tomorrow?</li>
+        </ol>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Home Assignment</h2>
+        <ul class="lesson-objectives">
+          <li><strong>Rest</strong> — seriously, no new crimping (risk of injury from over-practice)</li>
+          <li>Review notes only</li>
+          <li>Get good sleep before Saturday 9</li>
+          <li>Bring confidence and a good attitude</li>
+        </ul>
+    </section>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-ghost" href="lesson-cabling-07.html">&larr; Mod 7</a>
+      <a class="btn btn-ghost" href="course-cabling.html">Back to course</a>
+      <a class="btn btn-primary" href="lesson-cabling-09.html">Mod 9 &rarr;</a>
+    </nav>
+  </article>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=38104837"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

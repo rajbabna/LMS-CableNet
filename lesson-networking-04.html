@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DHCP &amp; DNS Configuration — Cable&Net Courses</title>
+  <meta name="description" content="Module 4: DHCP &amp; DNS Configuration. For enrolled students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9A932693">
+</head>
+<body data-course="networking">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course-networking.html">&larr; Back to Level 2</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="lesson">
+    <header class="lesson-header">
+      <span class="port-num">MOD 04</span>
+      <h1>Module 4: DHCP &amp; DNS Configuration</h1>
+      <p class="lesson-theme">Theme: Automatic IP Assignment &amp; Name Resolution</p>
+    </header>
+
+    <section class="lesson-section">
+      <h2>Learning Objectives</h2>
+        <ul class="lesson-objectives">
+          <li>Explain the DORA process for DHCP address assignment</li>
+          <li>Configure and observe DHCP behavior in Packet Tracer</li>
+          <li>Explain how DNS resolves names to IP addresses</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lecture Notes (9:00–10:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Automatically assigns IP addresses so devices don't need manual config</li>
+          <li><strong>DORA process:</strong> 1. <strong>Discover</strong> — client broadcasts for a DHCP server 2. <strong>Offer</strong> — server offers an available IP 3. <strong>Request</strong> — client requests that specific IP 4. <strong>Acknowledge</strong> — server confirms the lease</li>
+          <li>IP pools have a defined range and a lease expiration time</li>
+        </ul>
+
+        <ul class="lesson-objectives">
+          <li>Translates human-readable names (<code>www.example.com</code>) into IP addresses</li>
+          <li>DNS servers hold records mapping names to addresses</li>
+          <li>Without DNS, users would need to memorize IP addresses for every site</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 4A: Packet Tracer DHCP Lab (10:45–11:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Load the pre-made &quot;DHCP network&quot; file (1 router, 1 switch, 5 PCs)</li>
+          <li>Router acts as the DHCP server; PCs are set to DHCP mode</li>
+          <li>Observe: do PCs receive IP addresses automatically? (Yes)</li>
+          <li>Check assigned IPs and watch the DORA process play out in simulation</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 4B: Change DHCP Settings (11:30–12:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Modify the IP pool range on the router</li>
+          <li>Disable and re-enable one PC to trigger a new lease</li>
+          <li>Observe what IP address it receives, and discuss why DHCP matters at scale</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 4C: DNS Configuration (1:15–2:15)</h2>
+        <ul class="lesson-objectives">
+          <li>Add a DNS server to the network</li>
+          <li>Configure domain names for devices</li>
+          <li>Ping devices by name instead of IP address</li>
+          <li>Compare: pinging by IP vs. by name</li>
+        </ul>
+
+        <p>Real-world example: accessing a website.</p>
+
+        <ul class="lesson-objectives">
+          <li>Without DNS: typing <code>203.45.12.78</code> (hard to remember)</li>
+          <li>With DNS: typing <code>www.example.com</code> (easy!)</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Check for Understanding</h2>
+        <ol class="lesson-questions">
+          <li>What do the letters in &quot;DORA&quot; stand for?</li>
+          <li>What happens if a device's DHCP lease expires?</li>
+          <li>What problem does DNS solve for everyday internet use?</li>
+        </ol>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Home Assignment</h2>
+        <ul class="lesson-objectives">
+          <li>Reflect: how does DHCP make your life easier at home?</li>
+          <li>Find and screenshot your home router's DHCP settings</li>
+          <li>Write 2 sentences: &quot;Why does DNS matter?&quot;</li>
+          <li>Preview: next week is routing — how will that build on this?</li>
+        </ul>
+    </section>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-ghost" href="lesson-networking-03.html">&larr; Mod 3</a>
+      <a class="btn btn-ghost" href="course-networking.html">Back to course</a>
+      <a class="btn btn-primary" href="lesson-networking-05.html">Mod 5 &rarr;</a>
+    </nav>
+  </article>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=38104837"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -435,10 +435,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 .pinout-table td:first-child { font-family: var(--font-mono); color: var(--ink-soft); }
 
 .lesson-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
   margin-top: 2.5rem;
   padding-top: 1.4rem;
   border-top: 1px solid var(--line);
 }
+.lesson-nav .btn { text-align: center; }
 
 footer {
   text-align: center;

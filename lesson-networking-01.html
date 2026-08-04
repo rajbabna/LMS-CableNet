@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Addressing Fundamentals — Cable&Net Courses</title>
+  <meta name="description" content="Module 1: IP Addressing Fundamentals. For enrolled students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9A932693">
+</head>
+<body data-course="networking">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course-networking.html">&larr; Back to Level 2</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="lesson">
+    <header class="lesson-header">
+      <span class="port-num">MOD 01</span>
+      <h1>Module 1: IP Addressing Fundamentals</h1>
+      <p class="lesson-theme">Theme: Addressing: How Networks Talk</p>
+    </header>
+
+    <section class="lesson-section">
+      <h2>Learning Objectives</h2>
+        <ul class="lesson-objectives">
+          <li>Explain what an IP address is and how it's structured (32 bits, 4 octets)</li>
+          <li>Convert between decimal and binary representations</li>
+          <li>Distinguish IPv4 address classes (A, B, C) and private vs public addresses</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Arrival &amp; Recap (8:30–9:00)</h2>
+        <p>Intro to Part 2, set expectations, and quickly recap key Part 1 concepts (cabling enables the physical link; this course covers what rides on top).</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lecture Notes (9:00–10:30)</h2>
+        <ul class="lesson-objectives">
+          <li>A 32-bit number, written as 4 decimal octets (e.g., <code>192.168.1.100</code>)</li>
+          <li>Each octet ranges from 0–255 (8 bits each)</li>
+          <li>Binary underlies everything — networking math is built on powers of 2</li>
+        </ul>
+
+        <div class="pinout-wrap">
+          <table class="pinout-table">
+            <thead><tr><th>Class</th><th>Range (1st octet)</th><th>Typical Use</th></tr></thead>
+            <tbody>
+            <tr><td>A</td><td>1–126</td><td>Very large networks</td></tr>
+            <tr><td>B</td><td>128–191</td><td>Medium networks</td></tr>
+            <tr><td>C</td><td>192–223</td><td>Small networks (most common in labs/home)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul class="lesson-objectives">
+          <li><strong>Private ranges:</strong> <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li>
+          <li><strong>Public</strong> addresses are globally routable on the internet</li>
+          <li>Home routers use NAT to translate private addresses to a single public one</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 1A: Decimal to Binary Conversion (10:45–11:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Worksheet: convert 20 decimal numbers to binary</li>
+          <li>Cross-check with an online converter</li>
+          <li>Discuss powers of 2 and why binary matters in networking</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Lab 1B: IP Address Breakdown (11:30–12:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Given <code>192.168.1.100</code>: break down each octet, write it in binary</li>
+          <li>Introduce (at a high level) the concept of network vs host portion</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Continued Practice (1:15–2:15)</h2>
+        <ul class="lesson-objectives">
+          <li>More conversions</li>
+          <li>Analyze real IP addresses</li>
+          <li>Discussion: &quot;What's the IP on your home router?&quot;</li>
+          <li>Find a public IP address using an online tool</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Check for Understanding</h2>
+        <ol class="lesson-questions">
+          <li>How many bits make up an IPv4 address?</li>
+          <li>Is <code>192.168.1.1</code> a private or public address?</li>
+          <li>Convert <code>172</code> to binary.</li>
+        </ol>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Home Assignment</h2>
+        <ul class="lesson-objectives">
+          <li>Convert 10 IP addresses to binary (with answers)</li>
+          <li>Watch an &quot;IP addressing explained&quot; video (10 min)</li>
+          <li>Identify your home router's IP address and your computer's IP address</li>
+        </ul>
+    </section>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-ghost" href="course-networking.html">Back to course</a>
+      <a class="btn btn-primary" href="lesson-networking-02.html">Mod 2 &rarr;</a>
+    </nav>
+  </article>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=38104837"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

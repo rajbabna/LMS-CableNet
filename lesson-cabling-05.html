@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crimping Practice Marathon &amp; Testing Intro — Cable&Net Courses</title>
+  <meta name="description" content="Module 5: Crimping Practice Marathon &amp; Testing Intro. For enrolled students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9A932693">
+</head>
+<body data-course="cabling">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <nav class="nav-actions">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course-cabling.html">&larr; Back to Level 1</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="lesson">
+    <header class="lesson-header">
+      <span class="port-num">MOD 05</span>
+      <h1>Module 5: Crimping Practice Marathon &amp; Testing Intro</h1>
+      <p class="lesson-theme">Theme: Build Muscle Memory</p>
+    </header>
+
+    <section class="lesson-section">
+      <h2>Learning Objectives</h2>
+        <ul class="lesson-objectives">
+          <li>Crimp cables with increasing consistency (target: 5+ this session)</li>
+          <li>Operate a cable tester and interpret its results</li>
+          <li>Diagnose which pin(s) failed and begin connecting failures to causes</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Quick Q&amp;A on Technique (8:30–9:00)</h2>
+        <p>Revisit last week's grip/pressure lessons before diving back in.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Intensive Crimping Practice (9:00–10:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Students bring pre-measured cables from home</li>
+          <li>Each student aims for <strong>5+ cables</strong> this session</li>
+          <li>Instructor circulates, correcting form in real time — focus areas:</li>
+          <li>Wire insertion depth</li>
+          <li>Even crimp pressure</li>
+          <li>Full connector seating</li>
+          <li>Faster finishers assist slower students (peer teaching reinforces their own technique)</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Continued Crimping + Testing Introduction (10:45–12:30)</h2>
+        <ul class="lesson-objectives">
+          <li>Continue crimping as needed</li>
+          <li>Introduce the <strong>cable tester</strong>:</li>
+          <li>A light per pin means that pin is wired correctly</li>
+          <li>No light = broken or miswired pin</li>
+          <li>Each student tests their own cables for the first time</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Testing Lab (1:15–2:15)</h2>
+        <ul class="lesson-objectives">
+          <li>All students test the cables made in Saturday 4</li>
+          <li>Record results: which pins work, which fail, per cable</li>
+          <li>Guided failure analysis — ask diagnostic questions:</li>
+          <li>&quot;Why did pin 3 fail?&quot;</li>
+          <li>&quot;Are you inserting the wires fully?&quot;</li>
+          <li>&quot;Is your crimp pressure even across all pins?&quot;</li>
+          <li>Troubleshoot as a group, cable by cable</li>
+        </ul>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Wrap-Up: Homework Challenge (2:15–2:30)</h2>
+        <p>Frame remaining failures as a discussion topic for home, not a failure — this sets up next week's troubleshooting-focused module.</p>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Check for Understanding</h2>
+        <ol class="lesson-questions">
+          <li>What does a lit LED on a cable tester pin indicate?</li>
+          <li>If 4 consecutive pins fail on the same side, what's the likely cause?</li>
+          <li>What's the difference between a testing failure and a crimping failure?</li>
+        </ol>
+    </section>
+
+    <section class="lesson-section">
+      <h2>Home Assignment</h2>
+        <ul class="lesson-objectives">
+          <li>Inspect your tested cables — which failed, and why?</li>
+          <li>Write 2–3 sentences per failed cable explaining the likely issue</li>
+          <li>Watch a troubleshooting video on failed crimps</li>
+          <li>Prepare 4 more blank cables for Saturday 6</li>
+        </ul>
+    </section>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-ghost" href="lesson-cabling-04.html">&larr; Mod 4</a>
+      <a class="btn btn-ghost" href="course-cabling.html">Back to course</a>
+      <a class="btn btn-primary" href="lesson-cabling-06.html">Mod 6 &rarr;</a>
+    </nav>
+  </article>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=38104837"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>
