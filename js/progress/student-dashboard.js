@@ -51,6 +51,9 @@ class StudentDashboard {
       // Render the dashboard
       this.renderDashboard();
 
+      // Load achievements gallery (best effort)
+      await this.loadAchievements();
+
       // Bind logout button
       this.bindLogout();
 
@@ -243,6 +246,41 @@ class StudentDashboard {
     `;
 
     return card;
+  }
+
+  async loadAchievements() {
+    const box = document.getElementById("achievementsGrid");
+    if (!box) return;
+
+    try {
+      const { data, error } = await this.supabase.rpc("evaluate_achievements");
+      if (error) throw error;
+
+      const items = data || [];
+      if (items.length === 0) {
+        box.innerHTML = '<div class="empty-state">No achievements available yet.</div>';
+        return;
+      }
+
+      const earnedCount = items.filter(i => i.earned).length;
+
+      box.innerHTML = `
+        <div style="grid-column:1/-1; font-size:0.9rem; color:var(--ink-soft); margin-bottom:0.2rem;">
+          ${earnedCount} of ${items.length} badges earned
+        </div>
+        ${items.map(a => `
+          <div class="achievement-badge ${a.earned ? 'earned' : 'locked'}">
+            <span class="a-icon">${this.escapeHtml(a.icon)}</span>
+            <h3>${this.escapeHtml(a.title)}</h3>
+            <p>${this.escapeHtml(a.description)}</p>
+            ${a.earned_at
+              ? `<small style="color:var(--copper-dark); font-family:var(--font-mono);">${this.formatDate(a.earned_at)}</small>`
+              : ''}
+          </div>`).join('')}`;
+    } catch (err) {
+      console.error("loadAchievements error:", err);
+      box.innerHTML = '<div class="empty-state">Achievements unavailable.</div>';
+    }
   }
 
   formatDate(dateString) {

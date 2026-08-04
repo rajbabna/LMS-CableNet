@@ -272,6 +272,24 @@
   @media (max-width: 768px) {
     .courses-grid { grid-template-columns: 1fr; }
   }
+
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1rem;
+  }
+  .achievement-badge {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+  }
+  .achievement-badge .a-icon { font-size: 2rem; display: block; margin-bottom: 0.4rem; }
+  .achievement-badge h3 { font-size: 0.95rem; margin: 0.3rem 0; }
+  .achievement-badge p { font-size: 0.8rem; color: var(--ink-soft); margin: 0; }
+  .achievement-badge.earned { border-color: var(--copper); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .achievement-badge.locked { opacity: 0.5; filter: grayscale(0.9); }
 </style>
 </head>
 <body>
@@ -301,6 +319,17 @@
   <div id="coursesGrid" class="courses-grid" style="margin-top: 2rem;">
     <div class="loading">Loading your courses...</div>
   </div>
+
+  <!-- Achievements gallery (roadmap item 4) -->
+  <section class="dashboard-section" id="achievementsSection" style="margin-top: 2.5rem;">
+    <h2>🏆 Achievements</h2>
+    <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+      Badges earned from completing modules and quizzes.
+    </p>
+    <div id="achievementsGrid" class="achievements-grid" style="margin-top:1rem;">
+      <div class="loading">Checking your badges...</div>
+    </div>
+  </section>
 </main>
 
 <div class="wire-divider"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
