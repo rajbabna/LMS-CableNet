@@ -556,6 +556,35 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 .cq-locked .cq-icon {
   filter: grayscale(1);
 }
+.course-complete {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background: #eef4ec;
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+.course-complete .cc-badge {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+.course-complete .cc-copy {
+  display: flex;
+  flex-direction: column;
+}
+.course-complete .cc-copy strong {
+  font-size: 1.05rem;
+}
+.course-complete .cc-copy span {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.course-complete .cc-btn {
+  margin-left: auto;
+}
 
 .pending-box {
   text-align: center;

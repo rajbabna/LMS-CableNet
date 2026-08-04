@@ -208,6 +208,22 @@ async function loadModulesForCourse(courseId) {
       moduleList.appendChild(li);
     });
 
+    // Course-completion banner: once every module is done, offer the
+    // certificate. Matches the final-quiz unlock threshold.
+    if (finalQuizUnlocked && !isPreview && moduleList.parentNode) {
+      const banner = document.createElement('div');
+      banner.className = 'course-complete';
+      banner.innerHTML = `
+        <div class="cc-badge">🎓</div>
+        <div class="cc-copy">
+          <strong>Course complete — congratulations!</strong>
+          <span>You've finished every module. Claim your certificate of completion.</span>
+        </div>
+        <a class="btn btn-primary cc-btn" href="certificate.html?course=${courseId}">View certificate</a>
+      `;
+      moduleList.parentNode.insertBefore(banner, moduleList);
+    }
+
   } catch (err) {
     console.error('Exception loading modules:', err);
   }
