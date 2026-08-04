@@ -244,7 +244,7 @@ ${body}
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-course="${course.id}">
+<body data-course="${course.id}" data-module="${lesson.moduleNumber}">
 
 <header class="site-header">
   <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>

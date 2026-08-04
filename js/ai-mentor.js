@@ -17,6 +17,7 @@
   'use strict';
 
   const COURSE_ID = (document.body && document.body.dataset.course) || 'cabling';
+  const MODULE_ID = (document.body && document.body.dataset.module) || null;
   const MODEL = 'gpt-5.4-nano';
   const STORE_KEY = 'cn_ai_mentor_dismissed';
 
@@ -47,14 +48,21 @@
   async function buildContext() {
     const title = COURSE_TITLES[COURSE_ID] || COURSE_ID;
     let mods = [];
+    let activeModule = null;
     if (window.supabaseClient) {
       try {
-        const { data } = await supabaseClient
+        const q = supabaseClient
           .from('modules')
-          .select('title, description')
+          .select('title, description, module_number')
           .eq('course_id', COURSE_ID)
           .order('module_number', { ascending: true });
-        mods = data || [];
+        if (MODULE_ID) {
+          const { data } = await q.eq('module_number', MODULE_ID);
+          mods = data || [];
+        } else {
+          const { data } = await q;
+          mods = data || [];
+        }
       } catch (err) {
         console.log('AI mentor: module context unavailable', err);
       }
@@ -68,10 +76,22 @@
       'course. You are an AI assistant, NOT a human instructor, and you never grade or decide pass/fail.';
 
     text += '\n\nCOURSE CONTEXT (the student is currently studying):\n' + title;
+    if (MODULE_ID) {
+      text += '\nThe student is currently viewing ONE specific module. Focus your help on that module ' +
+        'and its topics. Here is the module:\n';
+    } else {
+      text += '\nThe student is browsing the course overview (not a single module yet).\n';
+    }
     if (mods.length) {
-      text += '\nModules:\n' + mods.map(function (m) {
-        return '- ' + (m.title || '') + (m.description ? ': ' + m.description : '');
-      }).join('\n');
+      if (MODULE_ID) {
+        const m = mods[0];
+        text += '- ' + (m.title || '') + (m.description ? ': ' + m.description : '') +
+          (m.module_number ? ' [Module ' + m.module_number + ']' : '');
+      } else {
+        text += 'Modules:\n' + mods.map(function (m) {
+          return '- ' + (m.title || '') + (m.description ? ': ' + m.description : '');
+        }).join('\n');
+      }
     }
 
     return text;
