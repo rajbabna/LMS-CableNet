@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student AI Chats — Cable&Net Courses</title>
-  <meta name="description" content="Topic summaries a student shared from the AI Mentor, for instructor review.">
+  <title>Student Profile — Cable&Net Courses</title>
+  <meta name="description" content="Instructor view of a student: AI mentor topic summaries and logged mentor sessions.">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,6 +123,51 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 0.6em 0.75em;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+    }
+    .field textarea { resize: vertical; min-height: 88px; }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: 2px solid var(--copper);
+      outline-offset: 1px;
+    }
+
+    .follow-up-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.18em 0.6em;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+    }
+    .follow-up-badge.open { background: #FEF3E0; color: var(--brown); border-color: var(--brown); }
+    .follow-up-badge.resolved { background: #E4EEE1; color: var(--green); border-color: var(--green); }
+    .btn-resolve {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.3em 0.8em;
+      border: 1px solid var(--green);
+      background: var(--green);
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-resolve:hover { background: #2f8a57; }
+
+    @media (max-width: 520px) {
+      #logSessionForm [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+    }
+
     @media (max-width: 860px) {
       .profile-container { grid-template-columns: 1fr; }
     }
@@ -150,7 +195,7 @@
 
   <main>
     <div class="hero">
-      <span class="eyebrow">🤖 AI Mentor Chats</span>
+      <span class="eyebrow">📋 Student Profile</span>
       <h1 id="studentName">Student</h1>
       <p class="lede" id="studentId"></p>
     </div>
@@ -158,6 +203,53 @@
     <div id="alert" class="alert-msg" role="alert" aria-live="polite"></div>
 
     <div class="profile-container">
+
+      <!-- Mentor sessions (human-logged) -->
+      <div class="profile-section">
+        <h2>📝 Mentor Sessions</h2>
+        <p style="font-size:0.85rem; color: var(--ink-soft); margin-top: -0.4rem; margin-bottom: 1.2rem;">
+          Human check-ins logged by instructors. Students never see these notes.
+        </p>
+
+        <form id="logSessionForm" autocomplete="off" style="margin-bottom: 1.6rem;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+            <div class="field">
+              <label for="sessionTopic">Topic *</label>
+              <input type="text" id="sessionTopic" placeholder="e.g., T568B wiring order" required>
+            </div>
+            <div class="field">
+              <label for="sessionCourse">Course</label>
+              <select id="sessionCourse"><option value="">— General —</option></select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="sessionDate">Session date</label>
+            <input type="date" id="sessionDate">
+          </div>
+          <div class="field">
+            <label for="sessionNotes">Notes</label>
+            <textarea id="sessionNotes" rows="3" placeholder="What was covered, how it went..."></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+            <div class="field">
+              <label for="sessionOutcome">Outcome</label>
+              <input type="text" id="sessionOutcome" placeholder="e.g., Now comfortable crimping RJ45">
+            </div>
+            <div class="field">
+              <label for="sessionFollowUp">Follow-up action</label>
+              <input type="text" id="sessionFollowUp" placeholder="e.g., Retest next session (tracks as open)">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Log Session</button>
+        </form>
+
+        <div class="mentor-timeline" id="mentorTimeline">
+          <div class="empty-state"><span class="spinner"></span> Loading mentor sessions...</div>
+        </div>
+        <div class="empty-state" id="mentorEmpty" style="display:none;">
+          No mentor sessions logged yet.
+        </div>
+      </div>
 
       <!-- AI Mentor chats -->
       <div class="profile-section">
@@ -182,7 +274,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/config.js?v=9A0E5BF5"></script>
   <script src="js/supabase-client.js?v=17E25610"></script>
-  <script src="js/mentor-sessions.js?v=5DF3B699"></script>
+  <script src="js/mentor-sessions.js?v=03C340AE"></script>
   <script src="js/menu.js?v=06BC2CFB"></script>
 </body>
 </html>
