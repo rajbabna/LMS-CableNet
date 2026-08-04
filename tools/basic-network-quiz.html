@@ -664,7 +664,10 @@
     renderQuestion();
   });
   el.closeBtn.addEventListener('click', function () {
-    window.close();
+    var qCourse = queryParam('course');
+    if (qCourse) { window.location.href = '../course-' + qCourse + '.html'; return; }
+    if (document.referrer) { window.location.href = document.referrer; return; }
+    window.location.href = '../student-dashboard.html';
   });
   el.signInBtn.addEventListener('click', function () {
     if (window.puter && puter.auth) {

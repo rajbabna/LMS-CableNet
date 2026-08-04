@@ -167,12 +167,13 @@ async function loadModulesForCourse(courseId) {
       // Practice + Final quiz cards for this module. Practice is always open;
       // Final is locked until the course-completion threshold is reached.
       const qEnc = encodeURIComponent(module.title || '');
+      const qParams = `module=${module.id}&course=${courseId}&mode=practice&title=${qEnc}`;
       const practiceHtml =
-        `<a class="module-quiz-cq cq-practice" href="tools/basic-network-quiz.html?module=${module.id}&mode=practice&title=${qEnc}" title="Practice quiz for this module" aria-label="Practice quiz">
+        `<a class="module-quiz-cq cq-practice" href="tools/basic-network-quiz.html?${qParams}" title="Practice quiz for this module" aria-label="Practice quiz">
           <span class="cq-icon">${iconFor('lesson')}</span><span class="cq-label">Practice</span>
         </a>`;
       const finalHtml = finalQuizUnlocked
-        ? `<a class="module-quiz-cq cq-final" href="tools/basic-network-quiz.html?module=${module.id}&mode=final&title=${qEnc}" title="Final quiz for this module" aria-label="Final quiz">
+        ? `<a class="module-quiz-cq cq-final" href="tools/basic-network-quiz.html?module=${module.id}&course=${courseId}&mode=final&title=${qEnc}" title="Final quiz for this module" aria-label="Final quiz">
             <span class="cq-icon">${iconFor('pdf')}</span><span class="cq-label">Final quiz</span>
           </a>`
         : `<span class="module-quiz-cq cq-final cq-locked" title="Complete ${totalModules - completedCount} more module(s) to unlock this final quiz">
