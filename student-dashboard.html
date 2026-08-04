@@ -559,8 +559,13 @@
             submitBtn.disabled = false;
             return;
           }
+          // Close first, then confirm on the next tick so the browser paints
+          // the closed state before the blocking alert dialog appears.
           closeModal();
-          alert("Thanks! Your feedback has been sent.");
+          submitBtn.disabled = false;
+          setTimeout(function () {
+            alert("Thanks! Your feedback has been sent.");
+          }, 0);
         } catch (err) {
           alert("Unexpected error: " + err.message);
           submitBtn.disabled = false;
