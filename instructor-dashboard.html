@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Main theme CSS -->
-  <link rel="stylesheet" href="css/style.css?v=76D70776">
+  <link rel="stylesheet" href="css/style.css?v=DA6FA414">
 
   <style>
     /* ===========================================================
@@ -504,10 +504,11 @@
             <th>Instructor</th>
             <th>Email</th>
             <th>Approved</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="adminInstructorsBody">
-          <tr><td colspan="3" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
         </tbody>
       </table>
 
@@ -1361,12 +1362,36 @@
             <td>${p.name}</td>
             <td>${p.email}</td>
             <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
+            <td>${p.approved
+              ? '<span style="color: var(--ink-soft);">Approved</span>'
+              : `<button class="btn btn-sm" onclick="approveInstructor('${p.id}')">Approve</button>`}</td>
           </tr>
         `).join('');
-        instructorsBody.innerHTML = instructorRows || '<tr><td colspan="3" class="empty-state">No instructors yet.</td></tr>';
+        instructorsBody.innerHTML = instructorRows || '<tr><td colspan="4" class="empty-state">No instructors yet.</td></tr>';
 
       } catch (err) {
         console.error('Admin overview load error:', err);
+      }
+    }
+
+    async function approveInstructor(userId) {
+      try {
+        const { data, error } = await supabaseClient.rpc('approve_instructor', {
+          p_user_id: userId
+        });
+        if (error) {
+          showAlert(`Error approving instructor: ${error.message}`, 'error');
+          return;
+        }
+        if (data === 'not_found') {
+          showAlert('Instructor not found or already approved.', 'error');
+          return;
+        }
+        showAlert('Instructor approved. They can now sign in and see the dashboard.', 'success');
+        await loadAdminOverview();
+      } catch (err) {
+        console.error('approveInstructor error:', err);
+        showAlert('Could not approve instructor.', 'error');
       }
     }
 
