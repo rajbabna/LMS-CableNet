@@ -31,6 +31,10 @@ $toolsDir = Join-Path $siteRoot 'tools'
 if (Test-Path -LiteralPath $toolsDir) {
   $files += Get-ChildItem -LiteralPath $toolsDir -Filter '*.html' -File
 }
+$lessonsDir = Join-Path $siteRoot 'lessons'
+if (Test-Path -LiteralPath $lessonsDir) {
+  $files += Get-ChildItem -LiteralPath $lessonsDir -Filter '*.html' -File -Recurse
+}
 
 $scriptPattern = '(<script[^>]*\bsrc=")([^"]+?)(\?v=[0-9a-f]{8})?(")'
 $linkPattern   = '(<link[^>]*\brel=["'']stylesheet["''][^>]*\bhref=")([^"]+?)(\?v=[0-9a-f]{8})?(")'
@@ -48,7 +52,7 @@ $evaluator = {
     return $m.Value
   }
 
-  $v = Get-AssetVersion (Join-Path $fileDir $path)
+  $v = Get-AssetVersion ([System.IO.Path]::GetFullPath((Join-Path $fileDir $path)))
   if (-not $v) { return $m.Value }
 
   return $prefix + $path + '?v=' + $v + $quote
