@@ -287,6 +287,8 @@ ${navLinks.join('\n')}
 <script src="js/supabase-client.js?v=17E25610"></script>
 <script src="js/auth-guard.js?v=38104837"></script>
 <script src="js/menu.js"></script>
+<script src="https://js.puter.com/v2/"></script>
+<script src="js/ai-mentor.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabaseClient.auth.getUser();

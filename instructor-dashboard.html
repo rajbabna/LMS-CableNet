@@ -633,6 +633,17 @@
         <div class="empty-state"><span class="spinner"></span> Loading...</div>
       </div>
     </div>
+
+    <!-- Student Feedback -->
+    <div id="feedbackSection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>💬 Student Feedback</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Ratings and comments submitted by students via "Give Feedback" on their dashboard.
+      </p>
+      <div id="feedbackOverview">
+        <div class="empty-state"><span class="spinner"></span> Loading...</div>
+      </div>
+    </div>
   </main>
 
   <!-- Modal: Add Student / Account -->
@@ -854,6 +865,7 @@
         await loadDashboard();
         await loadAuditLog();
         await loadAiMentorOverview();
+        await loadFeedback();
         if (profile.role === 'admin') {
           await loadAdminOverview();
           await loadAssignments();
@@ -996,6 +1008,52 @@
     function escapeHtml(text) {
       const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
       return String(text || '').replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // ============================================
+    // STUDENT FEEDBACK
+    // ============================================
+    async function loadFeedback() {
+      const section = document.getElementById('feedbackSection');
+      const container = document.getElementById('feedbackOverview');
+      if (!container) return;
+
+      const isAdmin = currentUserRole === 'admin';
+      section.style.display = '';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_beta_feedback');
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="empty-state">No feedback yet — students submit via "Give Feedback" on their dashboard.</div>';
+          return;
+        }
+
+        const total = data.length;
+        const avg = (data.reduce((s, r) => s + r.rating, 0) / total).toFixed(1);
+
+        container.innerHTML = `
+          <div style="display:flex; gap:1.5rem; align-items:baseline; padding:0.6rem 0 1rem; border-bottom:1px solid var(--line); margin-bottom:1rem; flex-wrap:wrap;">
+            <span><strong style="font-size:1.4em;">${avg}</strong>/5 avg</span>
+            <span>${total} submission${total === 1 ? '' : 's'}</span>
+          </div>
+          ${data.map(row => `
+            <div style="padding:0.8rem 0; border-bottom:1px solid var(--line);">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <strong>${escapeHtml(row.student_name)}</strong>
+                <span style="color:var(--copper-dark); font-weight:600;">${'★'.repeat(row.rating)}${'☆'.repeat(5 - row.rating)}</span>
+              </div>
+              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:0.2rem;">
+                ${escapeHtml(row.course_title)} · ${new Date(row.created_at).toLocaleString()}
+              </div>
+              <p style="margin:0.5rem 0 0; color:var(--ink);">${escapeHtml(row.comment || '<em style="color:var(--ink-soft)">No comment</em>')}</p>
+            </div>`).join('')}
+        `;
+      } catch (err) {
+        console.error('loadFeedback error:', err);
+        container.innerHTML = '<div class="empty-state">Could not load feedback.</div>';
+      }
     }
 
     // ============================================
