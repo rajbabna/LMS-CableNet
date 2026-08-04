@@ -83,8 +83,14 @@ async function loadModulesForCourse(courseId) {
     // Clear any placeholder content
     moduleList.innerHTML = '';
 
+    // Hide the standalone practice quiz card from the course grid. It's
+    // launched from the student dashboard instead of being a course module;
+    // the module row is kept so submit_quiz_score / quiz_scores keep working.
+    const clone = modules || [];
+    const visible = clone.filter(m => m.id !== 27);
+
     // If no modules found, show a message
-    if (!modules || modules.length === 0) {
+    if (!visible || visible.length === 0) {
       const li = document.createElement('li');
       li.innerHTML = '<span style="color: var(--ink-soft);">No modules available yet.</span>';
       moduleList.appendChild(li);
@@ -110,7 +116,7 @@ async function loadModulesForCourse(courseId) {
     };
     function iconFor(type) { return TYPE_ICONS[type] || TYPE_ICONS.lesson; }
 
-    modules.forEach(module => {
+    visible.forEach(module => {
       const li = document.createElement('li');
       li.setAttribute('data-module-id', module.id);
 
@@ -149,7 +155,7 @@ async function loadModulesForCourse(courseId) {
           </button>`;
 
       li.innerHTML = `
-        <div class="module-card-head">
+        <div class="module-head-top">
           <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
           ${typeBadge}
         </div>
