@@ -100,6 +100,16 @@ async function loadModulesForCourse(courseId) {
       text: 'Article'
     };
 
+    // Feather-style stroke icons per content type.
+    const TYPE_ICONS = {
+      lesson: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+      pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+      video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
+      interactive: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+      text: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>`
+    };
+    function iconFor(type) { return TYPE_ICONS[type] || TYPE_ICONS.lesson; }
+
     modules.forEach(module => {
       const li = document.createElement('li');
       li.setAttribute('data-module-id', module.id);
@@ -129,16 +139,14 @@ async function loadModulesForCourse(courseId) {
       const completed = completedIds.has(String(module.id)) || completedIds.has(module.id);
 
       const resourceHtml = isPreview
-        ? `<span class="preview-locked">🔒 Preview only — enroll to open resources</span>`
-        : `<a href="${module.content_url}">${contentLabel}</a>`;
+        ? `<span class="preview-locked">🔒 Enrollment required</span>`
+        : `<a class="module-open module-open-${type}" href="${module.content_url}" title="${contentLabel}" aria-label="${contentLabel}">${iconFor(type)}</a>`;
 
       const completionHtml = isPreview
-        ? `<div class="module-actions"><span class="preview-locked">🔒 Enrollment required</span></div>`
-        : `<div class="module-actions">
-            <button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
-              ${completed ? '✓ Completed' : 'Mark Complete'}
-            </button>
-          </div>`;
+        ? `<span class="preview-locked">🔒 Enrollment required</span>`
+        : `<button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
+            ${completed ? '✓ Completed' : 'Mark Complete'}
+          </button>`;
 
       li.innerHTML = `
         <div class="module-card-head">
@@ -147,14 +155,16 @@ async function loadModulesForCourse(courseId) {
         </div>
         <strong class="module-card-title">${module.title}</strong>
         ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
-        <div class="module-resource">${resourceHtml}</div>
         <div class="module-progress">
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
           </div>
           <div class="progress-text">${completed ? '100%' : '0%'}</div>
         </div>
-        ${completionHtml}
+        <div class="module-actions">
+          ${completionHtml}
+          ${resourceHtml}
+        </div>
       `;
 
       moduleList.appendChild(li);

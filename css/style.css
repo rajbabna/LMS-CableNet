@@ -464,6 +464,35 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 .module-resource .preview-locked {
   font-size: 0.82rem;
 }
+.module-actions {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.module-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 8px;
+  color: var(--copper-dark);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  margin-left: auto;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.module-open:hover {
+  background: #f6ece0;
+  border-color: var(--copper);
+  color: var(--copper);
+}
+.module-open svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
 
 .pending-box {
   text-align: center;
