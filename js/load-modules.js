@@ -149,21 +149,25 @@ async function loadModulesForCourse(courseId) {
           </button>`;
 
       li.innerHTML = `
-        <div class="module-card-head">
-          <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
-          ${typeBadge}
-        </div>
-        <strong class="module-card-title">${module.title}</strong>
-        ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
-        <div class="module-progress">
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
+        <div class="module-head">
+          <div class="module-head-top">
+            <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
+            ${typeBadge}
           </div>
-          <div class="progress-text">${completed ? '100%' : '0%'}</div>
+          <strong class="module-card-title">${module.title}</strong>
         </div>
-        <div class="module-actions">
-          ${completionHtml}
-          ${resourceHtml}
+        <div class="module-body">
+          ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
+          <div class="module-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
+            </div>
+            <div class="progress-text">${completed ? '100%' : '0%'}</div>
+          </div>
+          <div class="module-actions">
+            ${completionHtml}
+            ${resourceHtml}
+          </div>
         </div>
       `;
 
