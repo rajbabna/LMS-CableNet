@@ -14,6 +14,23 @@ function deriveCourseFromUrl() {
   return null;
 }
 
+// Returns a site-root path for a top-level page (e.g. 'login.html'),
+// e.g. '/LMS-CableNet/login.html' on GitHub Pages or '/login.html' on a local
+// web root. Always begins with '/' (webroot-absolute) so redirects stay valid
+// from nested lesson pages (lessons/<course>/...) as well as root pages.
+function rootRelative(fileName) {
+  const parts = (window.location.pathname || '').split('/').filter(Boolean);
+  if (parts.length === 0) return fileName;
+  // Strip the trailing file plus the 'lessons/<course>/' folders (when the
+  // page lives under the lessons tree). Whatever remains is the webroot prefix.
+  const depth = parts.includes('lessons') ? 3 : 1;
+  const base = parts.slice(0, Math.max(parts.length - depth, 0));
+  if (base.length === 0) return '/' + fileName;
+  return '/' + base.join('/') + '/' + fileName;
+}
+const LOGIN_URL = rootRelative('login.html');
+const INDEX_URL = rootRelative('index.html');
+
 window.authGuardReady = (async () => {
   try {
     const pageCourse = document.body.dataset.course || deriveCourseFromUrl();
@@ -22,7 +39,7 @@ window.authGuardReady = (async () => {
     // account + expiry; there is no self-serve trial) ----
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
-      window.location.href = 'login.html';
+      window.location.href = LOGIN_URL;
       return;
     }
 
@@ -35,13 +52,13 @@ window.authGuardReady = (async () => {
 
     if (error) {
       console.error('Error loading profile:', error);
-      window.location.href = 'login.html';
+      window.location.href = LOGIN_URL;
       return;
     }
 
     // Validate user role and approval
     if (profile.role !== 'student' || !profile.approved) {
-      window.location.href = 'index.html';
+      window.location.href = INDEX_URL;
       return;
     }
 
@@ -90,11 +107,11 @@ window.authGuardReady = (async () => {
       link.addEventListener('click', async (e) => {
         e.preventDefault();
         await supabaseClient.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.href = LOGIN_URL;
       });
     });
   } catch (err) {
     console.error('Auth guard error:', err);
-    window.location.href = 'login.html';
+    window.location.href = LOGIN_URL;
   }
 })();
