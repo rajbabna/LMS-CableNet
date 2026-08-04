@@ -547,6 +547,11 @@
           alert("Please add a short comment so we know what to fix.");
           return;
         }
+
+        // Close the modal immediately — the input is already captured. This
+        // guarantees the modal never stays open after Submit, regardless of
+        // what the RPC call does.
+        closeModal();
         submitBtn.disabled = true;
         try {
           const { error } = await supabaseClient.rpc("submit_feedback", {
@@ -554,18 +559,15 @@
             p_comment: comment,
             p_course_id: courseSel.value || null
           });
-          if (error) {
-            alert("Could not submit feedback: " + error.message);
-            submitBtn.disabled = false;
-            return;
-          }
-          // Close the modal, reset the form, and confirm inline (no blocking
-          // alert, so the closed state is always visible).
-          closeModal();
           submitBtn.disabled = false;
           commentEl.value = "";
           selectedRating = 0;
           renderStars();
+          if (error) {
+            console.error("Feedback submit failed:", error.message);
+            alert("Could not submit feedback: " + error.message);
+            return;
+          }
           const feedbackLink = document.getElementById("feedback-link");
           if (feedbackLink) {
             const orig = feedbackLink.textContent;
@@ -573,8 +575,9 @@
             setTimeout(function () { feedbackLink.textContent = orig; }, 3000);
           }
         } catch (err) {
-          alert("Unexpected error: " + err.message);
           submitBtn.disabled = false;
+          console.error("Feedback submit error:", err);
+          alert("Unexpected error: " + err.message);
         }
       });
     }
