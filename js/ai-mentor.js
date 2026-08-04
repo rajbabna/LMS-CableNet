@@ -41,6 +41,8 @@
   let busy = false;
   let aiSessionId = null;
   let savedThisChat = false;
+  let flagOffered = false;
+  let flagHandled = false;
 
   // ============================================================
   // Course context (grounds answers in the curriculum)
@@ -212,6 +214,29 @@
         border-radius: 4px;
         padding: 0.1em 0.35em;
       }
+      .ai-mentor-msg .ai-mentor-flagbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+      }
+      .ai-mentor-msg .ai-mentor-flagbar button {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.03em;
+        border: 1px solid var(--copper);
+        background: var(--copper);
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.4em 0.9em;
+        cursor: pointer;
+      }
+      .ai-mentor-msg .ai-mentor-flagbar button.flag-no {
+        background: transparent;
+        color: var(--ink-soft);
+        border-color: var(--line);
+      }
+      .ai-mentor-msg .ai-mentor-flagbar button:disabled { opacity: 0.5; cursor: default; }
       .ai-mentor-msg.assistant strong { color: var(--ink); }
       .ai-mentor-msg.assistant em { color: var(--ink-soft); }
       .ai-mentor-msg.typing { color: var(--ink-soft); font-style: italic; }
@@ -480,6 +505,7 @@
         conversation.pop();
       } else {
         conversation.push({ role: 'assistant', content: reply });
+        maybeOfferFlag();
       }
     } catch (err) {
       console.error('AI mentor error:', err);
@@ -553,6 +579,73 @@
     if (userMessageCount() === 0 || savedThisChat) return;
     savedThisChat = true;
     await syncSession();
+  }
+
+  // ============================================================
+  // Escalation flags (Step 16)
+  //   After a student asks several questions in one chat, the AI
+  //   mentor OFFERS to flag the topic for the instructor. The flag
+  //   is created ONLY if the student explicitly agrees (consent),
+  //   and it is idempotent server-side. Never automatic.
+  // ============================================================
+  async function maybeOfferFlag() {
+    if (flagOffered || flagHandled || userMessageCount() < 2) return;
+    flagOffered = true;
+
+    let session = null;
+    if (window.supabaseClient) {
+      try {
+        const { data } = await supabaseClient.auth.getSession();
+        session = data.session || null;
+      } catch (err) {
+        console.log('AI mentor: flag needs a login', err);
+      }
+    }
+    if (!session) return; // cannot attribute a flag without a login
+
+    const card = appendMessage('assistant',
+      '<p>You have asked about this topic a few times now — it might be worth ' +
+      'going over it with your instructor directly. Want me to flag it?</p>' +
+      '<div class="ai-mentor-flagbar">' +
+      '<button type="button" class="flag-yes">Yes, flag this topic</button>' +
+      '<button type="button" class="flag-no">No thanks</button>' +
+      '</div>');
+
+    const yesBtn = card.querySelector('.flag-yes');
+    const noBtn = card.querySelector('.flag-no');
+
+    yesBtn.addEventListener('click', async function () {
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      flagHandled = true;
+      card.innerHTML = '<p>Flagging this topic for your instructor…</p>';
+
+      const topic = await generateSummary();
+      const fallbackTopic = 'Student asked about: ' +
+        String(conversation[0].content || COURSE_ID).slice(0, 160);
+
+      try {
+        const { error } = await supabaseClient.rpc('create_ai_mentor_flag', {
+          p_course_id: COURSE_ID,
+          p_module_id: MODULE_ID,
+          p_topic: topic || fallbackTopic,
+          p_reason: 'Asked about this topic multiple times in one AI mentor chat.'
+        });
+        if (error) throw error;
+        card.innerHTML = '<p>✓ Flagged — your instructor will see this as a suggested ' +
+          'topic for your next session. You can keep asking me anytime.</p>';
+      } catch (err) {
+        console.error('AI mentor: flag failed', err);
+        card.innerHTML = '<p>Could not flag the topic right now — sorry about that.</p>';
+      }
+    });
+
+    noBtn.addEventListener('click', function () {
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      flagHandled = true;
+      card.innerHTML = '<p>Okay — no problem. If you change your mind, just ask.</p>';
+    });
   }
 
   // ============================================================

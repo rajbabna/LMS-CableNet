@@ -5,11 +5,13 @@
 //   1. Human-logged mentor sessions (log form + timeline +
 //      follow-up resolve)  -> mentor_sessions table
 //   2. Shared AI Mentor chat summaries -> mentor_ai_sessions
+//   3. AI Mentor escalation flags (open/resolved/dismissed)
 // Requires an instructor/admin session.
 //
 // Query params: ?student_id=<uuid>&name=<encoded display name>
 //
-// Step 14 (mentor sessions) + Step 15 (AI chat summaries).
+// Step 14 (mentor sessions) + Step 15 (AI chat summaries) +
+// Step 16 (escalation flags).
 // ===========================================================
 
 (function () {
@@ -26,6 +28,8 @@
     mentorEmpty: document.getElementById('mentorEmpty'),
     aiTimeline: document.getElementById('aiTimeline'),
     aiEmpty: document.getElementById('aiEmpty'),
+    flagTimeline: document.getElementById('flagTimeline'),
+    flagEmpty: document.getElementById('flagEmpty'),
     alert: document.getElementById('alert')
   };
 
@@ -256,6 +260,76 @@
   }
 
   // ============================================
+  // AI Mentor escalation flags
+  // ============================================
+  async function loadFlags() {
+    el.flagTimeline.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading flagged topics...</div>';
+    el.flagEmpty.style.display = 'none';
+
+    try {
+      const { data, error } = await supabaseClient.rpc('get_ai_mentor_flags_for_student', {
+        p_student_id: studentId
+      });
+
+      if (error) throw error;
+
+      const flags = data || [];
+      if (flags.length === 0) {
+        el.flagTimeline.innerHTML = '';
+        el.flagEmpty.style.display = 'block';
+        return;
+      }
+
+      const statusLabel = { open: 'OPEN', resolved: '✓ resolved', dismissed: 'dismissed' };
+
+      el.flagTimeline.innerHTML = flags.map(f => {
+        const when = new Date(f.created_at).toLocaleString();
+        const actions = f.status === 'open'
+          ? `<button class="btn-resolve" onclick="resolveFlag('${f.id}')">Resolve</button>` +
+            `<button class="btn-dismiss" onclick="dismissFlag('${f.id}')">Dismiss</button>`
+          : '';
+        return `
+          <article class="mentor-entry">
+            <div class="mentor-entry-head">
+              <span class="flag-badge ${f.status}">${statusLabel[f.status] || f.status}</span>
+              ${f.course_title ? `<span class="mentor-course">${escapeHtml(f.course_title)}</span>` : ''}
+              <span class="mentor-date">${when}</span>
+            </div>
+            <h3>${escapeHtml(f.topic)}</h3>
+            ${f.module_id ? `<p style="color: var(--ink-soft); font-size:0.78rem; margin:0 0 0.4rem;">Module ${escapeHtml(f.module_id)}</p>` : ''}
+            ${f.reason ? `<p>${escapeHtml(f.reason)}</p>` : ''}
+            ${actions ? `<p style="margin:0.7rem 0 0;">${actions}</p>` : ''}
+          </article>`;
+      }).join('');
+    } catch (err) {
+      console.error('loadFlags error:', err);
+      el.flagTimeline.innerHTML = '<div class="empty-state">Could not load flagged topics.</div>';
+    }
+  }
+
+  async function setFlagStatus(flagId, rpc, label) {
+    try {
+      const { data, error } = await supabaseClient.rpc(rpc, { p_flag_id: flagId });
+      if (error) throw error;
+      if (data === 'not_authorized') { showAlert('Not authorized to update flags.', 'error'); return; }
+      if (data === 'not_found') { showAlert('Flag not found or already handled.', 'error'); return; }
+      showAlert('✓ Flag ' + label, 'success');
+      await loadFlags();
+    } catch (err) {
+      console.error('setFlagStatus error:', err);
+      showAlert('Could not update flag.', 'error');
+    }
+  }
+
+  function resolveFlag(flagId) {
+    setFlagStatus(flagId, 'resolve_ai_mentor_flag', 'resolved');
+  }
+
+  function dismissFlag(flagId) {
+    setFlagStatus(flagId, 'dismiss_ai_mentor_flag', 'dismissed');
+  }
+
+  // ============================================
   // Utility
   // ============================================
   function escapeHtml(text) {
@@ -296,11 +370,14 @@
     document.getElementById('logSessionForm').addEventListener('submit', logSession);
 
     window.resolveFollowUp = resolveFollowUp;
+    window.resolveFlag = resolveFlag;
+    window.dismissFlag = dismissFlag;
 
     await Promise.all([
       loadCourses(),
       loadMentorTimeline(),
-      loadAiTimeline()
+      loadAiTimeline(),
+      loadFlags()
     ]);
 
     document.getElementById('logoutLink').addEventListener('click', (e) => {

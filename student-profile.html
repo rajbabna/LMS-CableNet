@@ -34,6 +34,7 @@
       color: var(--ink);
     }
     .profile-section h3 { font-size: 1rem; margin-bottom: 1rem; }
+    .profile-section.span-all { grid-column: 1 / -1; }
 
     .alert-msg {
       font-family: var(--font-mono);
@@ -163,6 +164,28 @@
       cursor: pointer;
     }
     .btn-resolve:hover { background: #2f8a57; }
+    .btn-dismiss {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.3em 0.8em;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink-soft);
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 0.4rem;
+    }
+    .btn-dismiss:hover { border-color: var(--ink-soft); color: var(--ink); }
+    .flag-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.18em 0.6em;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+    }
+    .flag-badge.open { background: #FEF3E0; color: var(--brown); border-color: var(--brown); }
+    .flag-badge.resolved { background: #E4EEE1; color: var(--green); border-color: var(--green); }
+    .flag-badge.dismissed { background: var(--bg); color: var(--ink-soft); }
 
     @media (max-width: 520px) {
       #logSessionForm [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
@@ -265,6 +288,21 @@
         </div>
       </div>
 
+      <!-- AI Mentor escalation flags -->
+      <div class="profile-section span-all">
+        <h2>🚩 Flagged Topics</h2>
+        <p style="font-size:0.85rem; color: var(--ink-soft); margin-top: -0.4rem; margin-bottom: 1.2rem;">
+          Topics the student asked the AI mentor to flag for you — created only when the student agreed.
+          Suggestions, not bookings: cover them in a session, then resolve or dismiss.
+        </p>
+        <div class="mentor-timeline" id="flagTimeline">
+          <div class="empty-state"><span class="spinner"></span> Loading flagged topics...</div>
+        </div>
+        <div class="empty-state" id="flagEmpty" style="display:none;">
+          No flagged topics for this student.
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -274,7 +312,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/config.js?v=9A0E5BF5"></script>
   <script src="js/supabase-client.js?v=17E25610"></script>
-  <script src="js/mentor-sessions.js?v=03C340AE"></script>
+  <script src="js/mentor-sessions.js?v=0F6BD986"></script>
   <script src="js/menu.js?v=06BC2CFB"></script>
 </body>
 </html>
