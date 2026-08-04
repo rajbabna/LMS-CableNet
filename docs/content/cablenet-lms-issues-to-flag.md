@@ -17,6 +17,7 @@ These were open questions in earlier reviews and are now settled by design decis
 - **Add Student/Account modal — repeated fields in screenshot** — resolved: confirmed a screenshot artifact, not a bug. The live modal (`instructor-dashboard.html`) is a single clean form: Role, Email, Full Name, Temporary Password, Course, Access Duration + Cancel/Add. No repeated-entry list. (The `old/` variants also exist but are not deployed.)
 - **No UI path to historical `mentor_sessions` data** — resolved as an **accepted trade-off** (deliberate, not an oversight): the human-logged Mentor Sessions UI was retired in favour of AI Mentor chat summaries, and rebuilding a dashboard for it would duplicate that purpose. If an old session ever needs review (e.g. the KrishB cable-testing / T568A/B sessions), access is via the Supabase SQL editor (`SELECT * FROM mentor_sessions ORDER BY created_at DESC;`) — the table, RLS, and RPCs remain intact. Re-open this if real instructors ask for the old logs.
 - **`topic_summary` nullable safety net** — resolved: both dashboards handle a null summary gracefully with fallback text (`instructor-dashboard.html` "AI Mentor Activity" → "No summary shared"; `js/mentor-sessions.js` AI Chats timeline has a fallback line). And with always-on capture, new chats always write a summary, so null only ever affects pre-decision legacy rows.
+- **Beta feedback channel** — added Aug 2, 2026: students get a "Give Feedback" button on their dashboard (rating 1–5 + comment) via `sql/30-beta-feedback.sql` (table `beta_feedback`, `submit_feedback` RPC, RLS: students own-row, admins read all, instructors excluded from feedback reads). Review query is in `docs/content/beta-test-kit.md`.
 
 ---
 
@@ -32,8 +33,10 @@ Admin, instructor, and both student test accounts are on close variants of the s
   read every row (all courses) through the REST API, and the dashboard's "Recent
   Activity" panel showed audit entries for students outside the instructor's courses.
 - Fixed by `sql/29-scope-staff-rls.sql` (course-scoped: admin all, instructors only
-  assigned courses, students own-row). Apply it in the Supabase SQL editor, then run
-  this checklist with a genuinely separate instructor account:
+  assigned courses, students own-row). **Applied in Supabase Aug 2, 2026.** A runnable,
+  copy-paste version of the checklist below lives in
+  `docs/content/separate-account-checklist.md` — execute it with a genuinely separate
+  instructor account before onboarding beta students.
   1. Create a second instructor via the admin dashboard's add-account form; approve
      and assign them to ONE course (`assign_instructor`).
   2. Log in as that instructor: the dashboard must list only that course's students;
