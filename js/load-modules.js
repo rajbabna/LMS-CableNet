@@ -91,14 +91,25 @@ async function loadModulesForCourse(courseId) {
       return;
     }
 
-    // Render each module as a list item
+    // Render each module as a grid card
+    const typeDisplayNames = {
+      lesson: 'Lesson',
+      pdf: 'PDF',
+      video: 'Video',
+      interactive: 'Tool',
+      text: 'Article'
+    };
+
     modules.forEach(module => {
       const li = document.createElement('li');
       li.setAttribute('data-module-id', module.id);
 
-      // Determine icon or label based on content type
+      const type = module.content_type || 'lesson';
+      const typeBadge = `<span class="mod-type-badge mod-type-${type}">${typeDisplayNames[type] || type}</span>`;
+
+      // Determine action label based on content type
       let contentLabel = 'open lesson';
-      switch(module.content_type) {
+      switch(type) {
         case 'pdf':
           contentLabel = 'open pdf';
           break;
@@ -130,20 +141,20 @@ async function loadModulesForCourse(courseId) {
           </div>`;
 
       li.innerHTML = `
-        <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
-        <span>
-          <strong>${module.title}</strong>
-          ${module.description ? `<br><span style="font-size: 0.9em; color: var(--ink-soft);">${module.description}</span>` : ''}
-          <br>
-          ${resourceHtml}
-          <div class="module-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
-            </div>
-            <div class="progress-text">${completed ? '100%' : '0%'}</div>
+        <div class="module-card-head">
+          <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
+          ${typeBadge}
+        </div>
+        <strong class="module-card-title">${module.title}</strong>
+        ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
+        <div class="module-resource">${resourceHtml}</div>
+        <div class="module-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
           </div>
-          ${completionHtml}
-        </span>
+          <div class="progress-text">${completed ? '100%' : '0%'}</div>
+        </div>
+        ${completionHtml}
       `;
 
       moduleList.appendChild(li);
