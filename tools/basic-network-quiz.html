@@ -223,11 +223,12 @@
     <span class="pill" id="cardCount">5 of 15 per round</span>
     <span class="pill" id="bestPill">Best: —</span>
     <span class="pill" id="puterPill">Puter: off</span>
+    <span class="pill" id="accountPill">Course account: off</span>
   </div>
 
   <!-- Start screen -->
   <div class="start-screen" id="startScreen">
-    <p>Each attempt deals you 5 random questions from a pool of 15, so you get a fresh mix every time. No account needed — your best score is saved on your device (and to your Puter account if you sign in).</p>
+    <p>Each attempt deals you 5 random questions from a pool of 15, so you get a fresh mix every time. No account needed — your best score is saved on your device. If you're signed in to your course account, your best score also syncs to the course.</p>
     <button class="btn-ghost" id="signInBtn">Sign in with Puter</button>
     <button class="btn-primary" id="startBtn">Start Quiz</button>
   </div>
@@ -265,6 +266,9 @@
 </div>
 
 <script src="https://js.puter.com/v2/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/config.js?v=9A0E5BF5"></script>
+<script src="../js/supabase-client.js?v=17E25610"></script>
 <script>
 (function () {
   'use strict';
@@ -367,6 +371,7 @@
 
   var STORE_KEY = 'cn_basic_quiz_best';
   var PUTER_KV_KEY = 'cn_basic_quiz_best_score';
+  var QUIZ_MODULE_ID = 27;
 
   var POOL_SIZE = QUESTIONS.length;
   var ROUND_SIZE = 5;
@@ -392,6 +397,7 @@
     cardCount: document.getElementById('cardCount'),
     bestPill: document.getElementById('bestPill'),
     puterPill: document.getElementById('puterPill'),
+    accountPill: document.getElementById('accountPill'),
     signInBtn: document.getElementById('signInBtn'),
     finalScore: document.getElementById('finalScore'),
     finalDetail: document.getElementById('finalDetail'),
@@ -430,6 +436,41 @@
 
   function puterSignedIn() {
     return !!(window.puter && puter.auth && puter.auth.isSignedIn());
+  }
+
+  function getSupabaseUser() {
+    if (!window.supabaseClient) return Promise.resolve(null);
+    return supabaseClient.auth.getUser()
+      .then(function (r) { return r.data.user || null; })
+      .catch(function () { return null; });
+  }
+
+  function updateAccountPill(user) {
+    el.accountPill.textContent = user
+      ? 'Course account: connected'
+      : 'Course account: off';
+  }
+
+  // Best effort: persists the best score to the course via the
+  // submit_quiz_score RPC. Never blocks the quiz or throws.
+  function submitBestToSupabase(score) {
+    return getSupabaseUser().then(function (user) {
+      updateAccountPill(user);
+      if (!user || !window.supabaseClient) return false;
+      return supabaseClient.rpc('submit_quiz_score', {
+        p_module_id: QUIZ_MODULE_ID,
+        p_score: score
+      }).then(function (res) {
+        if (res.error) {
+          console.error('Quiz score sync failed:', res.error.message);
+          return false;
+        }
+        return res.data === 'ok';
+      }).catch(function (err) {
+        console.error('Quiz score sync error:', err);
+        return false;
+      });
+    });
   }
 
   function saveBest(score) {
@@ -546,6 +587,15 @@
     el.syncNote.textContent = puterSignedIn()
       ? 'Saved to your Puter account.'
       : 'Saved on this device. Sign in with Puter to keep your best score on any device.';
+
+    // Best attempt: also sync to the course account if the student is
+    // logged in. Appends a note without disturbing the Puter messaging.
+    submitBestToSupabase(best).then(function (synced) {
+      if (synced) {
+        el.syncNote.textContent = 'Saved to your Puter account and your course account.'
+          + (puterSignedIn() ? '' : ' (Sign in with Puter for cross-device best.)');
+      }
+    });
   }
 
   function refreshAuth() {
@@ -560,6 +610,9 @@
         if (best > 0) { setLocalBest(best); updateBestPill(); }
       });
     }
+
+    // Reflect the course-account (Supabase) state in the pill.
+    getSupabaseUser().then(updateAccountPill);
   }
 
   // ---- Wire up ----

@@ -562,7 +562,7 @@
 
         <!-- Filter -->
         <div class="filter-bar">
-          <select id="courseFilter" onchange="loadDashboard()">
+          <select id="courseFilter" onchange="loadDashboard(); loadQuizScores();">
             <option value="">All Courses</option>
           </select>
         </div>
@@ -686,6 +686,28 @@
       <div id="dgRecent">
         <div class="empty-state">(none)</div>
       </div>
+    </div>
+
+    <!-- Quiz Scores -->
+    <div id="quizScoresSection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>📝 Quiz Scores</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Best scores students have earned on the practice quiz, filtered to the selected course above.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Module</th>
+            <th>Attempts</th>
+            <th>Best Score</th>
+            <th>Last Attempt</th>
+          </tr>
+        </thead>
+        <tbody id="quizScoresBody">
+          <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
   </main>
 
@@ -910,6 +932,7 @@
         await loadAiMentorOverview();
         await loadFeedback();
         await loadMentorDigest();
+        await loadQuizScores();
         if (profile.role === 'admin') {
           await loadAdminOverview();
           await loadAssignments();
@@ -1689,6 +1712,50 @@
         }
       } catch (err) {
         showAlert(`Unexpected error: ${err.message}`, 'error');
+      }
+    }
+
+    // ============================================
+    // QUIZ SCORES
+    // Reads best quiz scores for a course. Respects the
+    // course filter; tablets show student, module, attempts,
+    // best score and last attempt date.
+    // ============================================
+    async function loadQuizScores() {
+      const section = document.getElementById('quizScoresSection');
+      const tbody = document.getElementById('quizScoresBody');
+      if (!section || !tbody) return;
+      section.style.display = '';
+
+      const courseId = document.getElementById('courseFilter').value;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_quiz_scores_for_course', {
+          p_course_id: courseId
+        });
+
+        if (error) {
+          console.error('Quiz scores error:', error.message);
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load quiz scores.</td></tr>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No quiz scores yet — students sync scores when they take the practice quiz while signed in.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.map(row => `
+          <tr>
+            <td><strong>${escapeHtml(row.student_name)}</strong></td>
+            <td>${escapeHtml(row.module_title)}</td>
+            <td>${row.attempts}</td>
+            <td><span style="font-family: var(--font-mono); color: var(--teal); font-weight:600;">${row.best_score}%</span></td>
+            <td style="font-size:0.8rem; color: var(--ink-soft);">${new Date(row.last_attempt_date).toLocaleString()}</td>
+          </tr>`).join('');
+      } catch (err) {
+        console.error('loadQuizScores error:', err);
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load quiz scores.</td></tr>`;
       }
     }
 

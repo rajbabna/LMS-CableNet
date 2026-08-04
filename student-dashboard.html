@@ -226,6 +226,14 @@
     gap: 0.8rem;
   }
 
+  /* Practice quiz card */
+  .quiz-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.8rem;
+  }
+
   .btn-continue {
     flex: 1;
     display: inline-flex;
@@ -301,6 +309,19 @@
   <div id="coursesGrid" class="courses-grid" style="margin-top: 2rem;">
     <div class="loading">Loading your courses...</div>
   </div>
+
+  <!-- Practice Quiz -->
+  <section class="dashboard-section quiz-card" style="margin-top: 2rem;">
+    <span class="port-num" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 4px; padding: 0.25em 0.6em; display: inline-block; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">PING 01</span>
+    <h2 style="margin: 0 0 0.6rem; font-size: 1.1rem;">Test your networking basics</h2>
+    <p style="margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.9rem;">
+      Five quick questions from a pool of 15. Your best score is saved to your course account when you're signed in.
+    </p>
+    <div class="course-actions">
+      <a class="btn-continue" href="tools/basic-network-quiz.html" target="_blank" rel="noopener">Take the quiz ↗</a>
+      <span class="best-score-pill" id="dashboardBestPill" style="display:none; align-self:center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--green); border: 1px solid var(--green); border-radius: 999px; padding: 0.35em 0.9em;">Best: —</span>
+    </div>
+  </section>
 </main>
 
 <div class="wire-divider"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -524,6 +545,22 @@
 
 <!-- Load student's enrolled courses (same pattern as landing page, but from enrollments table) -->
 <script src="js/progress/student-dashboard.js?v=DF9A5C6F"></script>
+<script>
+  // Show the student's best practice-quiz score (localStorage key used by
+  // tools/basic-network-quiz.html). Best-effort only.
+  (function () {
+    try {
+      var best = parseInt(localStorage.getItem('cn_basic_quiz_best') || '0', 10);
+      if (best > 0) {
+        var pill = document.getElementById('dashboardBestPill');
+        if (pill) {
+          pill.textContent = 'Best: ' + best + '%';
+          pill.style.display = 'inline-block';
+        }
+      }
+    } catch (e) { /* ignore */ }
+  })();
+</script>
 <script src="js/menu.js?v=06BC2CFB"></script>
 
 </body>
