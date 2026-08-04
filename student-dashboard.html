@@ -559,13 +559,19 @@
             submitBtn.disabled = false;
             return;
           }
-          // Close first, then confirm on the next tick so the browser paints
-          // the closed state before the blocking alert dialog appears.
+          // Close the modal, reset the form, and confirm inline (no blocking
+          // alert, so the closed state is always visible).
           closeModal();
           submitBtn.disabled = false;
-          setTimeout(function () {
-            alert("Thanks! Your feedback has been sent.");
-          }, 0);
+          commentEl.value = "";
+          selectedRating = 0;
+          renderStars();
+          const feedbackLink = document.getElementById("feedback-link");
+          if (feedbackLink) {
+            const orig = feedbackLink.textContent;
+            feedbackLink.textContent = "✓ Feedback sent";
+            setTimeout(function () { feedbackLink.textContent = orig; }, 3000);
+          }
         } catch (err) {
           alert("Unexpected error: " + err.message);
           submitBtn.disabled = false;
