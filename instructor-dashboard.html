@@ -1177,7 +1177,11 @@
 
       } catch (err) {
         console.error('loadMentorDigest error:', err);
-        section.style.display = 'none';
+        section.style.display = '';
+        document.getElementById('dgOpenList').innerHTML =
+          `<div class="empty-state" style="color: var(--copper-dark);">
+            Could not load digest: ${escapeHtml(err.message)}
+          </div>`;
       }
     }
 
