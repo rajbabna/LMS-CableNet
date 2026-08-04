@@ -212,6 +212,13 @@
     }
     .btn-stalled:hover { background: #F7E4DC; }
 
+    .btn-unstall {
+      background: var(--green);
+      color: #fff;
+      border: 1px solid var(--green);
+    }
+    .btn-unstall:hover { background: #2f8a57; }
+
     /* Primary action button */
     .btn-action { width: 100%; margin-bottom: 1.2rem; }
 
@@ -957,10 +964,15 @@
                   onclick="openHistoryModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                   History
                 </button>
-                <button class="btn btn-table btn-stalled"
-                  onclick="openStalledModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
-                  Stalled
-                </button>
+                ${row.is_stalled
+                  ? `<button class="btn btn-table btn-unstall"
+                      onclick="unStallStudent('${row.student_id}', '${row.course_id}')">
+                      Un-stall
+                    </button>`
+                  : `<button class="btn btn-table btn-stalled"
+                      onclick="openStalledModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                      Stalled
+                    </button>`}
                 <a class="btn btn-table btn-mentor"
                   href="student-profile.html?student_id=${row.student_id}&name=${encodeURIComponent(row.student_name)}">
                   AI Chats
@@ -1266,6 +1278,25 @@
 
         showAlert('✓ Student marked as stalled', 'success');
         closeStalledModal();
+        await loadDashboard();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+      }
+    }
+
+    async function unStallStudent(studentId, courseId) {
+      try {
+        const { data, error } = await supabaseClient.rpc('mark_student_stalled', {
+          p_student_id: studentId,
+          p_course_id:  courseId,
+          p_stalled:    false,
+          p_reason:     ''
+        });
+
+        if (error) { showAlert(`Error: ${error.message}`, 'error'); return; }
+
+        showAlert('✓ Student un-stalled', 'success');
         await loadDashboard();
         await loadAuditLog();
       } catch (err) {
