@@ -687,6 +687,26 @@
         <div class="empty-state">(none)</div>
       </div>
     </div>
+
+    <!-- Content Editor (admin only) -->
+    <div id="contentEditorSection" class="dashboard-section" style="margin-top:1.5rem; display:none;">
+      <h2>🛠️ Content Editor</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Create and edit courses and their modules. Changes reflect immediately for enrolled students.
+      </p>
+
+      <button class="btn btn-primary" onclick="openCourseModal(false)">+ Add Course</button>
+
+      <div id="ceCourseToolbar" style="margin:1.2rem 0 0.6rem;">
+        <button class="btn btn-ghost" onclick="closeModules()" id="ceBackBtn" style="display:none;">← Back to courses</button>
+      </div>
+
+      <div id="ceCourses">
+        <div class="empty-state"><span class="spinner"></span> Loading courses...</div>
+      </div>
+
+      <div id="ceModulesPanel" style="display:none; margin-top:0.5rem;"></div>
+    </div>
   </main>
 
   <!-- Modal: Add Student / Account -->
@@ -814,6 +834,73 @@
     </div>
   </div>
 
+  <!-- Modal: Add / Edit Course -->
+  <div id="courseModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="courseModalTitle">
+    <div class="modal">
+      <h3 id="courseModalTitle">Add Course</h3>
+      <input type="hidden" id="ceEditingCourseId">
+      <div class="field">
+        <label for="ceCourseId">Course id (slug)</label>
+        <input type="text" id="ceCourseId" placeholder="e.g., networking" autocomplete="off">
+        <small>Used in URLs. Keep lowercase, no spaces. Only editable when creating.</small>
+      </div>
+      <div class="field">
+        <label for="ceCourseTitle">Title</label>
+        <input type="text" id="ceCourseTitle" placeholder="Network Operations — Configuration &amp; Troubleshooting" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="ceCourseDescription">Description</label>
+        <textarea id="ceCourseDescription" rows="2" placeholder="Short description shown on the landing page"></textarea>
+      </div>
+      <div class="field">
+        <label for="ceCoursePort">Port number</label>
+        <input type="number" id="ceCoursePort" min="1" step="1">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeCourseModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitCourse()">Save Course</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Module -->
+  <div id="moduleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="moduleModalTitle">
+    <div class="modal">
+      <h3 id="moduleModalTitle">Add Module</h3>
+      <input type="hidden" id="ceModuleId">
+      <div class="field">
+        <label for="ceModuleNum">Module number</label>
+        <input type="number" id="ceModuleNum" min="1" step="1">
+      </div>
+      <div class="field">
+        <label for="ceModuleTitle">Title</label>
+        <input type="text" id="ceModuleTitle" placeholder="T568A / T568B termination" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="ceModuleDescription">Description</label>
+        <textarea id="ceModuleDescription" rows="2" placeholder="Short description shown in the module list"></textarea>
+      </div>
+      <div class="field">
+        <label for="ceModuleType">Content type</label>
+        <select id="ceModuleType">
+          <option value="lesson">lesson</option>
+          <option value="video">video</option>
+          <option value="pdf">pdf</option>
+          <option value="interactive">interactive</option>
+          <option value="text">text</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ceModuleUrl">Content URL</label>
+        <input type="text" id="ceModuleUrl" placeholder="https://..." autocomplete="off">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModuleModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitModule()">Save Module</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
@@ -829,6 +916,7 @@
     let currentEnrollmentId = null;
     let currentCourseId    = null;
     let currentUserRole    = null;
+    let ceCurrentCourseId  = null;
 
     // ============================================
     // INITIALISATION
@@ -913,6 +1001,7 @@
         if (profile.role === 'admin') {
           await loadAdminOverview();
           await loadAssignments();
+          await loadContentEditor();
         }
 
       } catch (err) {
@@ -1720,6 +1809,224 @@
         `).join('');
       } catch (err) {
         console.error('Audit log load error:', err);
+      }
+    }
+
+    // ============================================
+    // CONTENT EDITOR (admin)
+    // ============================================
+    const CE_TYPES = ['lesson', 'video', 'pdf', 'interactive', 'text'];
+
+    async function loadContentEditor() {
+      const section = document.getElementById('contentEditorSection');
+      if (!section) return;
+      if (currentUserRole !== 'admin') return;
+      section.style.display = '';
+      await renderCourses();
+      if (ceCurrentCourseId) await renderModules(ceCurrentCourseId);
+    }
+
+    async function renderCourses() {
+      const box = document.getElementById('ceCourses');
+      try {
+        const { data, error } = await supabaseClient.rpc('get_admin_overview');
+        if (error) throw error;
+        const courses = (data && data.courses) || [];
+        box.innerHTML = courses.length
+          ? courses.map(c => `
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; padding:0.8rem 0; border-bottom:1px solid var(--line);">
+                <div>
+                  <strong>${escapeHtml(c.title)}</strong>
+                  <span style="color:var(--ink-soft); font-family:var(--font-mono); font-size:0.78rem;"> [${escapeHtml(c.id)} · port ${c.port_number}]</span>
+                  <span style="color:var(--ink-soft); font-size:0.82rem; margin-left:0.4rem;">${c.enrolled_count} enrolled</span>
+                </div>
+                <div style="display:flex; gap:0.4rem;">
+                  <button class="btn btn-sm" onclick="openModules('${c.id}')">Modules</button>
+                  <button class="btn btn-sm" style="background:transparent; color:var(--copper-dark); border:1px solid var(--copper-dark);" onclick="openCourseModal(true, '${c.id}')">Edit</button>
+                  <button class="btn btn-sm" style="background:transparent; color:var(--copper-dark); border:1px solid var(--copper-dark);" onclick="deleteCourse('${c.id}')">Delete</button>
+                </div>
+              </div>`).join('')
+          : '<div class="empty-state">No courses yet. Use "+ Add Course".</div>';
+      } catch (err) {
+        console.error('renderCourses error:', err);
+        box.innerHTML = '<div class="empty-state" style="color:var(--copper-dark);">Could not load courses: ' + escapeHtml(err.message) + '</div>';
+      }
+    }
+
+    function openModules(courseId) {
+      ceCurrentCourseId = courseId;
+      document.getElementById('ceCourses').style.display = 'none';
+      document.getElementById('ceBackBtn').style.display = '';
+      document.getElementById('ceModulesPanel').style.display = '';
+      renderModules(courseId);
+    }
+
+    function closeModules() {
+      ceCurrentCourseId = null;
+      document.getElementById('ceCourses').style.display = '';
+      document.getElementById('ceBackBtn').style.display = 'none';
+      document.getElementById('ceModulesPanel').style.display = 'none';
+      renderCourses();
+    }
+
+    async function renderModules(courseId) {
+      const panel = document.getElementById('ceModulesPanel');
+      try {
+        const { data: modules, error } = await supabaseClient
+          .from('modules')
+          .select('*')
+          .eq('course_id', courseId)
+          .order('module_number', { ascending: true });
+        if (error) throw error;
+
+        panel.innerHTML = `
+          <h3 style="margin:0 0 0.6rem;">Modules — ${escapeHtml(courseId)}</h3>
+          <button class="btn btn-primary" onclick="openModuleModal(false, ${ceCurrentCourseId ? `'${ceCurrentCourseId}'` : 'null'})">+ Add Module</button>
+          <div style="margin-top:0.8rem;">
+            ${(modules || []).length
+              ? modules.map(m => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; padding:0.6rem 0; border-bottom:1px dashed var(--line);">
+                    <div>
+                      <span class="mod-tag">MOD ${String(m.module_number).padStart(2, '0')}</span>
+                      <strong>${escapeHtml(m.title)}</strong>
+                      <span style="color:var(--ink-soft); font-family:var(--font-mono); font-size:0.74rem;"> [${escapeHtml(m.content_type)}]</span>
+                      <div style="font-size:0.8rem; color:var(--ink-soft);">${escapeHtml(m.description || '')}</div>
+                      <div style="font-size:0.74rem; color:var(--teal); word-break:break-all;">${escapeHtml(m.content_url || '')}</div>
+                    </div>
+                    <div style="display:flex; gap:0.4rem;">
+                      <button class="btn btn-sm" style="background:transparent; color:var(--copper-dark); border:1px solid var(--copper-dark);"
+                        onclick="openModuleModal(true, '${ceCurrentCourseId}', '${m.id}', '${m.module_number}', '${m.title}', '${m.description || ''}', '${m.content_type}', '${m.content_url || ''}')">Edit</button>
+                      <button class="btn btn-sm" style="background:transparent; color:var(--copper-dark); border:1px solid var(--copper-dark);" onclick="deleteModule('${m.id}')">Delete</button>
+                    </div>
+                  </div>`).join('')
+              : '<div class="empty-state">No modules in this course yet.</div>'}
+          </div>`;
+      } catch (err) {
+        console.error('renderModules error:', err);
+        panel.innerHTML = '<div class="empty-state" style="color:var(--copper-dark);">Could not load modules: ' + escapeHtml(err.message) + '</div>';
+      }
+    }
+
+    // ---- Course modal ----
+    function openCourseModal(editing, courseId) {
+      document.getElementById('courseModal').classList.add('active');
+      document.getElementById('ceEditingCourseId').value = editing ? courseId : '';
+      document.getElementById('courseModalTitle').textContent = editing ? 'Edit Course' : 'Add Course';
+      document.getElementById('ceCourseId').disabled = editing;
+      if (editing && courseId) {
+        document.getElementById('ceCourseId').value = courseId;
+      } else {
+        document.getElementById('ceCourseId').value = '';
+        document.getElementById('ceCourseTitle').value = '';
+        document.getElementById('ceCourseDescription').value = '';
+        document.getElementById('ceCoursePort').value = '';
+      }
+      document.getElementById('ceCourseTitle').focus();
+    }
+    function closeCourseModal() { document.getElementById('courseModal').classList.remove('active'); }
+
+    async function submitCourse() {
+      const id    = document.getElementById('ceCourseId').value.trim();
+      const title = document.getElementById('ceCourseTitle').value.trim();
+      const desc  = document.getElementById('ceCourseDescription').value.trim();
+      const port  = parseInt(document.getElementById('ceCoursePort').value, 10);
+      if (!id || !title) { showAlert('Course id and title are required.', 'error'); return; }
+      const editing = !!document.getElementById('ceEditingCourseId').value;
+
+      try {
+        const rpc = editing ? 'update_course' : 'create_course';
+        const { data, error } = await supabaseClient.rpc(rpc, {
+          p_id: editing ? document.getElementById('ceEditingCourseId').value : id,
+          p_title: title, p_description: desc, p_port_number: port
+        });
+        if (error) throw error;
+        if (data === 'not_authorized') { showAlert('Not authorized.', 'error'); return; }
+        if (data === 'not_found') { showAlert('Course not found.', 'error'); return; }
+        showAlert('✓ Course saved', 'success');
+        closeCourseModal();
+        await renderCourses();
+      } catch (err) {
+        console.error('submitCourse error:', err);
+        showAlert('Could not save course: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteCourse(courseId) {
+      if (!confirm(`Delete course "${courseId}" and all its modules/enrollments?\nThis cannot be undone.`)) return;
+      try {
+        const { data, error } = await supabaseClient.rpc('delete_course', { p_id: courseId });
+        if (error) throw error;
+        if (data === 'not_authorized') { showAlert('Not authorized.', 'error'); return; }
+        showAlert('✓ Course deleted', 'success');
+        closeModules();
+        await renderCourses();
+      } catch (err) {
+        console.error('deleteCourse error:', err);
+        showAlert('Could not delete course: ' + err.message, 'error');
+      }
+    }
+
+    // ---- Module modal ----
+    function openModuleModal(editing, courseId, moduleId, moduleNumber, title, description, type, url) {
+      document.getElementById('moduleModal').classList.add('active');
+      document.getElementById('moduleModalTitle').textContent = editing ? 'Edit Module' : 'Add Module';
+      document.getElementById('ceModuleId').value = editing ? moduleId : '';
+      document.getElementById('ceModuleNum').value = editing ? moduleNumber : '';
+      document.getElementById('ceModuleTitle').value = editing ? title : '';
+      document.getElementById('ceModuleDescription').value = editing ? description : '';
+      document.getElementById('ceModuleType').value = editing ? type : 'lesson';
+      document.getElementById('ceModuleUrl').value = editing ? url : '';
+      document.getElementById('ceModuleNum').focus();
+    }
+    function closeModuleModal() { document.getElementById('moduleModal').classList.remove('active'); }
+
+    async function submitModule() {
+      const num  = parseInt(document.getElementById('ceModuleNum').value, 10);
+      const title = document.getElementById('ceModuleTitle').value.trim();
+      const desc  = document.getElementById('ceModuleDescription').value.trim();
+      const type  = document.getElementById('ceModuleType').value;
+      const url   = document.getElementById('ceModuleUrl').value.trim();
+      const moduleId = document.getElementById('ceModuleId').value;
+      if (!ceCurrentCourseId) { showAlert('No course selected.', 'error'); return; }
+      if (!title) { showAlert('Module title is required.', 'error'); return; }
+
+      try {
+        let data, error;
+        if (moduleId) {
+          ({ data, error } = await supabaseClient.rpc('update_module', {
+            p_module_id: parseInt(moduleId, 10), p_module_number: num, p_title: title,
+            p_description: desc, p_content_type: type, p_content_url: url
+          }));
+        } else {
+          ({ data, error } = await supabaseClient.rpc('create_module', {
+            p_course_id: ceCurrentCourseId, p_module_number: num, p_title: title,
+            p_description: desc, p_content_type: type, p_content_url: url
+          }));
+        }
+        if (error) throw error;
+        if (data === 'not_authorized') { showAlert('Not authorized.', 'error'); return; }
+        if (data === 'exists') { showAlert('Another module already has that module number.', 'error'); return; }
+        if (data === 'course_not_found') { showAlert('Course not found.', 'error'); return; }
+        showAlert('✓ Module saved', 'success');
+        closeModuleModal();
+        await renderModules(ceCurrentCourseId);
+      } catch (err) {
+        console.error('submitModule error:', err);
+        showAlert('Could not save module: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteModule(moduleId) {
+      if (!confirm('Delete this module?')) return;
+      try {
+        const { data, error } = await supabaseClient.rpc('delete_module', { p_module_id: parseInt(moduleId, 10) });
+        if (error) throw error;
+        if (data === 'not_authorized') { showAlert('Not authorized.', 'error'); return; }
+        showAlert('✓ Module deleted', 'success');
+        await renderModules(ceCurrentCourseId);
+      } catch (err) {
+        console.error('deleteModule error:', err);
+        showAlert('Could not delete module: ' + err.message, 'error');
       }
     }
 
