@@ -35,6 +35,9 @@ if (Test-Path -LiteralPath $toolsDir) {
 $scriptPattern = '(<script[^>]*\bsrc=")([^"]+?)(\?v=[0-9a-f]{8})?(")'
 $linkPattern   = '(<link[^>]*\brel=["'']stylesheet["''][^>]*\bhref=")([^"]+?)(\?v=[0-9a-f]{8})?(")'
 
+$ciScriptPattern = '(?i)' + $scriptPattern
+$ciLinkPattern   = '(?i)' + $linkPattern
+
 $evaluator = {
   param($m)
   $prefix = $m.Groups[1].Value
@@ -55,8 +58,8 @@ $updated = 0
 foreach ($f in $files) {
   $fileDir = $f.DirectoryName
   $text    = [System.Text.Encoding]::UTF8.GetString([System.IO.File]::ReadAllBytes($f.FullName))
-  $newText = [regex]::Replace($text, $scriptPattern, $evaluator)
-  $newText = [regex]::Replace($newText, $linkPattern, $evaluator)
+  $newText = [regex]::Replace($text, $ciScriptPattern, $evaluator)
+  $newText = [regex]::Replace($newText, $ciLinkPattern, $evaluator)
 
   if ($newText -ne $text) {
     [System.IO.File]::WriteAllBytes($f.FullName, [System.Text.Encoding]::UTF8.GetBytes($newText))
