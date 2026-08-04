@@ -652,6 +652,41 @@
         <div class="empty-state"><span class="spinner"></span> Loading...</div>
       </div>
     </div>
+
+    <!-- Mentor Sessions Digest -->
+    <div id="mentorDigestSection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>📋 Mentor Sessions Digest</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Rollup of logged mentor sessions: activity, open follow-ups, and what topics keep coming up.
+      </p>
+
+      <div class="stat-cards" style="margin:0.8rem 0 0.2rem;">
+        <div class="stat-card"><strong id="dgTotal">0</strong><span>Sessions</span></div>
+        <div class="stat-card"><strong id="dgWeek">0</strong><span>This week</span></div>
+        <div class="stat-card"><strong id="dgOpen">0</strong><span>Open follow-ups</span></div>
+        <div class="stat-card"><strong id="dgResolved">0</strong><span>Resolved</span></div>
+      </div>
+
+      <h3 style="margin:1.2rem 0 0.6rem;">⭕ Open follow-ups</h3>
+      <div id="dgOpenList">
+        <div class="empty-state">(none)</div>
+      </div>
+
+      <h3 style="margin:1.2rem 0 0.6rem;">🔝 Most-discussed topics</h3>
+      <div id="dgTopics">
+        <div class="empty-state">(none)</div>
+      </div>
+
+      <h3 style="margin:1.2rem 0 0.6rem;">🗂️ By course</h3>
+      <div id="dgCourses">
+        <div class="empty-state">(none)</div>
+      </div>
+
+      <h3 style="margin:1.2rem 0 0.6rem;">🕒 Recent sessions</h3>
+      <div id="dgRecent">
+        <div class="empty-state">(none)</div>
+      </div>
+    </div>
   </main>
 
   <!-- Modal: Add Student / Account -->
@@ -874,6 +909,7 @@
         await loadAuditLog();
         await loadAiMentorOverview();
         await loadFeedback();
+        await loadMentorDigest();
         if (profile.role === 'admin') {
           await loadAdminOverview();
           await loadAssignments();
@@ -1071,6 +1107,92 @@
       } catch (err) {
         console.error('loadFeedback error:', err);
         container.innerHTML = '<div class="empty-state">Could not load feedback.</div>';
+      }
+    }
+
+    // ============================================
+    // MENTOR SESSIONS DIGEST
+    // ============================================
+    async function loadMentorDigest() {
+      const section = document.getElementById('mentorDigestSection');
+      if (!section) return;
+      section.style.display = '';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_mentor_sessions_digest');
+        if (error) throw error;
+        if (!data) return;
+
+        const s = data.stats || {};
+        document.getElementById('dgTotal').textContent    = s.total_sessions || 0;
+        document.getElementById('dgWeek').textContent     = s.sessions_this_week || 0;
+        document.getElementById('dgOpen').textContent     = s.open_follow_ups || 0;
+        document.getElementById('dgResolved').textContent = s.resolved_follow_ups || 0;
+
+        const openList = data.open_follow_ups || [];
+        document.getElementById('dgOpenList').innerHTML = openList.length
+          ? openList.map(o => `
+              <div style="padding:0.7rem 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div>
+                  <strong>${escapeHtml(o.student_name)}</strong>
+                  <span style="color:var(--ink-soft); font-size:0.8rem;"> — ${escapeHtml(o.course_title)} · ${new Date(o.session_date + 'T00:00:00').toLocaleDateString()}</span>
+                  <div style="font-size:0.85rem; color:var(--ink); margin-top:0.2rem;">${escapeHtml(o.follow_up) || ''}</div>
+                </div>
+                <button class="btn btn-sm" onclick="resolveDigestFollowUp('${o.session_id}')">Resolve</button>
+              </div>`).join('')
+          : '<div class="empty-state">No open follow-ups.</div>';
+
+        const topics = data.top_topics || [];
+        document.getElementById('dgTopics').innerHTML = topics.length
+          ? topics.map(t => `
+              <span style="display:inline-block; margin:0.25rem 0.5rem 0.25rem 0; padding:0.3em 0.9em; border:1px solid var(--line); border-radius:999px; font-family:var(--font-mono); font-size:0.78rem; background:var(--bg);">
+                ${escapeHtml(t.topic)} <strong style="color:var(--copper-dark);">×${t.count}</strong>
+              </span>`).join('')
+          : '<div class="empty-state">None logged yet.</div>';
+
+        const courses = data.by_course || [];
+        document.getElementById('dgCourses').innerHTML = courses.length
+          ? courses.map(c => `
+              <div style="display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px dashed var(--line); font-size:0.9rem;">
+                <span>${escapeHtml(c.course_title)}</span>
+                <span style="font-family:var(--font-mono); color:var(--ink-soft);">${c.session_count} session${c.session_count === 1 ? '' : 's'}</span>
+              </div>`).join('')
+          : '<div class="empty-state">No sessions logged.</div>';
+
+        const recent = data.recent || [];
+        document.getElementById('dgRecent').innerHTML = recent.length
+          ? recent.map(r => `
+              <div style="padding:0.5rem 0; border-bottom:1px dashed var(--line); font-size:0.9rem; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                <div>
+                  <strong>${escapeHtml(r.student_name)}</strong> — ${escapeHtml(r.topic)}
+                  <span style="color:var(--ink-soft); font-size:0.8rem;"> · ${escapeHtml(r.course_title)}</span>
+                </div>
+                <span style="color:var(--ink-soft); font-size:0.8rem; white-space:nowrap;">
+                  ${new Date(r.session_date + 'T00:00:00').toLocaleDateString()}
+                  ${r.follow_up_status === 'open' ? '<span style="color:var(--brown);">⭕</span>' : ''}
+                  ${r.follow_up_status === 'resolved' ? '<span style="color:var(--green);">✓</span>' : ''}
+                </span>
+              </div>`).join('')
+          : '<div class="empty-state">No sessions logged.</div>';
+
+      } catch (err) {
+        console.error('loadMentorDigest error:', err);
+        section.style.display = 'none';
+      }
+    }
+
+    async function resolveDigestFollowUp(sessionId) {
+      try {
+        const { data, error } = await supabaseClient.rpc('resolve_mentor_followup', {
+          p_session_id: sessionId
+        });
+        if (error) throw error;
+        if (data === 'not_found') { showAlert('Session not found or not yours to resolve.', 'error'); return; }
+        showAlert('✓ Follow-up resolved', 'success');
+        await loadMentorDigest();
+      } catch (err) {
+        console.error('resolveDigestFollowUp error:', err);
+        showAlert('Could not resolve follow-up.', 'error');
       }
     }
 
