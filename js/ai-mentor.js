@@ -17,7 +17,7 @@
   'use strict';
 
   const COURSE_ID = (document.body && document.body.dataset.course) || 'cabling';
-  const MODEL = 'anthropic/claude-3-5-sonnet';
+  const MODEL = 'gpt-5.4-nano';
   const STORE_KEY = 'cn_ai_mentor_dismissed';
 
   const COURSE_TITLES = {
