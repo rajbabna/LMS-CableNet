@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Main theme CSS -->
-  <link rel="stylesheet" href="css/style.css?v=9A932693">
+  <link rel="stylesheet" href="css/style.css?v=19DBC468">
 
   <style>
     /* ===========================================================
@@ -429,7 +429,10 @@
   <!-- Header -->
   <header class="site-header">
     <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
-    <nav class="nav-actions">
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <nav class="nav-actions" id="primary-nav">
       <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);">Admin Panel</span>
       <span id="roleBadge" class="role-badge" style="display:none;"></span>
       <a href="#" id="logoutLink" onclick="handleLogout(); return false;" style="margin-left:1.4rem;">Logout</a>
@@ -1500,5 +1503,6 @@
       }
     }
   </script>
+<script src="js/menu.js?v=06BC2CFB"></script>
 </body>
 </html>

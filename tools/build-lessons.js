@@ -248,7 +248,10 @@ ${body}
 
 <header class="site-header">
   <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
-  <nav class="nav-actions">
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
     <a href="student-dashboard.html">Dashboard</a>
     <a href="${course.page}">&larr; Back to ${course.id === 'cabling' ? 'Level 1' : 'Level 2'}</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
@@ -283,6 +286,7 @@ ${navLinks.join('\n')}
 <script src="js/config.js?v=9A0E5BF5"></script>
 <script src="js/supabase-client.js?v=17E25610"></script>
 <script src="js/auth-guard.js?v=38104837"></script>
+<script src="js/menu.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabaseClient.auth.getUser();

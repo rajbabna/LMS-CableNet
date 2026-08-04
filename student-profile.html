@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Main theme CSS -->
-  <link rel="stylesheet" href="css/style.css?v=9A932693">
+  <link rel="stylesheet" href="css/style.css?v=19DBC468">
 
   <style>
     .profile-container {
@@ -132,7 +132,10 @@
 
   <header class="site-header">
     <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
-    <nav class="nav-actions">
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <nav class="nav-actions" id="primary-nav">
       <a href="instructor-dashboard.html">← Dashboard</a>
       <span id="profileName" style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
       <span id="profileRole" class="role-badge" style="display:none;"></span>
@@ -180,5 +183,6 @@
   <script src="js/config.js?v=9A0E5BF5"></script>
   <script src="js/supabase-client.js?v=17E25610"></script>
   <script src="js/mentor-sessions.js?v=5DF3B699"></script>
+  <script src="js/menu.js?v=06BC2CFB"></script>
 </body>
 </html>

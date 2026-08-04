@@ -119,6 +119,57 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   color: #fff;
 }
 
+/* ===========================================================
+   Mobile nav toggle (burger) — hidden on desktop, expands the
+   .nav-actions menu into a full-width column on small screens.
+   =========================================================== */
+.nav-toggle {
+  display: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.4rem;
+  color: var(--ink);
+}
+.nav-toggle .nav-toggle-bar {
+  display: block;
+  width: 22px;
+  height: 3px;
+  margin: 5px auto;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+@media (max-width: 720px) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+  }
+  .nav-toggle { display: block; }
+  .nav-toggle ~ .nav-actions {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 0.6rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+    gap: 0.5rem;
+  }
+  .nav-toggle ~ .nav-actions.nav-open { display: flex; }
+  .nav-toggle ~ .nav-actions a,
+  .nav-toggle ~ .nav-actions span {
+    margin-left: 0 !important;
+    padding: 0.35rem 0;
+  }
+}
+
 .role-badge {
   font-family: var(--font-mono);
   font-size: 0.72rem;

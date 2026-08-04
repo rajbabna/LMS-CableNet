@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <!-- CSS Stylesheets -->
-<link rel="stylesheet" href="css/style.css?v=9A932693">
+<link rel="stylesheet" href="css/style.css?v=19DBC468">
 <link rel="stylesheet" href="css/progress-tracking-styles.css?v=8763A535">
 
 <style>
@@ -278,7 +278,10 @@
 
 <header class="site-header">
   <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
-  <nav class="nav-actions">
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
     <span data-user-name style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <span data-user-role class="role-badge">Student</span>
     <a href="#" id="feedback-link" style="margin-left:1.4rem;">Give Feedback</a>
@@ -521,6 +524,7 @@
 
 <!-- Load student's enrolled courses (same pattern as landing page, but from enrollments table) -->
 <script src="js/progress/student-dashboard.js?v=DF9A5C6F"></script>
+<script src="js/menu.js?v=06BC2CFB"></script>
 
 </body>
 </html>

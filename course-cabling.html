@@ -8,14 +8,17 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=9A932693">
+  <link rel="stylesheet" href="css/style.css?v=19DBC468">
   <link rel="stylesheet" href="css/progress-tracking-styles.css?v=8763A535">
 </head>
 <body data-course="cabling">
 
 <header class="site-header">
   <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
-  <nav class="nav-actions">
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
     <a href="student-dashboard.html">Dashboard</a>
     <a href="course-networking.html" data-target-course="networking">Level 2 — Config &amp; Troubleshooting</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
@@ -51,6 +54,7 @@
 <script src="js/progress/progress-tracker.js?v=CC2E5DDC"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="js/ai-mentor.js?v=7FD6AFB8"></script>
+<script src="js/menu.js?v=06BC2CFB"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     loadModulesForCourse('cabling');
