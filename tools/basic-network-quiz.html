@@ -267,16 +267,17 @@
 
 <script src="https://js.puter.com/v2/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../js/config.js?v=3193B9A3"></script>
-<script src="../js/supabase-client.js?v=95482D4C"></script>
+<script src="../js/config.js?v=9A0E5BF5"></script>
+<script src="../js/supabase-client.js?v=17E25610"></script>
 <script>
 (function () {
   'use strict';
 
-  // ---- Beginner-friendly question pool ----
-  // Each attempt deals 5 random questions from this pool, so every
-  // student gets a different set.
-  var QUESTIONS = [
+  // ---- Fallback question pool ----
+  // Used when the module's pool isn't loaded from the DB yet (the DB
+  // source is sql/40-quiz-questions.sql). Each attempt deals 5 random
+  // questions from the active pool, so every student gets a different set.
+  var FALLBACK_QUESTIONS = [
     {
       q: "What is the internet?",
       options: ["A global network that connects computers and devices around the world", "A type of computer program", "A brand of cable", "A web browser"],
@@ -371,10 +372,50 @@
 
   var STORE_KEY = 'cn_basic_quiz_best';
   var PUTER_KV_KEY = 'cn_basic_quiz_best_score';
-  var QUIZ_MODULE_ID = 27;
 
-  var POOL_SIZE = QUESTIONS.length;
+  // ---- Runtime config from query params ----
+  //   ?module=<id>&mode=practice|final&title=<module title>
+  function queryParam(name) {
+    var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  var qModuleId = parseInt(queryParam('module') || '27', 10) || 27;
+  var qMode = (queryParam('mode') || 'practice') === 'final' ? 'final' : 'practice';
+  var qTitle = queryParam('title') || '';
+  var QUIZ_MODULE_ID = qModuleId;
+
+  // Question pool is filled from the DB when loaded; the built-in array is
+  // only a fallback (kept so the tool works even before migration 40 runs).
+  var POOL = FALLBACK_QUESTIONS.slice();
+  var POOL_SIZE = POOL.length;
   var ROUND_SIZE = 5;
+
+  function mapRow(r) {
+    return {
+      q: r.question,
+      options: r.options,
+      correct: r.correct_index,
+      explanation: r.explanation
+    };
+  }
+
+  // Load the module's question pool from Supabase. Never throws.
+  function loadDbPool() {
+    if (!window.supabaseClient) return Promise.resolve(false);
+    return supabaseClient.rpc('get_module_quiz_questions', { p_module_id: qModuleId })
+      .then(function (res) {
+        if (res.error) { console.error('Quiz pool load error:', res.error.message); return false; }
+        if (res.data && res.data.length > 0) {
+          POOL = res.data.map(mapRow);
+          POOL_SIZE = POOL.length;
+          return true;
+        }
+        // Module has no authored questions. Final quizzes must not run empty.
+        if (qMode === 'final') { POOL = []; POOL_SIZE = 0; }
+        return false;
+      })
+      .catch(function () { return false; });
+  }
 
   var currentDeck = [];
   var currentIndex = 0;
@@ -616,8 +657,8 @@
   }
 
   // ---- Wire up ----
-  el.startBtn.addEventListener('click', function () { startQuiz(shuffle(QUESTIONS).slice(0, ROUND_SIZE)); });
-  el.retryBtn.addEventListener('click', function () { startQuiz(shuffle(QUESTIONS).slice(0, ROUND_SIZE)); });
+  el.startBtn.addEventListener('click', function () { startQuiz(shuffle(POOL).slice(0, ROUND_SIZE)); });
+  el.retryBtn.addEventListener('click', function () { startQuiz(shuffle(POOL).slice(0, ROUND_SIZE)); });
   el.nextBtn.addEventListener('click', function () {
     currentIndex++;
     renderQuestion();
@@ -632,6 +673,23 @@
   });
 
   // Init
+  var eyebrow = document.querySelector('.eyebrow');
+  if (eyebrow) {
+    eyebrow.textContent = (qMode === 'final' ? 'Final quiz' : 'Practice')
+      + ' · Module ' + qModuleId + (qTitle ? ' · ' + qTitle : '');
+  }
+
+  loadDbPool().then(function () {
+    if (POOL.length === 0) {
+      var start = el.startScreen;
+      start.querySelector('p').textContent =
+        'No questions have been added for this module yet. Check back soon.';
+      el.startBtn.disabled = true;
+    } else {
+      el.cardCount.textContent = ROUND_SIZE + ' of ' + POOL_SIZE + ' per round';
+    }
+  });
+
   refreshAuth();
   updateBestPill();
   loadBest(function (best) {

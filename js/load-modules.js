@@ -89,6 +89,16 @@ async function loadModulesForCourse(courseId) {
     const clone = modules || [];
     const visible = clone.filter(m => m.id !== 27);
 
+    // Final-quiz unlock: a module's Final quiz becomes available only once the
+    // student has completed the course-completion threshold (fraction of
+    // course modules). Defaults to ALL modules (i.e. at course completion);
+    // lower it if finals should open earlier.
+    const FINAL_QUIZ_THRESHOLD = 1.0;
+    const totalModules = visible.length;
+    const completedCount = visible.filter(m => completedIds.has(String(m.id)) || completedIds.has(m.id)).length;
+    const courseProgress = totalModules ? completedCount / totalModules : 0;
+    const finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+
     // If no modules found, show a message
     if (!visible || visible.length === 0) {
       const li = document.createElement('li');
@@ -154,6 +164,26 @@ async function loadModulesForCourse(courseId) {
             ${completed ? '✓ Completed' : 'Mark Complete'}
           </button>`;
 
+      // Practice + Final quiz cards for this module. Practice is always open;
+      // Final is locked until the course-completion threshold is reached.
+      const qEnc = encodeURIComponent(module.title || '');
+      const practiceHtml =
+        `<a class="module-quiz-cq cq-practice" href="tools/basic-network-quiz.html?module=${module.id}&mode=practice&title=${qEnc}" title="Practice quiz for this module" aria-label="Practice quiz">
+          <span class="cq-icon">${iconFor('lesson')}</span><span class="cq-label">Practice</span>
+        </a>`;
+      const finalHtml = finalQuizUnlocked
+        ? `<a class="module-quiz-cq cq-final" href="tools/basic-network-quiz.html?module=${module.id}&mode=final&title=${qEnc}" title="Final quiz for this module" aria-label="Final quiz">
+            <span class="cq-icon">${iconFor('pdf')}</span><span class="cq-label">Final quiz</span>
+          </a>`
+        : `<span class="module-quiz-cq cq-final cq-locked" title="Complete ${totalModules - completedCount} more module(s) to unlock this final quiz">
+            <span class="cq-icon">🔒</span><span class="cq-label">Final quiz</span>
+          </span>`;
+      const quizRow =
+        `<div class="module-quiz">
+          <div class="module-quiz-label">Quiz</div>
+          <div class="module-quiz-pair">${practiceHtml}${finalHtml}</div>
+        </div>`;
+
       li.innerHTML = `
         <div class="module-head-top">
           <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
@@ -171,6 +201,7 @@ async function loadModulesForCourse(courseId) {
           ${completionHtml}
           ${resourceHtml}
         </div>
+        ${quizRow}
       `;
 
       moduleList.appendChild(li);
