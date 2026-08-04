@@ -164,9 +164,14 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   }
   .nav-toggle ~ .nav-actions.nav-open { display: flex; }
   .nav-toggle ~ .nav-actions a,
-  .nav-toggle ~ .nav-actions span {
+  .nav-toggle ~ .nav-actions span:not(.role-badge) {
     margin-left: 0 !important;
     padding: 0.35rem 0;
+  }
+  .nav-toggle ~ .nav-actions .role-badge {
+    align-self: flex-start;
+    margin-left: 0 !important;
+    padding: 0.2em 0.7em;
   }
 }
 
