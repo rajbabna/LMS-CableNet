@@ -385,20 +385,22 @@
   }
 
   // Puter's free tier is shared and can hit "request queue is full" (503)
-  // under load. Retry a few times with backoff before giving up so students
+  // under load. Retry with exponential backoff before giving up so students
   // rarely ever see the raw error.
   async function chatWithRetry(messages, attempts) {
     const delay = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+    const isBusy = function (err) {
+      const msg = (err && err.message) || String(err);
+      return /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+    };
     let lastErr = null;
     for (let i = 0; i < attempts; i++) {
       try {
         return await puter.ai.chat(messages, { model: MODEL, stream: true });
       } catch (err) {
         lastErr = err;
-        const msg = (err && err.message) || String(err);
-        const isBusy = /503|queue is full|rate.?limit|too many|busy/i.test(msg);
-        if (!isBusy || i === attempts - 1) break;
-        await delay(700 * (i + 1));
+        if (!isBusy(err) || i === attempts - 1) break;
+        await delay(1000 * Math.pow(2, i)); // 1s, 2s, 4s, 8s ...
       }
     }
     throw lastErr;
@@ -441,7 +443,7 @@
     messages.push.apply(messages, conversation.slice(-8));
 
     try {
-      const resp = await chatWithRetry(messages, 3);
+      const resp = await chatWithRetry(messages, 5);
       let reply = '';
       typingEl.className = 'ai-mentor-msg assistant';
       typingEl.innerHTML = '';
@@ -463,9 +465,9 @@
       console.error('AI mentor error:', err);
       typingEl.remove();
       const msg = (err && err.message) || String(err);
-      const busy = /503|queue is full|rate.?limit|too many|busy/i.test(msg);
+      const busy = /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
       appendMessage('error', busy
-        ? 'The AI Mentor is busy right now — try again in a few seconds.'
+        ? 'The AI Mentor is busy right now — give it a few seconds and try again.'
         : 'Could not reach the AI Mentor: ' + msg);
       conversation.pop();
     }

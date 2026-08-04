@@ -119,7 +119,7 @@ async function loadModulesForCourse(courseId) {
 
       const resourceHtml = isPreview
         ? `<span class="preview-locked">🔒 Preview only — enroll to open resources</span>`
-        : `<a href="${module.content_url}" target="_blank">${contentLabel}</a>`;
+        : `<a href="${module.content_url}">${contentLabel}</a>`;
 
       const completionHtml = isPreview
         ? `<div class="module-actions"><span class="preview-locked">🔒 Enrollment required</span></div>`
