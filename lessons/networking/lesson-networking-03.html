@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="3">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Build a simple switched network in Cisco Packet Tracer</li>
           <li>Manually configure static IP addresses on end devices</li>
           <li>Test and verify connectivity using ping</li>
+          <li>Explain why same-subnet PCs can reach each other via a switch</li>
         </ul>
     </section>
 
@@ -53,6 +54,12 @@
           <li>Instructor builds a 4-PC network with 1 switch, narrating each step</li>
           <li>Show how to add devices and connect them with straight-through cables</li>
           <li>Everyone follows along on their own machine</li>
+        </ul>
+
+        <ul class="lesson-objectives">
+          <li>All 4 PCs share the <strong>same subnet</strong> (<code>192.168.1.0/24</code>), so the switch can forward between them — no router needed</li>
+          <li>The switch <strong>learns MAC addresses</strong>: it records which MAC arrives on which port, then forwards only to the right port (no flooding after the first message)</li>
+          <li>This is <strong>Layer 2 switching</strong> in action</li>
         </ul>
     </section>
 
@@ -89,6 +96,7 @@
           <li>Discuss: why does it work?</li>
           <li>Try pinging all device combinations</li>
           <li>Observe how the switch learns MAC addresses over time</li>
+          <li><strong>Bonus:</strong> temporarily put PC3 on a different subnet (e.g., <code>192.168.2.3</code>) — ping PC3 fails! Same-switch device but different subnet = a router is required. This previews routing next-next week.</li>
         </ul>
 
         <p>This network runs on the same crimped cables from Part 1 — connecting the physical skills from Module 1–9 (Part 1) to the logical configuration skills in this course.</p>
@@ -116,11 +124,13 @@
           <li>Write 3 sentences: &quot;How does IP addressing work?&quot;</li>
           <li>Prepare for DHCP &amp; DNS next week</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/ip-addressing-and-subnetting.md; &gt; Cisco Networking Basics M7 (access layer), Addressing M6 (Cisco devices)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-networking-02.html">&larr; Mod 2</a>
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-04.html">Mod 4 &rarr;</a>
     </nav>
   </article>
@@ -131,7 +141,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

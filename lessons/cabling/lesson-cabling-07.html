@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="cabling" data-module="7">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-cabling.html">&larr; Back to Level 1</a>
+    <a href="../../course.html?course=cabling">&larr; Back to Level 1</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Describe the role of switches, routers, and modems in a network</li>
           <li>Identify ports, LEDs, and cable connections on real equipment</li>
           <li>Build and test a simple 2-device network in Cisco Packet Tracer</li>
+          <li>Explain the Layer-2 vs Layer-3 difference between switch and router</li>
         </ul>
     </section>
 
@@ -55,13 +56,15 @@
     <section class="lesson-section">
       <h2>Lecture: Network Devices (9:00–10:30)</h2>
         <ul class="lesson-objectives">
-          <li><strong>Switches</strong> — connect devices within a network (Layer 2), forward traffic based on MAC addresses</li>
-          <li><strong>Routers</strong> — connect different networks together (Layer 3), forward traffic based on IP addresses</li>
+          <li><strong>Switches</strong> — connect devices within a network (<strong>Layer 2</strong>), forward traffic based on <strong>MAC addresses</strong>. Maintain a MAC address table so each port can carry full bandwidth at once.</li>
+          <li><strong>Routers</strong> — connect different networks together (<strong>Layer 3</strong>), forward traffic based on <strong>IP addresses</strong>. Choose the best path via a routing table.</li>
           <li><strong>Modems</strong> — connect a local network to an ISP's external connection</li>
           <li><strong>Network cards (NICs)</strong> — where cables physically plug into a device</li>
           <li><strong>Ports &amp; speeds</strong> — 100 Mbps (Fast Ethernet) vs 1 Gbps (Gigabit) ports</li>
           <li>Show real equipment or photos to make ports and LEDs tangible</li>
         </ul>
+
+        <p><strong>Rule of thumb:</strong> Switch = MAC, &quot;inside&quot; the network. Router = IP, &quot;between&quot; networks. A typical home &quot;router&quot; is actually a router + switch + wireless access point combined.</p>
     </section>
 
     <section class="lesson-section">
@@ -71,6 +74,7 @@
           <li>Identify ports, status LEDs, and cable types in use</li>
           <li>Discuss: how many devices/cables can a given switch support?</li>
           <li>Trace physical cables through a real (or classroom) network setup</li>
+          <li>Count how many ports are 100 Mbps vs 1 Gbps on each device</li>
         </ul>
     </section>
 
@@ -82,6 +86,7 @@
           <li>Drag 2 PCs onto the canvas</li>
           <li>Connect them with a straight-through cable</li>
           <li>Observe the simulated packet flow</li>
+          <li>Try it again through a switch (3+ PCs) and watch the switch forward</li>
         </ol>
     </section>
 
@@ -91,6 +96,7 @@
           <li>Assign IP addresses to both PCs</li>
           <li>Ping between them and watch the simulation animate the packet</li>
           <li>Discuss: &quot;Where is the data actually going?&quot;</li>
+          <li>Compare: two PCs on the same subnet (switch handles it) vs two PCs on different subnets (a router is required) — a preview of Part 2</li>
           <li>Connect it back to Module 3–6: <em>&quot;The cable you crimped is what makes this possible.&quot;</em></li>
         </ul>
     </section>
@@ -106,6 +112,7 @@
           <li>What's the functional difference between a switch and a router?</li>
           <li>What device connects your home network to your ISP?</li>
           <li>In Packet Tracer, what did assigning IP addresses allow you to do?</li>
+          <li>Which layer does a switch operate at, and what does it forward on?</li>
         </ol>
     </section>
 
@@ -116,12 +123,15 @@
           <li>Prepare final crimped cables for Saturday 8</li>
           <li>Memorize the T568B order — it will be tested</li>
           <li>Review all lab notes from Modules 1–7</li>
+          <li>Read: docs/resources/networking/routing-and-switching.md (switches/routers)</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/routing-and-switching.md (switch vs &gt; router); Cisco Addressing M6 (Cisco switches and routers)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-cabling-06.html">&larr; Mod 6</a>
-      <a class="btn btn-ghost" href="../../course-cabling.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=cabling">Back to course</a>
       <a class="btn btn-primary" href="lesson-cabling-08.html">Mod 8 &rarr;</a>
     </nav>
   </article>
@@ -132,7 +142,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

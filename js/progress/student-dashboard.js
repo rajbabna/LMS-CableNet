@@ -48,6 +48,12 @@ class StudentDashboard {
       // Fetch course progress data
       await this.fetchCourses();
 
+      // Fetch how many quizzes the student has passed (best_score >= 70).
+      await this.loadQuizStats();
+
+      // Fetch per-unit breakdown for enrolled courses (sql/45).
+      await this.loadUnitBreakdown();
+
       // Render the dashboard
       this.renderDashboard();
 
@@ -129,6 +135,67 @@ class StudentDashboard {
     }
   }
 
+  async loadQuizStats() {
+    this.quizPassed = 0;
+    try {
+      const { data: { session } } = await this.supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await this.supabase
+        .from("quiz_scores")
+        .select("best_score")
+        .eq("user_id", session.user.id);
+      this.quizPassed = (data || []).filter(q => (q.best_score || 0) >= 70).length;
+    } catch (err) {
+      console.error("Quiz stats load error:", err);
+    }
+  }
+
+  async loadUnitBreakdown() {
+    this.unitData = {};
+    try {
+      const enrolledIds = this.courses.filter(c => c.is_enrolled && !c.is_expired)
+        .map(c => c.course_id);
+      if (enrolledIds.length === 0) return;
+
+      const [unitsRes, modulesRes, completionsRes] = await Promise.all([
+        this.supabase.from("units").select("id, course_id, unit_number, title, sort_order")
+          .in("course_id", enrolledIds)
+          .order("sort_order", { ascending: true }).order("unit_number", { ascending: true }),
+        this.supabase.from("modules").select("id, course_id, unit_id")
+          .in("course_id", enrolledIds),
+        this.supabase.from("module_completions")
+          .select("module_id")
+          .eq("user_id", this.currentUser.id)
+          .eq("status", "completed")
+      ]);
+
+      const completed = new Set((completionsRes.data || []).map(c => c.module_id));
+      const units = unitsRes.data || [];
+      const modules = modulesRes.data || [];
+
+      // Prepend a unit title suffix for id uniqueness? No — group by course.
+      const byCourse = {};
+      units.forEach(u => {
+        if (!byCourse[u.course_id]) byCourse[u.course_id] = [];
+        byCourse[u.course_id].push({
+          id: u.id, number: u.unit_number, title: u.title,
+          total: 0, done: 0
+        });
+      });
+
+      modules.forEach(m => {
+        let unit = (byCourse[m.course_id] || []).find(u => u.id === m.unit_id);
+        if (!unit) return; // orphan modules don't appear on the card
+        unit.total += 1;
+        if (completed.has(String(m.id)) || completed.has(m.id)) unit.done += 1;
+      });
+
+      this.unitData = byCourse;
+    } catch (err) {
+      console.error("Unit breakdown load error:", err);
+    }
+  }
+
   renderDashboard() {
     const grid = document.getElementById("coursesGrid");
 
@@ -151,6 +218,36 @@ class StudentDashboard {
       return;
     }
 
+    // Quick stats strip (replaces the overall-progress summary card)
+    const active = this.courses.filter(c => c.is_enrolled && !c.is_expired);
+    if (active.length > 0) {
+      const done = active.reduce((s, c) => s + (c.completed_modules || 0), 0);
+      const total = active.reduce((s, c) => s + (c.total_modules || 0), 0);
+      const certificates = active.filter(c => (c.progress_percentage || 0) >= 100).length;
+      const allLifetime = active.every(c => !c.expires_at);
+      const nearestExpiry = active
+        .filter(c => c.expires_at)
+        .map(c => new Date(c.expires_at).getTime())
+        .sort((a, b) => a - b)[0];
+      const accessLabel = allLifetime || !nearestExpiry
+        ? 'Lifetime access'
+        : Math.ceil((nearestExpiry - Date.now()) / 86400000) + ' days left';
+
+      const strip = document.createElement("div");
+      strip.className = "stat-strip";
+      strip.innerHTML = `
+        <div class="stat-tile"><span class="stat-num">${done}</span><span class="stat-label">Modules complete</span></div>
+        <div class="stat-tile"><span class="stat-num">${this.quizPassed || 0}</span><span class="stat-label">Quizzes passed</span></div>
+        <div class="stat-tile"><span class="stat-num">${certificates}</span><span class="stat-label">Certificates</span></div>
+        <div class="stat-tile"><span class="stat-num">∞</span><span class="stat-label">${accessLabel}</span></div>
+      `;
+      grid.appendChild(strip);
+
+      // Hero donut + Resume (left = overall %).
+      const overall = total ? Math.round((done / total) * 100) : 0;
+      this.renderHeroStats(active, overall, done, total);
+    }
+
     // Render each course card
     this.courses.forEach(course => {
       const card = this.createCourseCard(course);
@@ -158,9 +255,51 @@ class StudentDashboard {
     });
   }
 
+  renderHeroStats(active, overall, done, total) {
+    const right = document.getElementById("heroRight");
+    if (!right) return;
+    const donut = document.getElementById("heroDonut");
+    const pctEl = document.getElementById("heroDonutPct");
+    const resumeEl = document.getElementById("heroResume");
+    if (donut && pctEl) {
+      donut.style.setProperty("--p", overall + "%");
+      pctEl.textContent = overall + "%";
+    }
+    // Resume targets the active course with the most remaining work.
+    const resumeCourse = (active || [])
+      .slice()
+      .sort((a, b) => ((a.completed_modules || 0) / Math.max(a.total_modules || 1, 1)) - ((b.completed_modules || 0) / Math.max(b.total_modules || 1, 1)))[0];
+    if (resumeEl && resumeCourse) {
+      const link = "course.html?course=" + encodeURIComponent(resumeCourse.course_id);
+      const short = "PORT " + String(resumeCourse.port_number || 0).padStart(2, "0");
+      resumeEl.href = link;
+      resumeEl.textContent = done === total ? "Review completed" : ("Resume · " + short);
+    }
+    right.hidden = !resumeCourse;
+  }
+
+  unitStripHtml(course) {
+    const units = (this.unitData || {})[course.course_id] || [];
+    if (units.length === 0) return "";
+    const rows = units.slice(0, 4).map(u => {
+      const pct = u.total ? Math.round((u.done / u.total) * 100) : 0;
+      return `
+        <div class="unit-strip-row">
+          <span class="unit-strip-label" title="${this.escapeHtml(u.title)}">UNIT ${String(u.number).padStart(2, '0')}</span>
+          <span class="unit-strip-count">${u.done}/${u.total}</span>
+        </div>
+        <div class="unit-strip-bar"><span style="width:${pct}%"></span></div>`;
+    }).join("");
+    const more = units.length > 4
+      ? `<div class="unit-strip-more">+ ${units.length - 4} more unit${units.length - 4 === 1 ? '' : 's'}</div>`
+      : "";
+    return `<div class="unit-strip">${rows}${more}</div>`;
+  }
+
   createCourseCard(course) {
     const card = document.createElement("div");
-    card.className = "course-card";
+    const portClass = "port-" + String(course.port_number || 0).padStart(2, '0');
+    card.className = "course-card " + portClass;
     if (!course.is_enrolled || course.is_expired) {
       card.classList.add("course-preview");
     }
@@ -193,50 +332,55 @@ class StudentDashboard {
     // Format enrollment date
     const enrolledDate = course.is_enrolled ? this.formatDate(course.enrolled_at) : "Not enrolled";
 
-    // Expiry line (enrolled but limited-time)
-    let expiryLine = "";
-    if (course.is_enrolled && course.expires_at) {
-      if (course.is_expired) {
-        expiryLine = `<span class="expiry expired">Expired ${this.formatDate(course.expires_at)}</span>`;
+    // Access line — every enrolled card shows exactly one row so the
+    // two cards stay aligned: a real expiry, or lifetime access.
+    let accessLine = "";
+    if (course.is_enrolled) {
+      if (course.expires_at) {
+        if (course.is_expired) {
+          accessLine = `<span class="expiry expired">Expired ${this.formatDate(course.expires_at)}</span>`;
+        } else {
+          const daysLeft = Math.ceil((new Date(course.expires_at).getTime() - Date.now()) / 86400000);
+          const near = daysLeft <= 14;
+          accessLine = `<span class="expiry${near ? ' warning' : ''}">${near ? '⏳ ' : ''}Access until ${this.formatDate(course.expires_at)}</span>`;
+        }
       } else {
-        expiryLine = `<span class="expiry">Access until ${this.formatDate(course.expires_at)}</span>`;
+        accessLine = `<span class="expiry lifetime">✓ Lifetime access</span>`;
       }
     }
 
-    // Determine course link based on course_id
-    const courseLinks = {
-      cabling: "course-cabling.html",
-      networking: "course-networking.html"
-    };
-    const courseLink = courseLinks[course.course_id] || "#";
+    // Determine course link (data-driven course dashboard)
+    const courseLink = "course.html?course=" + encodeURIComponent(course.course_id);
 
     // Build card HTML
     card.innerHTML = `
-      <div class="port-num">Port ${course.port_number}</div>
-      
+      <div class="port-num ${portClass}">PORT ${String(course.port_number).padStart(2, '0')}</div>
+
       <h3>${this.escapeHtml(course.course_title)}</h3>
       ${course.description ? `<p class="course-desc">${this.escapeHtml(course.description)}</p>` : ''}
-      
-      <div class="progress-section">
-        <div class="progress-label">
-          <span>${completedModules} of ${totalModules} modules complete</span>
-          <span class="progress-percentage">${course.is_enrolled && !course.is_expired ? progressPercent + '%' : '—'}</span>
-        </div>
-        
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${course.is_enrolled && !course.is_expired ? progressPercent : 0}%"></div>
-        </div>
-      </div>
 
-      <div class="enrollment-date">
-        ${enrolledDate}
-      </div>
+<div class="progress-section">
+          <div class="progress-label">
+            <span>${completedModules} of ${totalModules} modules complete</span>
+            <span class="progress-percentage ${course.is_enrolled && !course.is_expired && progressPercent === 100 ? 'complete' : (course.is_enrolled && !course.is_expired && progressPercent === 0 ? 'muted' : '')}">${course.is_enrolled && !course.is_expired ? (progressPercent === 100 ? '✓ Complete' : (progressPercent === 0 ? 'Not started' : progressPercent + '%')) : '—'}</span>
+          </div>
 
-      ${expiryLine}
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${course.is_enrolled && !course.is_expired ? progressPercent : 0}%"></div>
+          </div>
+        </div>
+
+      ${this.unitStripHtml(course)}
 
       <div class="course-status ${statusClass}">
         ${statusLabel}
       </div>
+
+      <div class="enrollment-date">
+        ${course.is_enrolled ? `<span class="enr-label">Enrolled ·</span> ${enrolledDate}` : 'Not enrolled'}
+      </div>
+
+      ${accessLine}
 
       <div class="course-actions">
         <a href="${courseLink}" class="btn-continue">
@@ -264,6 +408,16 @@ class StudentDashboard {
 
       const earnedCount = items.filter(i => i.earned).length;
 
+      // Hero motivation callout
+      const motivate = document.getElementById("heroMotivate");
+      const earnedEl = document.getElementById("motivateEarned");
+      const totalEl = document.getElementById("motivateTotalLabel");
+      if (motivate && earnedEl && totalEl) {
+        earnedEl.textContent = earnedCount;
+        totalEl.textContent = "of " + items.length + " badges";
+        motivate.hidden = false;
+      }
+
       box.innerHTML = `
         <div style="grid-column:1/-1; font-size:0.9rem; color:var(--ink-soft); margin-bottom:0.2rem;">
           ${earnedCount} of ${items.length} badges earned
@@ -273,8 +427,8 @@ class StudentDashboard {
             <span class="a-icon">${this.escapeHtml(a.icon)}</span>
             <h3>${this.escapeHtml(a.title)}</h3>
             <p>${this.escapeHtml(a.description)}</p>
-            ${a.earned_at
-              ? `<small style="color:var(--copper-dark); font-family:var(--font-mono);">${this.formatDate(a.earned_at)}</small>`
+            ${a.earned
+              ? `<div class="badge-earned-label">✓ Earned</div>`
               : ''}
           </div>`).join('')}`;
     } catch (err) {

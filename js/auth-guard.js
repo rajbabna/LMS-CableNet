@@ -5,9 +5,13 @@
 // window.authGuardReady (Promise) so later scripts can await the guard.
 // Also sets dataset.enrollmentExpired = "true" when an enrollment has lapsed.
 
-// Derives the course slug from the page URL as a fallback for cached HTML
-// that lacks <body data-course="...">.
+// Derives the course slug from the URL: first the ?course= query param
+// (data-driven course.html), then the legacy filename convention as a
+// fallback for cached HTML that lacks <body data-course="...">.
 function deriveCourseFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get('course');
+  if (fromQuery) return fromQuery;
   const fileName = (window.location.pathname.split('/').pop() || '').toLowerCase();
   if (fileName.indexOf('cabling') !== -1) return 'cabling';
   if (fileName.indexOf('networking') !== -1) return 'networking';
@@ -46,7 +50,7 @@ window.authGuardReady = (async () => {
     // Fetch user profile
     const { data: profile, error } = await supabaseClient
       .from('profiles')
-      .select('approved, role')
+      .select('approved, role, full_name')
       .eq('id', session.user.id)
       .single();
 
@@ -60,6 +64,18 @@ window.authGuardReady = (async () => {
     if (profile.role !== 'student' || !profile.approved) {
       window.location.href = INDEX_URL;
       return;
+    }
+
+    // Populate nav identity (username + role badge) for consistent headers
+    const userEl = document.querySelector('[data-user-name]');
+    if (userEl) userEl.textContent = profile.full_name || session.user.email;
+    const roleEl = document.querySelector('[data-user-role]');
+    if (roleEl) {
+      roleEl.textContent = profile.role === 'instructor' || profile.role === 'admin'
+        ? 'Instructor'
+        : 'Student';
+      roleEl.className = 'role-badge role-badge--' + (profile.role || 'student');
+      roleEl.style.display = '';
     }
 
     // ---- Course preview flag ----

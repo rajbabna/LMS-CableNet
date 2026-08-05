@@ -130,6 +130,32 @@
         font-family: var(--font-body);
         font-size: 0.95rem;
       }
+      .cr-info {
+        padding: 1.4rem 1.6rem;
+        max-height: 62vh;
+        overflow: auto;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--ink);
+      }
+      .cr-info-row {
+        margin-top: 0.6rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed var(--line);
+        color: var(--ink-soft);
+        font-size: 0.85rem;
+      }
+      .cr-info-row:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+      .cr-info-url {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        word-break: break-all;
+      }
       .cr-foot {
         display: flex;
         justify-content: flex-end;
@@ -279,6 +305,60 @@
     closeBtn.focus();
   }
 
+  // Info view: shows the module's type, description, duration and URL
+  // instead of embedding content. Backed by a plain-text DOM build to
+  // avoid rendering anything unsafe from the description.
+  function openInfo(module) {
+    if (!module) return;
+    var type = (module.content_type || 'lesson');
+    var title = module.title || 'Module info';
+
+    injectStyles();
+    ensureModal();
+
+    var modal = document.getElementById('crModal');
+    var badgeEl = modal.querySelector('[data-cr-badge]');
+    var titleEl = modal.querySelector('[data-cr-title]');
+    var bodyEl = modal.querySelector('[data-cr-body]');
+    var extEl = modal.querySelector('[data-cr-external]');
+
+    badgeEl.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+    titleEl.textContent = title;
+    extEl.href = module.content_url || '';
+
+    bodyEl.innerHTML = '';
+    var box = document.createElement('div');
+    box.className = 'cr-info';
+
+    if (module.description) {
+      var p = document.createElement('p');
+      p.textContent = module.description;
+      box.appendChild(p);
+    }
+    var meta = [
+      module.module_number ? 'Module ' + module.module_number : null,
+      module.duration ? 'Time: ' + module.duration : null
+    ].filter(Boolean);
+    if (meta.length) {
+      var row = document.createElement('div');
+      row.className = 'cr-info-row';
+      row.textContent = meta.join(' · ');
+      box.appendChild(row);
+    }
+    if (module.content_url) {
+      var urlRow = document.createElement('div');
+      urlRow.className = 'cr-info-row cr-info-url';
+      urlRow.textContent = module.content_url;
+      box.appendChild(urlRow);
+    }
+    bodyEl.appendChild(box);
+
+    lastFocused = document.activeElement;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('[data-cr-close]').focus();
+  }
+
   function close() {
     var modal = document.getElementById('crModal');
     if (!modal) return;
@@ -306,5 +386,5 @@
     }
   });
 
-  window.ContentRenderer = { open: open, close: close };
+  window.ContentRenderer = { open: open, openInfo: openInfo, close: close };
 })();

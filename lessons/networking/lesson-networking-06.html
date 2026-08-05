@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="6">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -72,6 +72,23 @@
             <tr><td><strong>Ipconfig / Ifconfig</strong></td><td>Local device's IP, gateway, DNS configuration</td></tr>
             <tr><td><strong>Nslookup</strong></td><td>DNS resolution — what IP a name resolves to</td></tr>
             <tr><td><strong>Netstat</strong></td><td>Active network connections on a device</td></tr>
+            <tr><td><strong>Arp</strong></td><td>The IP-to-MAC table on this device</td></tr>
+            <tr><td><strong>Pathping</strong> (Win)</td><td>Traceroute + per-hop packet-loss stats</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Ping yourself, then your IP, then your gateway, then a far address — <strong>where the ping stops is where the problem lives</strong>:</p>
+
+        <div class="pinout-wrap">
+          <table class="pinout-table">
+            <thead><tr><th>Test</th><th>Fails → meaning</th></tr></thead>
+            <tbody>
+            <tr><td>ping 127.0.0.1</td><td>TCP/IP stack / drivers</td></tr>
+            <tr><td>ping own IP</td><td>Interface not up / wrong IP</td></tr>
+            <tr><td>ping default gateway</td><td>Layer 1/2 problem (cable, port, VLAN, DHCP)</td></tr>
+            <tr><td>ping remote IP</td><td>Routing / firewall / WAN</td></tr>
+            <tr><td>ping remote hostname (IP OK)</td><td>DNS problem</td></tr>
             </tbody>
           </table>
         </div>
@@ -125,12 +142,15 @@
           <li>Ping 3 websites and save the output</li>
           <li>Traceroute to youtube.com and analyze the hops</li>
           <li>Write: &quot;What did each command tell you?&quot;</li>
+          <li>Read: docs/resources/networking/network-utilities-and-troubleshooting.md</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/network-utilities-and-troubleshooting.md; &gt; Cisco Networking Basics M17 (network testing utilities)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-networking-05.html">&larr; Mod 5</a>
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-07.html">Mod 7 &rarr;</a>
     </nav>
   </article>
@@ -141,7 +161,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

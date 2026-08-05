@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course — Cable&Net Courses</title>
+  <meta name="description" content="Course dashboard: structured units, progress tracking and resources for registered students.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1293C4F3">
+  <link rel="stylesheet" href="css/progress-tracking-styles.css?v=8763A535">
+</head>
+<body data-course="">
+
+<header class="site-header">
+  <div class="brand"><a href="index.html" style="color:inherit; text-decoration:none;">CABLE<strong>&amp;</strong>NET COURSES</a></div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="student-dashboard.html">Dashboard</a>
+    <a href="course.html?course=cabling" title="Network Foundations - Cabling &amp; Infrastructure">PORT 01</a>
+    <a href="course.html?course=networking" title="Network Operations - Configuration &amp; Troubleshooting">PORT 02</a>
+    <span data-user-name style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <span data-user-role class="role-badge role-badge--student" style="display:none;"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider" aria-hidden="true">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="student-dashboard.html">Dashboard</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current" id="breadcrumbCurrent">Course</span>
+  </nav>
+
+  <!-- Course dashboard: header + unit rail + content. Populated by load-modules.js -->
+  <section class="course-head" id="courseHead" hidden>
+    <span class="port-num" id="coursePort"></span>
+    <h1 id="courseTitle"></h1>
+    <p class="course-desc" id="courseDesc"></p>
+    <div class="course-progress">
+      <div class="progress-label"><span>Course progress</span><span id="coursePct">Loading…</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="courseFill" style="width:0%"></div></div>
+    </div>
+    <div class="course-head-footer" id="courseHeadFooter"></div>
+  </section>
+
+  <div class="course-dash-body">
+    <aside class="course-rail" id="courseRail" hidden>
+      <div class="rail-title">Units</div>
+      <ul class="rail-units" id="unitRailList"></ul>
+      <div class="rail-stats" id="railStats"></div>
+    </aside>
+
+    <div class="course-content">
+      <!-- Notice banner - preview / expired, set by load-modules.js -->
+      <div id="previewBanner" class="preview-banner" style="display:none;"></div>
+
+      <!-- Populated dynamically by load-modules.js; skeleton placeholders show while fetching -->
+      <ul class="module-list" id="moduleList">
+        <li class="skeleton"></li><li class="skeleton"></li><li class="skeleton"></li>
+        <li class="skeleton"></li><li class="skeleton"></li><li class="skeleton"></li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<footer>© 2026 Raj Babna · Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/auth-guard.js?v=2EB80F4C"></script>
+<script src="js/content-renderer.js?v=D6658A32"></script>
+<script src="js/load-modules.js?v=F7455AE5"></script>
+<script src="js/progress/progress-tracker.js?v=CC2E5DDC"></script>
+<script src="https://js.puter.com/v2/"></script>
+<script src="js/ai-mentor.js?v=7DE7964F"></script>
+<script src="js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('course') || document.body.dataset.course;
+    if (courseId) {
+      document.body.dataset.course = courseId;
+      loadModulesForCourse(courseId);
+    } else {
+      const list = document.getElementById('moduleList');
+      if (list) list.innerHTML = '<li><span style="color: var(--ink-soft);">No course selected.</span></li>';
+    }
+  });
+</script>
+
+</body>
+</html>

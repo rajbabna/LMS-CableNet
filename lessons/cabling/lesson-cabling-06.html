@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="cabling" data-module="6">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-cabling.html">&larr; Back to Level 1</a>
+    <a href="../../course.html?course=cabling">&larr; Back to Level 1</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Diagnose common crimping failure patterns from tester results</li>
           <li>Remake a failed cable successfully</li>
           <li>Build a repeatable &quot;crimp → test → learn&quot; feedback loop</li>
+          <li>Explain the troubleshooting method (define → test → fix → verify)</li>
         </ul>
     </section>
 
@@ -56,17 +57,30 @@
       <h2>Lecture: Common Crimping Failures (9:00–10:30)</h2>
         <div class="pinout-wrap">
           <table class="pinout-table">
-            <thead><tr><th>Failure Pattern</th><th>Likely Cause</th></tr></thead>
+            <thead><tr><th>Failure Pattern (tester)</th><th>Likely Cause</th></tr></thead>
             <tbody>
             <tr><td>4 of 8 pins fail</td><td>Uneven crimping pressure</td></tr>
             <tr><td>One entire side fails</td><td>Wires not fully inserted on that side</td></tr>
             <tr><td>Random, scattered pins fail</td><td>Bent or damaged wires before crimping</td></tr>
             <tr><td>Connector physically damaged</td><td>Tool misuse or wrong tool</td></tr>
+            <tr><td>Crossed/out-of-order lights</td><td>Wire color order error (verify T568B)</td></tr>
+            <tr><td>No lights at all</td><td>Connector not seated / tested wrong end</td></tr>
             </tbody>
           </table>
         </div>
 
         <p>Cover prevention strategies for each pattern.</p>
+
+        <ol class="lesson-questions">
+          <li><strong>Define</strong> the problem — what exactly fails? (which pins)</li>
+          <li><strong>Gather</strong> info — run the tester, record the pattern</li>
+          <li><strong>Hypothesize</strong> — which mistake matches that pattern?</li>
+          <li><strong>Test the fix</strong> — re-terminate, re-test immediately</li>
+          <li><strong>Verify</strong> — the cable passes AND stays passing under slight flex/pull</li>
+          <li><strong>Document</strong> — note the cause so the same mistake is caught faster next time</li>
+        </ol>
+
+        <p>&gt; This same 6-step loop is the backbone of Part 2's network troubleshooting &gt; modules — it applies far beyond cables.</p>
     </section>
 
     <section class="lesson-section">
@@ -75,6 +89,7 @@
           <li>Examine last week's failed cables under a magnifier</li>
           <li>Identify the specific issue per cable using the failure-pattern table</li>
           <li>Compare good vs bad crimps side by side</li>
+          <li>Look through the transparent plug: can you SEE the mistake before testing?</li>
         </ul>
     </section>
 
@@ -94,6 +109,7 @@
           <li>More crimping with new blank cables</li>
           <li>Test immediately after each crimp — reinforce the feedback loop: <strong>Crimp → Test → Get result → Learn → Crimp better</strong></li>
           <li>By this point, quality should be visibly improving</li>
+          <li>Quick pull-test habit: after a pass, gently pull the plug — if the clip holds and the cable stays live, the strain relief engaged</li>
         </ul>
     </section>
 
@@ -108,6 +124,7 @@
           <li>If a cable fails on 4 pins clustered on one side, what's the likely fix?</li>
           <li>Why is immediate testing after crimping more effective than testing in a batch later?</li>
           <li>Describe the crimp-test-learn feedback loop in your own words.</li>
+          <li>What does a &quot;crossed&quot; tester pattern mean, and how do you prevent it?</li>
         </ol>
     </section>
 
@@ -118,12 +135,15 @@
           <li>Target: 8 total working cables by Saturday 7</li>
           <li>Practice at home if tools are available</li>
           <li>Study: &quot;What makes a good crimp?&quot; — be ready to explain it</li>
+          <li>Read: docs/resources/cabling/rj45-crimping-field-guide.md</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/cabling/rj45-crimping-field-guide.md; &gt; Cisco Network Addressing and Basic Troubleshooting M7 (troubleshooting)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-cabling-05.html">&larr; Mod 5</a>
-      <a class="btn btn-ghost" href="../../course-cabling.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=cabling">Back to course</a>
       <a class="btn btn-primary" href="lesson-cabling-07.html">Mod 7 &rarr;</a>
     </nav>
   </article>
@@ -134,7 +154,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

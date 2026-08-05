@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="cabling" data-module="2">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-cabling.html">&larr; Back to Level 1</a>
+    <a href="../../course.html?course=cabling">&larr; Back to Level 1</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -45,11 +45,28 @@
           <li>Explain the difference between UTP and STP cable</li>
           <li>Describe fiber optic cable at a basic level</li>
           <li>Reference the EIA/TIA-568 structured cabling standard</li>
+          <li>Explain why twisted pairs cancel electromagnetic interference</li>
         </ul>
     </section>
 
     <section class="lesson-section">
       <h2>Lecture Notes (9:00–10:30)</h2>
+        <p>A network cable is a <strong>Layer 1 (Physical)</strong> medium — it carries electrical or light signals between devices. Three families dominate:</p>
+
+        <div class="pinout-wrap">
+          <table class="pinout-table">
+            <thead><tr><th>Family</th><th>Medium</th><th>Typical use</th><th>Reach limit</th></tr></thead>
+            <tbody>
+            <tr><td>Copper UTP</td><td>Twisted copper pairs</td><td>Office/home LANs</td><td>~100 m</td></tr>
+            <tr><td>Copper STP</td><td>Twisted pairs + foil/braid</td><td>Noisy industrial environments</td><td>~100 m</td></tr>
+            <tr><td>Fiber optic</td><td>Glass/plastic core</td><td>Backbones, WAN, data centers</td><td>100 m – 40 km+</td></tr>
+            <tr><td>Coaxial</td><td>Central conductor + shield</td><td>Legacy cable TV, older LANs</td><td>~500 m</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Why twisted pairs?</strong> Twisting the two wires of a circuit <strong>cancels electromagnetic interference (EMI)</strong> from adjacent pairs and the environment. This is what lets Cat5e/Cat6 run fast without each pair radiating into another — untwist the wires and the crosstalk/EMI returns.</p>
+
         <div class="pinout-wrap">
           <table class="pinout-table">
             <thead><tr><th>Category</th><th>Max Speed</th><th>Max Distance</th><th>Notes</th></tr></thead>
@@ -57,9 +74,12 @@
             <tr><td>Cat5e</td><td>1 Gbps</td><td>100m</td><td>Still common, budget option</td></tr>
             <tr><td>Cat6</td><td>1–10 Gbps</td><td>55–100m</td><td>Best balance of cost/performance</td></tr>
             <tr><td>Cat6A</td><td>10 Gbps</td><td>100m</td><td>Thicker, better shielding</td></tr>
+            <tr><td>Cat8</td><td>40 Gbps (≤30 m)</td><td>30m</td><td>Data-center short links</td></tr>
             </tbody>
           </table>
         </div>
+
+        <p><strong>Installer rule:</strong> residential/office → Cat5e or Cat6; new structured installs today → <strong>Cat6A</strong> is the safe future-proof choice; Cat8 is niche (very short switch-to-server runs only).</p>
 
         <ul class="lesson-objectives">
           <li><strong>UTP</strong> (Unshielded Twisted Pair) — standard for most office/home use, cheaper, twisting alone reduces interference</li>
@@ -69,12 +89,15 @@
         <ul class="lesson-objectives">
           <li>Uses light instead of electricity</li>
           <li>Immune to electrical interference, much longer distances</li>
+          <li><strong>Multi-mode</strong> (OM2/OM3/OM4) = short high-speed links inside a building</li>
+          <li><strong>Single-mode</strong> (OS2) = long-haul WAN (10s of km)</li>
           <li>More expensive, requires specialized tools to terminate</li>
         </ul>
 
         <ul class="lesson-objectives">
           <li><strong>EIA/TIA-568</strong> governs commercial building cabling in most of the world</li>
           <li>&quot;Structured cabling&quot; = planned, labeled, standardized cable runs rather than ad-hoc wiring — critical for maintainability in real buildings</li>
+          <li><strong>Safety/code:</strong> cable run above ceilings must be <strong>plenum-rated</strong> (low-smoke, low-flame jacket); never run parallel alongside mains power for long distances (induction noise)</li>
         </ul>
     </section>
 
@@ -84,7 +107,8 @@
           <li>Examine different cable types (Cat5e, Cat6, Cat6A samples)</li>
           <li>Feel the physical difference between UTP and STP</li>
           <li>Measure jacket diameter, count twists per inch</li>
-          <li>Identify connector types on hand</li>
+          <li>Identify connector types on hand (RJ45, keystone, fiber LC/SC)</li>
+          <li>Read the jacket printing: category rating, plenum/fire rating, AWG</li>
         </ul>
     </section>
 
@@ -94,6 +118,7 @@
           <li>Cross-section view of a twisted pair cable</li>
           <li>Discuss why twisting matters (cancels electromagnetic interference)</li>
           <li>Discuss jacket materials and what they protect against</li>
+          <li>Test the interference idea: hold wires near a speaker/EM source and observe — twisted vs untwisted difference</li>
         </ul>
     </section>
 
@@ -105,6 +130,8 @@
           <li>What cable category should they recommend, and why?</li>
           <li>How many cables/meters are needed given the office layout?</li>
           <li>Discuss trade-offs: budget Cat5e vs future-proof Cat6A</li>
+          <li>What standard documents a &quot;structured&quot; plan, and why label it?</li>
+          <li>Which would you run to the far building: copper or fiber, and why?</li>
         </ul>
     </section>
 
@@ -114,6 +141,7 @@
           <li>What does &quot;UTP&quot; stand for and when would you choose STP instead?</li>
           <li>Which cable category would you recommend for a 10 Gbps office network?</li>
           <li>What standard governs commercial cabling installs?</li>
+          <li>Why are copper pairs twisted (electrical reason)?</li>
         </ol>
     </section>
 
@@ -123,12 +151,15 @@
           <li>Memorize the RJ45 pin order (colors 1–8) ahead of next week</li>
           <li>Watch the RJ45 tutorial video (5 min), twice</li>
           <li>Find a damaged cable at home or school to bring in</li>
+          <li>Read: docs/resources/cabling/cable-types-and-categories.md</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/cabling/cable-types-and-categories.md; &gt; Cisco Networking Basics M6 (network media), Addressing M1 (physical layer)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-cabling-01.html">&larr; Mod 1</a>
-      <a class="btn btn-ghost" href="../../course-cabling.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=cabling">Back to course</a>
       <a class="btn btn-primary" href="lesson-cabling-03.html">Mod 3 &rarr;</a>
     </nav>
   </article>
@@ -139,7 +170,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

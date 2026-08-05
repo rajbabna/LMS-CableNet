@@ -92,12 +92,31 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
    Layout shell
    =========================================================== */
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.4rem 2rem;
   max-width: 1100px;
   margin: 0 auto;
+}
+/* Full-bleed translucent backdrop so content scrolls cleanly under the
+   sticky header while the centred nav/brand stays centred. */
+.site-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  background: rgba(247, 245, 239, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  z-index: -1;
 }
 .brand {
   font-family: var(--font-mono);
@@ -118,6 +137,23 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
 .nav-actions a.btn {
   color: #fff;
 }
+
+/* Nav identity block: keep PORT links and user identity visually apart */
+.nav-actions [data-user-name] {
+  margin-left: 1.5rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--line);
+}
+.nav-actions .role-badge {
+  margin-left: 1.25rem;
+}
+/* Vertical separator before Log out */
+.nav-actions [data-action="logout"] {
+  margin-left: 1.5rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--line);
+}
+.nav-actions [data-action="logout"]:hover { color: #B91C1C; }
 
 /* ===========================================================
    Mobile nav toggle (burger) — hidden on desktop, expands the
@@ -168,6 +204,11 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
     margin-left: 0 !important;
     padding: 0.35rem 0;
   }
+  .nav-toggle ~ .nav-actions [data-action="logout"],
+  .nav-toggle ~ .nav-actions [data-user-name] {
+    border-left: none;
+    padding-left: 0;
+  }
   .nav-toggle ~ .nav-actions .role-badge {
     align-self: flex-start;
     margin-left: 0 !important;
@@ -197,12 +238,12 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   color: #fff;
 }
 .role-badge--student {
-  background: var(--blue);
+  color: var(--blue);
   border-color: var(--blue);
-  color: #fff;
+  background: #DDE7F1;
 }
 
-main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
+main { max-width: 1100px; margin: 0 auto; padding: 1.4rem 2rem 4rem; }
 
 .hero {
   padding: 3rem 0 2.5rem;
@@ -381,7 +422,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
   display: none;
 }
 .msg.show { display: block; }
-.msg.error { background: #F7E4DC; color: var(--copper-dark); }
+.msg.error { background: #FBE8EC; color: #B91C1C; }
 .msg.success { background: #E4EEE1; color: var(--green); }
 
 /* ===========================================================
@@ -413,11 +454,34 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
   border-color: var(--copper);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
+/* Locked / coming-soon cards are visibly greyed */
+.module-list li.status-locked,
+.module-list li.status-coming-soon {
+  opacity: 0.62;
+}
+.module-list li.status-locked .module-open,
+.module-list li.status-coming-soon .module-open {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* Skeleton loading placeholders (shimmer) */
+.module-list li.skeleton {
+  background: linear-gradient(90deg, #e6e2dc 25%, #f1eee9 50%, #e6e2dc 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border: 1px solid var(--line);
+  min-height: 9rem;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .module-head-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 .module-list .mod-tag {
   font-family: var(--font-mono);
@@ -451,6 +515,33 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
 .mod-type-pdf          { color: #a03d23; border-color: #e5bfae; background: #fdf0ea; }
 .mod-type-interactive  { color: #2f6a8b; border-color: #b2d4e5; background: #eaf5fb; }
 .mod-type-text         { color: var(--ink-soft); }
+.mod-type-quiz         { color: #6b2f8b; border-color: #d0b2e5; background: #f5eafa; }
+.mod-type-link         { color: #4a5568; border-color: #c2cbd6; background: #eef1f5; }
+
+/* Blueprint status badges (UNLOCK / IN PROGRESS / COMPLETED / LOCKED / COMING SOON) */
+.mod-status {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.22em 0.6em;
+  border-radius: 999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mod-status-unlock       { color: #1e6b53; border: 1px solid #9fd0bc; background: #eaf6f1; }
+.mod-status-in-progress  { color: #8a5a12; border: 1px solid #e6c78a; background: #fdf3dd; }
+.mod-status-completed    { color: #ffffff; border: 1px solid #2f9e6e; background: #2f9e6e; }
+.mod-status-locked       { color: var(--ink-soft); border: 1px solid var(--line); background: #e9ecef; }
+.mod-status-coming-soon  { color: #7a5b2a; border: 1px dashed #d9c292; background: #fbf3e0; }
+
+.module-duration {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  margin-top: 0.25rem;
+}
 .module-desc {
   color: var(--ink-soft);
   font-size: 0.87rem;
@@ -467,6 +558,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
   gap: 0.6rem;
   flex-wrap: wrap;
 }
+.module-open-row {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 .module-open {
   display: inline-flex;
   align-items: center;
@@ -477,7 +574,6 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
   color: var(--copper-dark);
   border: 1px solid var(--line);
   background: var(--paper);
-  margin-left: auto;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 button.module-open {
@@ -517,6 +613,13 @@ button.module-open {
 }
 .mf-btn:hover { border-color: var(--teal); color: var(--teal); }
 .mf-btn.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+.mf-btn.mf-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: #ccc;
+  color: #999;
+}
+.mf-btn.mf-disabled:hover { border-color: #ccc; color: #999; }
 @media (max-width: 520px) {
   .module-filter { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.25rem; }
   .mf-btn { white-space: nowrap; flex: 0 0 auto; }
@@ -761,6 +864,232 @@ button.module-open {
   border-top: 1px solid var(--line);
 }
 .lesson-nav .btn { text-align: center; }
+
+/* ---- Course dashboard layout (course.html) ---- */
+.course-head {
+  margin-bottom: 1.6rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.4rem 1.5rem 1.2rem;
+}
+.course-head h1 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1.2;
+  margin: 0.5rem 0 0.6rem;
+}
+.course-desc {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 1.2rem;
+  max-width: 68ch;
+}
+.course-progress {
+  max-width: 480px;
+}
+.course-progress .progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-bottom: 0.5rem;
+}
+.course-progress .progress-bar {
+  height: 8px;
+  margin-bottom: 0;
+  background: #d8d4ce;
+}
+.course-progress .progress-fill {
+  background: var(--teal);
+}
+
+.course-dash-body {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+.course-content {
+  min-width: 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 0.4rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Breadcrumb (course page) */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin: 0.2rem 0 1rem;
+}
+.breadcrumb a { color: var(--teal); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb-sep { color: #cfcabc; }
+.breadcrumb-current { color: var(--ink); font-weight: 500; }
+
+/* Header primary CTA (Start / Continue) */
+.course-head-footer {
+  display: flex;
+  align-items: center;
+  margin-top: 1.2rem;
+}
+.course-cta {
+  display: inline-block;
+  background: var(--copper);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.7em 1.4em;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.course-cta:hover { background: var(--copper-dark); text-decoration: none; color: #fff; }
+
+/* PORT badge colour identity (C2) */
+.port-num.port-01 {
+  border-color: var(--copper);
+  color: var(--copper-dark);
+  background: #FBEEE3;
+}
+.port-num.port-02 {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: #EDF2F6;
+}
+
+.course-rail {
+  position: sticky;
+  top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  padding: 1rem 0.9rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.rail-title {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0.4rem 0.7rem;
+}
+.rail-units {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.rail-unit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.45rem 0.5rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+.rail-unit-btn:hover {
+  background: #f6ece0;
+  border-color: var(--line);
+}
+.rail-unit.active .rail-unit-btn {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.rail-unit.active .rail-unit-btn .rail-unit-label { color: #fff; }
+.rail-unit-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rail-unit-btn:hover .rail-unit-label {
+  white-space: normal;
+  overflow: visible;
+}
+.rail-unit-bar {
+  flex: 0 0 42px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.rail-unit.active .rail-unit-bar { background: rgba(255, 255, 255, 0.3); }
+.rail-unit-bar span {
+  display: block;
+  height: 100%;
+  background: var(--copper);
+}
+.rail-unit.active .rail-unit-bar span { background: #fff; }
+.rail-unit-count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--teal);
+  border-radius: 999px;
+  padding: 0.12em 0.6em;
+  white-space: nowrap;
+}
+.rail-unit.active .rail-unit-count { background: rgba(255, 255, 255, 0.25); }
+.rail-stats {
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .course-dash-body { grid-template-columns: 1fr; }
+  .course-rail {
+    position: static;
+    margin-bottom: 1.2rem;
+  }
+  .rail-units {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .rail-unit-btn {
+    width: auto;
+    white-space: nowrap;
+  }
+  .rail-unit-bar { display: none; }
+  .rail-stats { display: none; }
+}
 
 footer {
   text-align: center;

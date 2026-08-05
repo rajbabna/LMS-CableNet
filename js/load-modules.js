@@ -1,14 +1,22 @@
 // ===========================================================
 // load-modules.js
-// Fetches modules from Supabase for a specific course
-// and renders them dynamically on the course pages.
-// Also renders per-module progress + "Mark Complete" buttons,
-// which are handled by js/progress/progress-tracker.js
+// Fetches a course + its units + modules from Supabase and
+// renders them as a course DASHBOARD:
+//
+//   - course header (title / port / description / overall %)
+//   - unit navigation rail (per-unit progress, click to filter)
+//   - modules grouped into collapsible unit sections
+//   - per-module progress + "Mark Complete" buttons, handled by
+//     js/progress/progress-tracker.js
+//
+// Graceful fallback: if the `units` table / `modules.unit_id`
+// migration (sql/45) hasn't been run yet, it renders the legacy
+// flat lessons + resources layout instead.
 // ===========================================================
 
 async function loadModulesForCourse(courseId) {
   const moduleList = document.querySelector('.module-list');
-  
+
   if (!moduleList) {
     console.log('No .module-list container found — skipping module loading');
     return;
@@ -49,57 +57,65 @@ async function loadModulesForCourse(courseId) {
     }
   }
 
-  // Load completed modules for this student from the DB.
+  // Load completed modules + quiz attempts (started signal) for this student.
   let completedIds = new Set();
+  let startedIds = new Set();
   if (!isPreview) {
     try {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (user) {
-        const { data: completions } = await supabaseClient
-          .from('module_completions')
-          .select('module_id')
-          .eq('user_id', user.id)
-          .eq('status', 'completed');
-        completedIds = new Set((completions || []).map(c => c.module_id));
+        const [completionsRes, attemptsRes] = await Promise.all([
+          supabaseClient.from('module_completions')
+            .select('module_id').eq('user_id', user.id).eq('status', 'completed'),
+          supabaseClient.from('quiz_scores')
+            .select('module_id').eq('user_id', user.id)
+        ]);
+        completedIds = new Set((completionsRes.data || []).map(c => c.module_id));
+        startedIds = new Set((attemptsRes.data || []).map(s => s.module_id));
       }
     } catch (err) {
       console.error('Could not load completions:', err);
     }
   }
 
-  try {
-    // Fetch all modules for this course, ordered by module number
-    const { data: modules, error } = await supabaseClient
-      .from('modules')
-      .select('*')
-      .eq('course_id', courseId)
-      .order('module_number', { ascending: true });
+  const pad2 = n => String(n || 0).padStart(2, '0');
+  const isCompleted = m => completedIds.has(String(m.id)) || completedIds.has(m.id);
 
-    if (error) {
-      console.error('Error loading modules:', error);
+  try {
+    // Fetch course metadata + units + modules in parallel.
+    const [courseRes, unitsRes, modulesRes, allCoursesRes] = await Promise.all([
+      supabaseClient.from('courses').select('*').eq('id', courseId).maybeSingle(),
+      supabaseClient.from('units').select('*').eq('course_id', courseId)
+        .order('sort_order', { ascending: true }).order('unit_number', { ascending: true }),
+      supabaseClient.from('modules').select('*').eq('course_id', courseId)
+        .order('module_number', { ascending: true }),
+      supabaseClient.from('courses').select('id, title, port_number')
+        .order('port_number', { ascending: true })
+    ]);
+
+    if (modulesRes.error) {
+      console.error('Error loading modules:', modulesRes.error);
+      moduleList.innerHTML = '<li><span style="color: #B91C1C;">Could not load course content: ' + modulesRes.error.message + '</span></li>';
       return;
     }
 
-    // Clear any placeholder content
     moduleList.innerHTML = '';
 
     // Hide the standalone practice quiz card from the course grid. It's
     // launched from the student dashboard instead of being a course module;
     // the module row is kept so submit_quiz_score / quiz_scores keep working.
-    const clone = modules || [];
+    const clone = modulesRes.data || [];
     const visible = clone.filter(m => m.id !== 27);
 
     // Final-quiz unlock: a module's Final quiz becomes available only once the
     // student has completed the course-completion threshold (fraction of
-    // course modules). Defaults to ALL modules (i.e. at course completion);
-    // lower it if finals should open earlier.
+    // course modules). Defaults to ALL modules (i.e. at course completion).
     const FINAL_QUIZ_THRESHOLD = 1.0;
     const totalModules = visible.length;
-    const completedCount = visible.filter(m => completedIds.has(String(m.id)) || completedIds.has(m.id)).length;
+    const completedCount = visible.filter(isCompleted).length;
     const courseProgress = totalModules ? completedCount / totalModules : 0;
     const finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
 
-    // If no modules found, show a message
     if (!visible || visible.length === 0) {
       const li = document.createElement('li');
       li.innerHTML = '<span style="color: var(--ink-soft);">No modules available yet.</span>';
@@ -107,68 +123,97 @@ async function loadModulesForCourse(courseId) {
       return;
     }
 
-    // Render each module as a grid card
+    // ---- Unit structure (sql/45). Falls back to legacy flat layout. ----
+    const course = courseRes.data || null;
+    const unitList = (unitsRes.data || []).filter(u => u.course_id === courseId);
+    const unitById = new Map(unitList.map(u => [u.id, u]));
+    const modulesByUnit = new Map(unitList.map(u => [u.id, []]));
+    const orphanModules = [];
+    visible.forEach(m => {
+      if (m.unit_id && unitById.has(m.unit_id)) modulesByUnit.get(m.unit_id).push(m);
+      else orphanModules.push(m);
+    });
+    const legacy = unitList.length === 0;
+
+    // ---- Shared card/type machinery (blueprint step) ----
     const typeDisplayNames = {
-      lesson: 'Lesson',
-      pdf: 'PDF',
-      video: 'Video',
-      interactive: 'Tool',
-      text: 'Article'
+      lesson: 'Lesson', pdf: 'PDF', video: 'Video', interactive: 'Tool',
+      text: 'Article', quiz: 'Quiz', link: 'Link'
     };
+    const TAB_DEFS = [
+      ['lesson', 'lessons', 'Lessons'], ['video', 'videos', 'Videos'],
+      ['pdf', 'pdfs', 'PDFs'], ['interactive', 'tools', 'Tools'],
+      ['text', 'articles', 'Articles'], ['quiz', 'quiz', 'Quiz'],
+      ['link', 'links', 'Links']
+    ];
+    const typeToTab = {};
+    TAB_DEFS.forEach(([type, key]) => { typeToTab[type] = key; });
+    const typeLabel = {};
+    TAB_DEFS.forEach(([type, key, label]) => { typeLabel[type] = label; });
 
-    // ---- Grid grouping + filtering (Step 5 redesign) ----
-    // 'all' shows "Core Lessons" plus a collapsible "Resources & Extras"
-    // section; other filters show a single content family. Cards keep the
-    // same style; grouping/filtering just control which are on screen.
-    let currentFilter = 'all';
-    let resourcesOpen = false;
-    const moduleById = new Map();
-
-    function filterMatches(t) {
-      switch (currentFilter) {
-        case 'lessons':   return t === 'lesson';
-        case 'videos':    return t === 'video';
-        case 'pdfs':      return t === 'pdf';
-        case 'tools':     return t === 'interactive';
-        case 'articles':  return t === 'text';
-        default:          return true;
-      }
-    }
-
-    // Feather-style stroke icons per content type.
     const TYPE_ICONS = {
       lesson: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
       pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
       video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
       interactive: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-      text: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>`
+      text: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>`,
+      quiz: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+      link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
     };
     function iconFor(type) { return TYPE_ICONS[type] || TYPE_ICONS.lesson; }
 
-    // Build the list of <li> card HTML for one content family.
+    const ACTION_ICONS = {
+      play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="6 3 20 12 6 21 6 3"/></svg>`,
+      download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+      open: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+      info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+    };
+
+    // ---- Card HTML ----
     function cardHtml(module) {
-      const type     = module.content_type || 'lesson';
+      const type = module.content_type || 'lesson';
       const typeBadge = `<span class="mod-type-badge mod-type-${type}">${typeDisplayNames[type] || type}</span>`;
 
-      let contentLabel = 'open lesson';
-      if (type === 'pdf') contentLabel = 'open pdf';
-      else if (type === 'video') contentLabel = 'watch video';
-      else if (type === 'interactive') contentLabel = 'launch tool';
-      else if (type === 'text') contentLabel = 'read article';
+      const completed = isCompleted(module);
+      const started = startedIds.has(String(module.id)) || startedIds.has(module.id);
 
-      const completed = completedIds.has(String(module.id)) || completedIds.has(module.id);
+      let status;
+      if (isPreview) status = 'locked';
+      else if (!module.content_url) status = 'coming-soon';
+      else if (completed) status = 'completed';
+      else if (started) status = 'in-progress';
+      else status = 'unlock';
+      const STATUS_LABEL = {
+        unlock: 'UNLOCK', 'in-progress': 'IN PROGRESS', completed: 'COMPLETED',
+        locked: 'LOCKED', 'coming-soon': 'COMING SOON'
+      };
+      const statusBadge = `<span class="mod-status mod-status-${status}">${STATUS_LABEL[status]}</span>`;
 
-      const resourceHtml = isPreview
-        ? `<span class="preview-locked">🔒 Enrollment required</span>`
-        : (type === 'lesson'
-            ? `<a class="module-open module-open-${type}" href="${module.content_url}" title="${contentLabel}" aria-label="${contentLabel}">${iconFor(type)}</a>`
-            : `<button type="button" class="module-open module-open-${type}" data-module-id="${module.id}" title="${contentLabel}" aria-label="${contentLabel}">${iconFor(type)}</button>`);
+      const contentLabel = {
+        lesson: 'open lesson', pdf: 'open pdf', video: 'watch video',
+        interactive: 'launch tool', text: 'read article', quiz: 'open quiz', link: 'open link'
+      }[type] || 'open lesson';
 
-      const completionHtml = isPreview
-        ? `<span class="preview-locked">🔒 Enrollment required</span>`
+      let actionIcon = ACTION_ICONS.open;
+      if (type === 'lesson' || type === 'video') actionIcon = ACTION_ICONS.play;
+      else if (type === 'pdf') actionIcon = ACTION_ICONS.download;
+
+      let mainAction = '';
+      if (status === 'unlock' || status === 'in-progress' || status === 'completed') {
+        if (type === 'lesson' || type === 'link') {
+          mainAction = `<a class="module-open module-open-${type}" href="${module.content_url}" target="${type === 'link' ? '_blank' : '_self'}" rel="noopener" title="${contentLabel}" aria-label="${contentLabel}">${actionIcon}</a>`;
+        } else {
+          mainAction = `<button type="button" class="module-open module-open-${type}" data-module-id="${module.id}" title="${contentLabel}" aria-label="${contentLabel}">${actionIcon}</button>`;
+        }
+      }
+
+      const completionHtml = isPreview || status === 'coming-soon'
+        ? `<span class="preview-locked">${status === 'coming-soon' ? '👷 Coming soon' : '🔒 Enrollment required'}</span>`
         : `<button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
             ${completed ? '✓ Completed' : 'Mark Complete'}
           </button>`;
+
+      const progressLabel = completed ? 'Complete' : (status === 'in-progress' ? 'In progress' : 'Not started');
 
       const qEnc = encodeURIComponent(module.title || '');
       const qParams = `module=${module.id}&course=${courseId}&mode=practice&title=${qEnc}`;
@@ -189,79 +234,206 @@ async function loadModulesForCourse(courseId) {
           <div class="module-quiz-pair">${practiceHtml}${finalHtml}</div>
         </div>`;
 
+      const liClass = 'status-' + status;
       return `
-        <li data-module-id="${module.id}">
+        <li data-module-id="${module.id}" class="${liClass}">
           <div class="module-head-top">
-            <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
+            <span class="mod-tag">MOD ${pad2(module.module_number)}</span>
+            ${statusBadge}
             ${typeBadge}
           </div>
           <strong class="module-card-title">${module.title}</strong>
           ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
+          ${module.duration ? `<div class="module-duration">⏱ ${module.duration}</div>` : ''}
           <div class="module-progress">
             <div class="progress-bar">
               <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
             </div>
-            <div class="progress-text">${completed ? '100%' : '0%'}</div>
+            <div class="progress-text">${progressLabel}</div>
           </div>
           <div class="module-actions">
             ${completionHtml}
-            ${resourceHtml}
+            <div class="module-open-row">
+              ${mainAction}
+              <button type="button" class="module-open module-open-info" data-info="${module.id}" title="Module info" aria-label="Module info">${ACTION_ICONS.info}</button>
+            </div>
           </div>
           ${quizRow}
         </li>`;
     }
 
-    function groupHead(title, count, toggle) {
-      return `<li class="module-group-head${toggle ? ' mg-toggle' : ''}"${toggle ? ' data-toggle="resources"' : ''}>
+    // ---- Section / group headers ----
+    function groupHead(unit, count, open) {
+      const title = unit.id === 'none'
+        ? unit.title
+        : `UNIT ${pad2(unit.unit_number)} — ${unit.title}`;
+      return `<li class="module-group-head mg-toggle${open ? ' mg-open' : ''}" data-unit-head="${unit.id}">
         <span class="mg-title">${title}</span>
         <span class="mg-count">${count}</span>
-        ${toggle ? `<span class="mg-caret">${resourcesOpen ? '▾' : '▸'}</span>` : ''}
+        <span class="mg-caret">${open ? '▾' : '▸'}</span>
       </li>`;
     }
 
-    // Re-renders the grid based on the active filter / resources state.
+    // ---- State ----
+    let currentFilter = 'all';
+    let currentUnit = 'all';
+    const openUnits = new Set(unitList.map(u => u.id));
+    let orphanOpen = true;
+
+    const railList = document.getElementById('unitRailList');
+    const railStats = document.getElementById('railStats');
+    const courseRail = document.getElementById('courseRail');
+
+    function filterMatches(t) {
+      if (currentFilter === 'all') return true;
+      return typeToTab[t] === currentFilter;
+    }
+
+    function unitModules(unit) {
+      return unit.id === 'none' ? orphanModules : (modulesByUnit.get(unit.id) || []);
+    }
+
+    // ---- Render: course header + unit rail ----
+    function renderCourseHead() {
+      const head = document.getElementById('courseHead');
+      if (!head || !course) return;
+      head.hidden = false;
+      const port = document.getElementById('coursePort');
+      const titleEl = document.getElementById('courseTitle');
+      const descEl = document.getElementById('courseDesc');
+      const pctEl = document.getElementById('coursePct');
+      const fillEl = document.getElementById('courseFill');
+      const crumb = document.getElementById('breadcrumbCurrent');
+      if (port) {
+        port.textContent = 'PORT ' + pad2(course.port_number);
+        port.className = 'port-num port-' + pad2(course.port_number);
+      }
+      if (titleEl) titleEl.textContent = course.title || 'Course';
+      if (descEl && course.description) descEl.textContent = course.description;
+      if (crumb) crumb.textContent = course.title || 'Course';
+      const pct = Math.round(courseProgress * 100);
+      if (pctEl) pctEl.textContent = (totalModules && pct === 0) ? 'Not started' : (pct + '%');
+      if (fillEl) fillEl.style.width = pct + '%';
+      document.title = (course.title || 'Course') + ' — Cable&Net Courses';
+
+      // Primary CTA: Start Course at 0%, otherwise Continue at the first
+      // incomplete module (C7). Targets the current unit section.
+      const footer = document.getElementById('courseHeadFooter');
+      if (footer) {
+        const firstOpen = visible.find(m => !isCompleted(m) && m.content_url && !isPreview);
+        const label = firstOpen
+          ? `Continue: ${firstOpen.title} →`
+          : (completedCount === totalModules && totalModules > 0 ? 'Course complete — review modules' : 'Start Course →');
+        footer.innerHTML = `<a class="btn btn-primary course-cta" href="#moduleList">${label}</a>`;
+      }
+    }
+
+    function parseMinutes(str) {
+      if (!str) return 0;
+      const m = String(str).match(/(\d+(?:\.\d+)?)\s*(min|mins|minute|minutes|hr|hrs|hour|hours)/i);
+      if (!m) return 0;
+      const n = parseFloat(m[1]);
+      return m[2][0].toLowerCase() === 'm' ? n : n * 60;
+    }
+    function estimatedStudyTime(modules) {
+      const mins = (modules || []).reduce((s, mod) => s + parseMinutes(mod.duration), 0);
+      if (!mins) return null;
+      if (mins < 60) return `Est. ~${Math.round(mins)} min total`;
+      const hrs = mins / 60;
+      return `Est. ~${hrs < 10 ? hrs.toFixed(1) : Math.round(hrs)} hrs total`;
+    }
+
+    function renderRail() {
+      if (!railList) return;
+      const pct = p => Math.round((p || 0) * 100);
+      const items = [];
+      items.push(railItem('all', 'All units', totalModules, completedCount, courseProgress));
+      unitList.forEach(u => {
+        const mods = modulesByUnit.get(u.id) || [];
+        const done = mods.filter(isCompleted).length;
+        items.push(railItem(u.id, `UNIT ${pad2(u.unit_number)} — ${u.title}`, mods.length, done, mods.length ? done / mods.length : 0));
+      });
+      if (orphanModules.length) {
+        const done = orphanModules.filter(isCompleted).length;
+        items.push(railItem('none', 'Extras', orphanModules.length, done, orphanModules.length ? done / orphanModules.length : 0));
+      }
+      railList.innerHTML = items.join('');
+      if (railStats) {
+        const study = estimatedStudyTime(visible);
+        railStats.innerHTML = study ? `${study}` : '';
+        railStats.style.display = study ? 'block' : 'none';
+      }
+    }
+
+    function railItem(id, label, total, done, progress) {
+      return `<li class="rail-unit${currentUnit === id ? ' active' : ''}" data-unit="${id}">
+        <button type="button" class="rail-unit-btn" title="${label}">
+          <span class="rail-unit-label">${label}</span>
+          <span class="rail-unit-bar"><span style="width:${Math.round(progress * 100)}%"></span></span>
+          <span class="rail-unit-count">${done}/${total}</span>
+        </button>
+      </li>`;
+    }
+
+    if (courseRail) courseRail.hidden = legacy;
+
+    // ---- Render: module grid ----
     function renderGrid() {
       moduleList.innerHTML = '';
       moduleById.clear();
-      const lessons = [];
-      const resources = [];
-      (visible || []).forEach(m => {
-        moduleById.set(m.id, m);
-        const t = m.content_type || 'lesson';
-        (t === 'lesson' ? lessons : resources).push(m);
-      });
+      visible.forEach(m => moduleById.set(m.id, m));
 
       let html = '';
-      if (currentFilter === 'all') {
-        html += groupHead('Core Lessons', lessons.length, false) + lessons.map(cardHtml).join('');
-        if (resources.length) {
-          html += groupHead('Resources & Extras', resources.length, true);
-          if (resourcesOpen) html += resources.map(cardHtml).join('');
+
+      if (legacy) {
+        // Pre-units fallback: flat lessons + resources split.
+        const lessons = visible.filter(m => (m.content_type || 'lesson') === 'lesson');
+        const resources = visible.filter(m => (m.content_type || 'lesson') !== 'lesson');
+        if (currentFilter === 'all') {
+          html += groupHead({ id: 'none', title: 'Core Lessons', unit_number: 1 }, lessons.length, true) + lessons.map(cardHtml).join('');
+          if (resources.length) {
+            html += groupHead({ id: 'none', title: 'Resources & Extras', unit_number: 2 }, resources.length, orphanOpen)
+              + (orphanOpen ? resources.map(cardHtml).join('') : '');
+          }
+        } else {
+          const shown = visible.filter(m => filterMatches(m.content_type || 'lesson'));
+          html += groupHead({ id: 'none', title: typeLabel[currentFilter] || 'Modules', unit_number: 1 }, shown.length, true)
+            + shown.map(cardHtml).join('');
         }
       } else {
-        const shown = (visible || []).filter(m => filterMatches(m.content_type || 'lesson'));
-        const title = currentFilter === 'lessons' ? 'Lessons'
-          : currentFilter === 'videos' ? 'Videos'
-          : currentFilter === 'pdfs' ? 'PDFs'
-          : currentFilter === 'tools' ? 'Tools' : 'Articles';
-        html += groupHead(title, shown.length, false) + shown.map(cardHtml).join('');
+        // Unit-driven layout.
+        const unitIds = currentUnit === 'all'
+          ? unitList.map(u => u.id).concat(orphanModules.length ? ['none'] : [])
+          : [currentUnit];
+
+        unitIds.forEach(id => {
+          const unit = id === 'none' ? { id: 'none', title: 'Extras', unit_number: (unitList.length || 0) + 1 } : unitById.get(id);
+          if (!unit) return;
+          const mods = unitModules(unit).filter(m => filterMatches(m.content_type || 'lesson'));
+          if (mods.length === 0) return;
+          const open = unit.id === 'none' ? orphanOpen : openUnits.has(unit.id);
+          html += groupHead(unit, mods.length, open);
+          if (open) html += mods.map(cardHtml).join('');
+        });
       }
+
       moduleList.innerHTML = html;
     }
 
-    // Sticky filter bar (mobile-friendly horizontal scroll).
+    // ---- Filter tabs (types) ----
     function ensureFilterBar() {
       if (!moduleList.parentNode || moduleList.parentNode.querySelector('.module-filter')) return;
       const bar = document.createElement('div');
       bar.className = 'module-filter';
       bar.setAttribute('role', 'tablist');
       bar.setAttribute('aria-label', 'Filter modules by type');
-      const pills = [
-        ['all', 'All'], ['lessons', 'Lessons'], ['videos', 'Videos'],
-        ['pdfs', 'PDFs'], ['tools', 'Tools'], ['articles', 'Articles']
-      ].map(([k, label]) =>
-        `<button type="button" class="mf-btn${k === 'all' ? ' active' : ''}" data-filter="${k}" role="tab" aria-selected="${k === 'all' ? 'true' : 'false'}">${label}</button>`
-      ).join('');
+      const present = new Set(visible.map(m => m.content_type || 'lesson'));
+      const pills = [['all', 'All', true]]
+        .concat(TAB_DEFS.map(([type, k, label]) => [k, label, present.has(type)]))
+        .map(([k, label, enabled]) => {
+          const dis = enabled ? '' : ' disabled aria-disabled="true" title="No content of this type yet"';
+          return `<button type="button" class="mf-btn${k === 'all' ? ' active' : ''}${enabled ? '' : ' mf-disabled'}" data-filter="${k}" role="tab" aria-selected="${k === 'all' ? 'true' : 'false'}"${dis}>${label}</button>`;
+        }).join('');
       bar.innerHTML = pills;
       moduleList.parentNode.insertBefore(bar, moduleList);
       bar.addEventListener('click', function (e) {
@@ -276,10 +448,35 @@ async function loadModulesForCourse(courseId) {
       });
     }
 
-    // Resources section toggle + non-lesson content cards open inline.
+    // ---- Unit rail interactions ----
+    if (railList) {
+      railList.addEventListener('click', function (e) {
+        const item = e.target.closest('.rail-unit[data-unit]');
+        if (!item) return;
+        currentUnit = item.dataset.unit;
+        renderRail();
+        renderGrid();
+      });
+    }
+
+    // ---- Unit section toggles + card interactions ----
     moduleList.addEventListener('click', function (e) {
-      const toggle = e.target.closest('.module-group-head[data-toggle="resources"]');
-      if (toggle) { resourcesOpen = !resourcesOpen; renderGrid(); return; }
+      const toggle = e.target.closest('.module-group-head[data-unit-head]');
+      if (toggle) {
+        const id = toggle.dataset.unitHead;
+        if (id === 'none') orphanOpen = !orphanOpen;
+        else if (openUnits.has(id)) openUnits.delete(id);
+        else openUnits.add(id);
+        renderGrid();
+        return;
+      }
+      const infoBtn = e.target.closest('.module-open-info[data-info]');
+      if (infoBtn) {
+        e.preventDefault();
+        const mod = moduleById.get(Number(infoBtn.dataset.info));
+        if (mod && window.ContentRenderer) ContentRenderer.openInfo(mod);
+        return;
+      }
       const btn = e.target.closest('.module-open[data-module-id]');
       if (!btn) return;
       const mod = moduleById.get(Number(btn.dataset.moduleId));
@@ -289,6 +486,19 @@ async function loadModulesForCourse(courseId) {
       }
     });
 
+    // ---- Course cross-navigation in the header (other courses) ----
+    const navCourses = document.querySelector('.nav-course-links');
+    if (navCourses && !(allCoursesRes.error) && (allCoursesRes.data || []).length) {
+      const others = (allCoursesRes.data || []).filter(c => c.id !== courseId);
+      if (others.length) {
+        navCourses.innerHTML = others.map(c =>
+          `<a href="course.html?course=${encodeURIComponent(c.id)}">${c.title}</a>`
+        ).join('');
+      }
+    }
+
+    renderCourseHead();
+    renderRail();
     ensureFilterBar();
     renderGrid();
 
@@ -310,6 +520,9 @@ async function loadModulesForCourse(courseId) {
 
   } catch (err) {
     console.error('Exception loading modules:', err);
+    if (moduleList) {
+      moduleList.innerHTML = '<li><span style="color: #B91C1C;">Something went wrong loading this course: ' + err.message + '</span></li>';
+    }
   }
 }
 

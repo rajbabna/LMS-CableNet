@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="8">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,8 @@
           <li>Explain why network security matters and name common threat types</li>
           <li>Configure basic firewall rules and Access Control Lists (ACLs)</li>
           <li>Explain the purpose of VLANs and basic network segmentation</li>
+          <li>Apply the CIA triad to a real security decision</li>
+          <li>Secure a home router with best-practice settings</li>
         </ul>
     </section>
 
@@ -55,12 +57,33 @@
     <section class="lesson-section">
       <h2>Lecture Notes (9:00–10:30)</h2>
         <ul class="lesson-objectives">
+          <li><strong>Confidentiality</strong> — only authorized people can read data</li>
+          <li><strong>Integrity</strong> — data is accurate and unchanged</li>
+          <li><strong>Availability</strong> — systems are up and usable when needed</li>
+          <li>Every security control exists to protect one or more of these</li>
+        </ul>
+
+        <ul class="lesson-objectives">
           <li><strong>Common threats:</strong> viruses, hacking attempts, Denial of Service (DoS)</li>
+          <li><strong>Phishing / social engineering</strong> — the #1 attack vector (the human is the weakest link; most breaches start with a phishing email, not a firewall)</li>
+          <li><strong>Malware</strong> — viruses, worms, trojans, ransomware, spyware</li>
+          <li><strong>Man-in-the-middle</strong> — eavesdropping or altering traffic between parties</li>
+          <li><strong>Zero-day</strong> — attack on an unpatched vulnerability</li>
+        </ul>
+
+        <ul class="lesson-objectives">
           <li><strong>Firewalls</strong> — hardware or software that filters traffic by rule</li>
           <li><strong>Access Control Lists (ACLs)</strong> — permit/deny rules applied to specific traffic types or addresses</li>
+          <li>Rule model (simplified): <strong>source IP:port → dest IP:port → action</strong></li>
+          <li><strong>Default should be DENY</strong> — allow only what's needed</li>
+        </ul>
+
+        <ul class="lesson-objectives">
+          <li><strong>Defense in depth</strong> — layering multiple security measures rather than relying on one (firewall + strong passwords + patching + antimalware)</li>
+          <li><strong>Least privilege</strong> — give users only the access they need</li>
           <li><strong>Encryption</strong> (overview) — protects data in transit from being read if intercepted</li>
           <li><strong>VPN</strong> (concept only) — creates an encrypted tunnel over a public network</li>
-          <li><strong>Defense in depth</strong> — layering multiple security measures rather than relying on one</li>
+          <li><strong>Patching</strong> — keep systems updated; most attacks exploit known holes</li>
         </ul>
     </section>
 
@@ -92,16 +115,18 @@
           <li>Introduce VLANs — separating departments on the same physical switch</li>
           <li>Configure a VLAN and show that VLAN traffic is isolated</li>
           <li>Discuss real-world use: separating student vs. staff networks</li>
+          <li>Note: VLANs = security AND performance (broadcast containment)</li>
         </ul>
     </section>
 
     <section class="lesson-section">
       <h2>Security Discussion (2:00–2:15)</h2>
         <ul class="lesson-objectives">
-          <li>Password strength &amp; policies</li>
-          <li>Changing default passwords</li>
-          <li>Role-based access control</li>
+          <li>Password strength &amp; policies (long passphrases + MFA)</li>
+          <li>Changing default passwords (routers ship with known credentials)</li>
+          <li>Role-based access control (least privilege)</li>
           <li>Monitoring &amp; alerts</li>
+          <li>Securing a home router: change defaults, enable WPA2/WPA3 (never WEP), disable remote admin, update firmware</li>
         </ul>
     </section>
 
@@ -116,6 +141,7 @@
           <li>What's the difference between a firewall rule and an ACL?</li>
           <li>Why would a company separate students and staff onto different VLANs?</li>
           <li>Name one reason default passwords are a security risk.</li>
+          <li>What are the three parts of the CIA triad, and give an attack on each?</li>
         </ol>
     </section>
 
@@ -126,12 +152,15 @@
           <li>Research: what are ports 22, 443, and 80 used for, and why do they matter?</li>
           <li>Study: review all Part 2 concepts ahead of the Saturday 9 exam</li>
           <li>Practice: redo your favorite Packet Tracer labs</li>
+          <li>Read: docs/resources/networking/network-security-basics.md</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/network-security-basics.md; &gt; Cisco Network Support and Security M2 (threats) &amp; M3 (network security)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-networking-07.html">&larr; Mod 7</a>
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-09.html">Mod 9 &rarr;</a>
     </nav>
   </article>
@@ -142,7 +171,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

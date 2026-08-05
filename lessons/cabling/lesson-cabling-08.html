@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="cabling" data-module="8">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-cabling.html">&larr; Back to Level 1</a>
+    <a href="../../course.html?course=cabling">&larr; Back to Level 1</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Consolidate all Part 1 concepts into a single review pass</li>
           <li>Complete one final, unscored practice crimp under exam-like conditions</li>
           <li>Enter the final assessment with clear expectations and reduced anxiety</li>
+          <li>Know how this course maps to the Cisco CCST Networking certification path</li>
         </ul>
     </section>
 
@@ -57,11 +58,22 @@
         <p>High-level recap across all modules:</p>
 
         <ul class="lesson-objectives">
-          <li>OSI layers (recap from Module 1)</li>
-          <li>Cable standards overview (Module 2)</li>
+          <li>OSI layers + TCP/IP comparison (recap from Module 1)</li>
+          <li>Cable standards overview, UTP vs STP, why twisting matters (Module 2)</li>
           <li>RJ45 pin order and crimping checklist (Modules 3–4)</li>
-          <li>Common mistakes recap (Module 6)</li>
+          <li>Tester reading + failure-pattern diagnosis (Modules 5–6)</li>
+          <li>Switch vs router, Packet Tracer preview (Module 7)</li>
         </ul>
+
+        <p>Part 1 + Part 2 together align with the <strong>Cisco CCST Networking</strong> certification and the Network Technician career path. The three free Cisco courses that feed our curriculum:</p>
+
+        <ul class="lesson-objectives">
+          <li><strong>Networking Basics</strong> (22 h)</li>
+          <li><strong>Network Addressing and Basic Troubleshooting</strong> (14 h)</li>
+          <li><strong>Network Support and Security</strong> (12 h)</li>
+        </ul>
+
+        <p>Students who continue into Part 2 and the Cisco courses earn industry digital badges and are prepared for the CCST exam.</p>
     </section>
 
     <section class="lesson-section">
@@ -71,6 +83,7 @@
           <li><strong>Not graded</strong> — but run under the same process/conditions as the real exam</li>
           <li>Instructor observes and gives final individual feedback</li>
           <li>Test the cable and discuss results</li>
+          <li>Run the pull-test and visual-inspection checklist used on exam day</li>
         </ul>
     </section>
 
@@ -96,6 +109,7 @@
           <li>Walk through the full crimping checklist from memory.</li>
           <li>What are the 3 components of the Saturday 9 exam?</li>
           <li>What's one common mistake you personally want to avoid tomorrow?</li>
+          <li>Name the three Cisco feeder courses that continue this path after Part 1.</li>
         </ol>
     </section>
 
@@ -106,12 +120,15 @@
           <li>Review notes only</li>
           <li>Get good sleep before Saturday 9</li>
           <li>Bring confidence and a good attitude</li>
+          <li>Optional: browse the free Cisco Networking Basics course to see what's next</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/shared/cisco-netacad-alignment-map.md (CCST path)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-cabling-07.html">&larr; Mod 7</a>
-      <a class="btn btn-ghost" href="../../course-cabling.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=cabling">Back to course</a>
       <a class="btn btn-primary" href="lesson-cabling-09.html">Mod 9 &rarr;</a>
     </nav>
   </article>
@@ -122,7 +139,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

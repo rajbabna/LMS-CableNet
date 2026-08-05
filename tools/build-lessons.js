@@ -34,8 +34,8 @@ const LIVE_URL = 'https://rajbabna.github.io/LMS-CableNet';
 // Courses: id -> { title, page, prefix in bundle filenames }
 // ------------------------------------------------------------
 const COURSES = [
-  { id: 'cabling',    title: 'Network Foundations - Cabling & Infrastructure', page: 'course-cabling.html',    prefix: 'module-' },
-  { id: 'networking', title: 'Network Operations - Configuration & Troubleshooting', page: 'course-networking.html', prefix: 'part2-module-' }
+  { id: 'cabling',    title: 'Network Foundations - Cabling & Infrastructure', page: 'course.html?course=cabling',    prefix: 'module-' },
+  { id: 'networking', title: 'Network Operations - Configuration & Troubleshooting', page: 'course.html?course=networking', prefix: 'part2-module-' }
 ];
 
 // ------------------------------------------------------------

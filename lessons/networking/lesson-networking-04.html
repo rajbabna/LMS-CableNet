@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="4">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Explain the DORA process for DHCP address assignment</li>
           <li>Configure and observe DHCP behavior in Packet Tracer</li>
           <li>Explain how DNS resolves names to IP addresses</li>
+          <li>Recognise the APIPA address (<code>169.254.x.x</code>) as &quot;no DHCP answer&quot;</li>
         </ul>
     </section>
 
@@ -55,11 +56,22 @@
           <li>IP pools have a defined range and a lease expiration time</li>
         </ul>
 
+        <p>If a device gets <strong>169.254.x.x</strong> (APIPA self-assigned), it got no DHCP answer. Check in order:</p>
+
+        <ol class="lesson-questions">
+          <li>Is the DHCP server running and is its scope not exhausted?</li>
+          <li>Is the device on the correct VLAN (Layer-2 path)?</li>
+          <li>Is the DHCP relay / helper-address configured if the server is on another subnet?</li>
+          <li>Is DHCP traffic (UDP 67/68) allowed by any firewall?</li>
+        </ol>
+
         <ul class="lesson-objectives">
           <li>Translates human-readable names (<code>www.example.com</code>) into IP addresses</li>
           <li>DNS servers hold records mapping names to addresses</li>
           <li>Without DNS, users would need to memorize IP addresses for every site</li>
         </ul>
+
+        <p><strong>Flow:</strong> browser asks local DNS → local DNS asks forwarders as needed → name resolves to an IP → traffic is sent to that IP. <strong>Troubleshooting hint:</strong> if ping by IP works but ping by name fails, the problem is DNS, not connectivity.</p>
     </section>
 
     <section class="lesson-section">
@@ -104,6 +116,7 @@
           <li>What do the letters in &quot;DORA&quot; stand for?</li>
           <li>What happens if a device's DHCP lease expires?</li>
           <li>What problem does DNS solve for everyday internet use?</li>
+          <li>What does getting <code>169.254.x.x</code> tell you about DHCP?</li>
         </ol>
     </section>
 
@@ -115,11 +128,13 @@
           <li>Write 2 sentences: &quot;Why does DNS matter?&quot;</li>
           <li>Preview: next week is routing — how will that build on this?</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/network-utilities-and-troubleshooting.md &gt; (DHCP/DNS sections); Cisco Networking Basics M11 (DHCP), M16 (DNS)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-networking-03.html">&larr; Mod 3</a>
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-05.html">Mod 5 &rarr;</a>
     </nav>
   </article>
@@ -130,7 +145,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

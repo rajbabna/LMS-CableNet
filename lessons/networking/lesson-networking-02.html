@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="2">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Explain what a subnet mask does and represent it in binary</li>
           <li>Calculate network address, broadcast address, and usable host range</li>
           <li>Read and write CIDR notation (e.g., <code>/24</code>, <code>/25</code>)</li>
+          <li>Apply the host formula: usable hosts = 2^(32 - prefix) - 2</li>
         </ul>
     </section>
 
@@ -60,10 +61,18 @@
           <li>In binary, mask bits are <code>1</code>s for network, <code>0</code>s for host</li>
         </ul>
 
+        <p><strong>Usable hosts = 2^(32 - prefix) - 2</strong>  (minus 2 = network + broadcast)</p>
+
+        <ul class="lesson-objectives">
+          <li>/24 → 2^8 - 2 = 254</li>
+          <li>/26 → 2^6 - 2 = 62</li>
+        </ul>
+
         <ul class="lesson-objectives">
           <li><strong>Network address:</strong> all host bits set to 0</li>
           <li><strong>Broadcast address:</strong> all host bits set to 1</li>
           <li><strong>Usable host range:</strong> everything between network and broadcast</li>
+          <li>Never assign the network or broadcast address to a device</li>
         </ul>
 
         <div class="pinout-wrap">
@@ -74,6 +83,9 @@
             <tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr>
             <tr><td>/26</td><td>255.255.255.192</td><td>62</td></tr>
             <tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr>
+            <tr><td>/28</td><td>255.255.255.240</td><td>14</td></tr>
+            <tr><td>/29</td><td>255.255.255.248</td><td>6</td></tr>
+            <tr><td>/30</td><td>255.255.255.252</td><td>2 (point-to-point)</td></tr>
             </tbody>
           </table>
         </div>
@@ -87,17 +99,20 @@
           <li>Network address → <code>192.168.1.0</code></li>
           <li>Broadcast address → <code>192.168.1.255</code></li>
           <li>Usable range → <code>192.168.1.1</code>–<code>192.168.1.254</code></li>
-          <li>Total usable hosts → 254</li>
+          <li>Total usable hosts → 254 (formula: 2^8 - 2)</li>
         </ul>
     </section>
 
     <section class="lesson-section">
-      <h2>Lab 2B: Practice Problems (11:30–12:30)</h2>
-        <ul class="lesson-objectives">
-          <li>Worksheet: 5 subnetting problems of varying difficulty</li>
-          <li>Instructor circulates to help</li>
-          <li>Review answers as a group</li>
-        </ul>
+      <h2>Lab 2B: Subdividing a Network (11:30–12:30)</h2>
+        <p>Split <code>192.168.1.0/24</code> into 4 equal subnets for 4 departments (Accounting, Sales, Support, Backend), each needing ~60 hosts:</p>
+
+        <ol class="lesson-questions">
+          <li>We need 4 subnets → borrow 2 host bits (2^2 = 4)</li>
+          <li>New prefix: /24 + 2 = <strong>/26</strong></li>
+          <li>Usable per subnet: 2^6 - 2 = <strong>62</strong> (fits 60)</li>
+          <li>Block size = 64, subnets start at 0: - <code>192.168.1.0</code>  /26  usable <code>192.168.1.1</code>–<code>192.168.1.62</code> - <code>192.168.1.64</code> /26  usable <code>192.168.1.65</code>–<code>192.168.1.126</code> - <code>192.168.1.128</code>/26  usable <code>192.168.1.129</code>–<code>192.168.1.190</code> - <code>192.168.1.192</code>/26  usable <code>192.168.1.193</code>–<code>192.168.1.254</code></li>
+        </ol>
     </section>
 
     <section class="lesson-section">
@@ -105,6 +120,8 @@
         <ul class="lesson-objectives">
           <li>Timed subnetting challenge (e.g., &quot;Who can solve <code>10.0.0.0/25</code> fastest?&quot;)</li>
           <li>Celebrate fast, correct answers to build confidence under pressure</li>
+          <li>Practice: given N hosts, choose the smallest prefix that fits</li>
+          <li>Quick-fire: readable /24–/30 host counts from memory</li>
         </ul>
     </section>
 
@@ -114,6 +131,7 @@
           <li>What's the broadcast address for <code>192.168.1.0/24</code>?</li>
           <li>How many usable hosts does a <code>/26</code> network support?</li>
           <li>Write <code>255.255.255.192</code> in CIDR notation.</li>
+          <li>Using the formula, how many usable hosts are in a <code>/28</code>?</li>
         </ol>
     </section>
 
@@ -124,12 +142,15 @@
           <li>Watch a &quot;CIDR notation explained&quot; video (8 min)</li>
           <li>Create a personal subnet cheat sheet</li>
           <li>Prepare for Packet Tracer next week</li>
+          <li>Read: docs/resources/networking/ip-addressing-and-subnetting.md</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/ip-addressing-and-subnetting.md; &gt; Cisco Networking Basics M9 (IPv4 segmentation)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-networking-01.html">&larr; Mod 1</a>
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-03.html">Mod 3 &rarr;</a>
     </nav>
   </article>
@@ -140,7 +161,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

@@ -62,18 +62,14 @@ async function loadCoursesOnLanding() {
       console.log('Visitor state check skipped:', err);
     }
 
-    // Map course id -> course page URL
-    const courseLinks = {
-      cabling: 'course-cabling.html',
-      networking: 'course-networking.html'
-    };
+    // Any course id maps to the single data-driven course dashboard.
 
     // Clear any placeholder content
     portsContainer.innerHTML = '';
 
     // Render each course as a port card
     courses.forEach(course => {
-      const link = courseLinks[course.id];
+      const link = 'course.html?course=' + encodeURIComponent(course.id);
 
       // Decide the status label + action button
       let statusHtml;

@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="1">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -44,6 +44,7 @@
           <li>Explain what an IP address is and how it's structured (32 bits, 4 octets)</li>
           <li>Convert between decimal and binary representations</li>
           <li>Distinguish IPv4 address classes (A, B, C) and private vs public addresses</li>
+          <li>Explain the roles of network, host, and gateway components of an address</li>
         </ul>
     </section>
 
@@ -60,6 +61,17 @@
           <li>Binary underlies everything — networking math is built on powers of 2</li>
         </ul>
 
+        <p>An IP address has two logical parts:</p>
+
+        <ul class="lesson-objectives">
+          <li><strong>Network portion</strong> — identifies the network</li>
+          <li><strong>Host portion</strong> — identifies a specific device on that network</li>
+          <li>The <strong>subnet mask</strong> tells you how many leading bits are the network part</li>
+          <li>The <strong>default gateway</strong> (usually the first usable host, e.g., <code>.1</code>) is where a device sends traffic destined for other networks</li>
+        </ul>
+
+        <p>&gt; These three ideas (network bits / host bits / gateway) are the foundation &gt; of every later module — everything builds on them.</p>
+
         <div class="pinout-wrap">
           <table class="pinout-table">
             <thead><tr><th>Class</th><th>Range (1st octet)</th><th>Typical Use</th></tr></thead>
@@ -67,6 +79,8 @@
             <tr><td>A</td><td>1–126</td><td>Very large networks</td></tr>
             <tr><td>B</td><td>128–191</td><td>Medium networks</td></tr>
             <tr><td>C</td><td>192–223</td><td>Small networks (most common in labs/home)</td></tr>
+            <tr><td>D</td><td>224–239</td><td>Multicast</td></tr>
+            <tr><td>E</td><td>240–255</td><td>Experimental</td></tr>
             </tbody>
           </table>
         </div>
@@ -74,7 +88,7 @@
         <ul class="lesson-objectives">
           <li><strong>Private ranges:</strong> <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li>
           <li><strong>Public</strong> addresses are globally routable on the internet</li>
-          <li>Home routers use NAT to translate private addresses to a single public one</li>
+          <li>Home routers use <strong>NAT</strong> to translate private addresses to a single public one</li>
         </ul>
     </section>
 
@@ -84,6 +98,7 @@
           <li>Worksheet: convert 20 decimal numbers to binary</li>
           <li>Cross-check with an online converter</li>
           <li>Discuss powers of 2 and why binary matters in networking</li>
+          <li>Use the 8-bit place table (128 64 32 16 8 4 2 1) for fast conversion</li>
         </ul>
     </section>
 
@@ -91,7 +106,9 @@
       <h2>Lab 1B: IP Address Breakdown (11:30–12:30)</h2>
         <ul class="lesson-objectives">
           <li>Given <code>192.168.1.100</code>: break down each octet, write it in binary</li>
-          <li>Introduce (at a high level) the concept of network vs host portion</li>
+          <li>Label the network vs host portion (using /24 as the boundary)</li>
+          <li>Identify the implied gateway of the subnet</li>
+          <li>Practice: break down a few more real addresses and screenshot them</li>
         </ul>
     </section>
 
@@ -102,6 +119,7 @@
           <li>Analyze real IP addresses</li>
           <li>Discussion: &quot;What's the IP on your home router?&quot;</li>
           <li>Find a public IP address using an online tool</li>
+          <li>Compare your private LAN IP vs your public (internet) IP</li>
         </ul>
     </section>
 
@@ -111,6 +129,7 @@
           <li>How many bits make up an IPv4 address?</li>
           <li>Is <code>192.168.1.1</code> a private or public address?</li>
           <li>Convert <code>172</code> to binary.</li>
+          <li>What determines the boundary between the network and host portions?</li>
         </ol>
     </section>
 
@@ -120,11 +139,14 @@
           <li>Convert 10 IP addresses to binary (with answers)</li>
           <li>Watch an &quot;IP addressing explained&quot; video (10 min)</li>
           <li>Identify your home router's IP address and your computer's IP address</li>
+          <li>Read: docs/resources/networking/ip-addressing-and-subnetting.md</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/ip-addressing-and-subnetting.md; &gt; Cisco Networking Basics M8 (Internet Protocol), M9 (IPv4 &amp; segmentation)</p>
     </section>
 
     <nav class="lesson-nav">
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-02.html">Mod 2 &rarr;</a>
     </nav>
   </article>
@@ -135,7 +157,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

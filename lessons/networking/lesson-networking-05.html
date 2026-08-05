@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="networking" data-module="5">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-networking.html">&larr; Back to Level 2</a>
+    <a href="../../course.html?course=networking">&larr; Back to Level 2</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -65,6 +65,26 @@
           <li><strong>Static</strong> — manually configured by an administrator; simple, predictable, but doesn't adapt automatically</li>
           <li><strong>Dynamic</strong> — routers exchange information automatically using protocols like RIP, OSPF, or EIGRP (overview only in this course — not hands-on)</li>
         </ul>
+
+        <ol class="lesson-questions">
+          <li>Examines the destination IP in the packet</li>
+          <li>Finds the <strong>longest (most specific) matching route</strong> in its table</li>
+          <li>Forwards out that interface / next hop</li>
+        </ol>
+
+        <p><strong>Routing protocol quick map:</strong></p>
+
+        <div class="pinout-wrap">
+          <table class="pinout-table">
+            <thead><tr><th>Protocol</th><th>Type</th><th>Metric</th><th>Use</th></tr></thead>
+            <tbody>
+            <tr><td>RIP</td><td>Distance-vector</td><td>Hop count (max 15)</td><td>Small legacy</td></tr>
+            <tr><td>EIGRP</td><td>Advanced DV</td><td>Composite (bandwidth/delay)</td><td>Cisco enterprise</td></tr>
+            <tr><td>OSPF</td><td>Link-state</td><td>Cost (bandwidth-based)</td><td>Enterprise, industry standard</td></tr>
+            <tr><td>BGP</td><td>Path-vector</td><td>Path attributes</td><td>Internet routing</td></tr>
+            </tbody>
+          </table>
+        </div>
     </section>
 
     <section class="lesson-section">
@@ -122,11 +142,13 @@
           <li>Study: what happens to traffic if routing is misconfigured?</li>
           <li>Prepare for troubleshooting next week</li>
         </ul>
+
+        <p>&gt; Resource: docs/resources/networking/routing-and-switching.md; &gt; Cisco Networking Basics M14 (routing between networks)</p>
     </section>
 
     <nav class="lesson-nav">
       <a class="btn btn-ghost" href="lesson-networking-04.html">&larr; Mod 4</a>
-      <a class="btn btn-ghost" href="../../course-networking.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=networking">Back to course</a>
       <a class="btn btn-primary" href="lesson-networking-06.html">Mod 6 &rarr;</a>
     </nav>
   </article>
@@ -137,7 +159,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>

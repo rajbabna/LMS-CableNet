@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/style.css?v=10B92F08">
+  <link rel="stylesheet" href="../../css/style.css?v=1293C4F3">
 </head>
 <body data-course="cabling" data-module="1">
 
@@ -19,7 +19,7 @@
   </button>
   <nav class="nav-actions" id="primary-nav">
     <a href="../../student-dashboard.html">Dashboard</a>
-    <a href="../../course-cabling.html">&larr; Back to Level 1</a>
+    <a href="../../course.html?course=cabling">&larr; Back to Level 1</a>
     <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
     <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
   </nav>
@@ -45,6 +45,7 @@
         <ul class="lesson-objectives">
           <li>Name and describe the 7 layers of the OSI model</li>
           <li>Explain what happens at each layer in plain language</li>
+          <li>Compare the OSI and TCP/IP models (protocol suites)</li>
           <li>Identify and compare Bus, Star, Ring, and Mesh topologies</li>
           <li>Recommend a topology for a given real-world scenario</li>
         </ul>
@@ -55,7 +56,7 @@
         <p>The OSI (Open Systems Interconnection) model breaks network communication into 7 layers, from the physical wire up to the application a user sees:</p>
 
         <ol class="lesson-questions">
-          <li><strong>Physical</strong> — cables, connectors, voltages, radio signals</li>
+          <li><strong>Physical</strong> — cables, connectors, voltages, radio signals (this layer)</li>
           <li><strong>Data Link</strong> — MAC addresses, switches, framing</li>
           <li><strong>Network</strong> — IP addresses, routers, routing</li>
           <li><strong>Transport</strong> — TCP/UDP, ports, reliable delivery</li>
@@ -64,9 +65,25 @@
           <li><strong>Application</strong> — what the user interacts with (browser, email)</li>
         </ol>
 
+        <p><strong>How data travels:</strong> at the sending device data is <strong>encapsulated</strong> — each layer adds a header as it moves down; at the receiving device the layers <strong>de-encapsulate</strong> (strip headers) as data moves up. This is one of the most tested ideas in networking (from Cisco Networking Basics, Module 5).</p>
+
         <p>Teaching tip: use the mnemonic <em>&quot;Please Do Not Throw Sausage Pizza Away&quot;</em> to help students recall the order bottom-up.</p>
 
         <p>This course lives mostly at <strong>Layer 1 (Physical)</strong> and touches Layer 2 (switches) — but understanding the full stack helps students see where their cabling work fits into the bigger picture.</p>
+
+        <div class="pinout-wrap">
+          <table class="pinout-table">
+            <thead><tr><th>OSI (7 layers)</th><th>TCP/IP (4 layers)</th><th>What lives there in practice</th></tr></thead>
+            <tbody>
+            <tr><td>Application / Presentation / Session</td><td>Application</td><td>HTTP, DNS, FTP, email</td></tr>
+            <tr><td>Transport</td><td>Transport</td><td>TCP, UDP, port numbers</td></tr>
+            <tr><td>Network</td><td>Internet</td><td>IP, ICMP, ARP (this course's IP addressing)</td></tr>
+            <tr><td>Physical / Data Link</td><td>Network Access</td><td>Cables, Ethernet, switches, MAC</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Compare-and-contrast note: <strong>TCP/IP is the model actually used on the internet; OSI is the teaching/reference model.</strong></p>
 
         <div class="pinout-wrap">
           <table class="pinout-table">
@@ -81,15 +98,23 @@
         </div>
 
         <p>Emphasize: <strong>Star topology is what students will build in almost every lab in this course</strong> — it's the real-world default.</p>
+
+        <ul class="lesson-objectives">
+          <li><strong>LAN</strong> — Local Area Network (one building/office)</li>
+          <li><strong>WAN</strong> — Wide Area Network (connects LANs over distance; the internet is a WAN)</li>
+          <li><strong>WLAN</strong> — Wireless LAN (Wi-Fi)</li>
+          <li><strong>PAN</strong> — Personal Area Network (Bluetooth, a few devices)</li>
+        </ul>
     </section>
 
     <section class="lesson-section">
       <h2>Lab 1: Topology Design Exercises (10:45–12:30)</h2>
         <ol class="lesson-questions">
           <li>Draw a LAN for a small office building (10–15 devices)</li>
-          <li>Draw a topology for a hospital network (redundancy matters — patient safety systems can't go down)</li>
+          <li>Draw a topology for a hospital network (redundancy matters — patient safety systems can't go down) — note which OSI layers each part touches</li>
           <li>For each scenario below, have students pick and justify a topology: - A single classroom with 20 laptops - A hospital ICU - A budget internet café</li>
           <li>Use paper/whiteboard or a simple drawing app — no software required yet</li>
+          <li>Quick pair-share: label your drawn LAN with &quot;this is a LAN, client/server, star topology, Layer 1–2&quot; using new vocabulary</li>
         </ol>
     </section>
 
@@ -97,7 +122,7 @@
       <h2>Afternoon Activity (1:15–2:15)</h2>
         <ul class="lesson-objectives">
           <li>Watch a short cable basics video (10 min)</li>
-          <li>Group discussion: &quot;Where do you see networks in daily life?&quot; (home WiFi, school computer labs, ATMs, mobile networks)</li>
+          <li>Group discussion: &quot;Where do you see networks in daily life?&quot; (home WiFi, school computer labs, ATMs, mobile networks) — say which is a LAN, WLAN, WAN</li>
           <li>Open Q&amp;A</li>
         </ul>
     </section>
@@ -108,6 +133,7 @@
           <li>What layer of the OSI model do Ethernet cables operate at?</li>
           <li>Why is Star topology more common today than Bus?</li>
           <li>Name one advantage and one disadvantage of Mesh topology.</li>
+          <li>What is encapsulation, and to which layer does it relate?</li>
         </ol>
     </section>
 
@@ -117,11 +143,14 @@
           <li>Read the cabling standards handout (2 pages)</li>
           <li>Watch the &quot;Ethernet cable basics&quot; video (10 min)</li>
           <li>Identify and photograph/list the cables in your own home or workplace</li>
+          <li>Label each network you use today as LAN / WLAN / WAN</li>
         </ul>
+
+        <p>&gt; Resource: Cisco Networking Basics M1 (communication), M5 (communication &gt; principles), M7 (access layer); docs/resources/shared/cisco-netacad-alignment-map.md</p>
     </section>
 
     <nav class="lesson-nav">
-      <a class="btn btn-ghost" href="../../course-cabling.html">Back to course</a>
+      <a class="btn btn-ghost" href="../../course.html?course=cabling">Back to course</a>
       <a class="btn btn-primary" href="lesson-cabling-02.html">Mod 2 &rarr;</a>
     </nav>
   </article>
@@ -132,7 +161,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../../js/config.js?v=9A0E5BF5"></script>
 <script src="../../js/supabase-client.js?v=17E25610"></script>
-<script src="../../js/auth-guard.js?v=81485401"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
 <script src="../../js/menu.js?v=06BC2CFB"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="../../js/ai-mentor.js?v=7DE7964F"></script>
