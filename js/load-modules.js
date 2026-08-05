@@ -126,9 +126,13 @@ async function loadModulesForCourse(courseId) {
     };
     function iconFor(type) { return TYPE_ICONS[type] || TYPE_ICONS.lesson; }
 
+    // Lookup for non-lesson content cards -> open inline modal (Step 5).
+    const moduleById = new Map();
+
     visible.forEach(module => {
       const li = document.createElement('li');
       li.setAttribute('data-module-id', module.id);
+      moduleById.set(module.id, module);
 
       const type = module.content_type || 'lesson';
       const typeBadge = `<span class="mod-type-badge mod-type-${type}">${typeDisplayNames[type] || type}</span>`;
@@ -156,7 +160,9 @@ async function loadModulesForCourse(courseId) {
 
       const resourceHtml = isPreview
         ? `<span class="preview-locked">🔒 Enrollment required</span>`
-        : `<a class="module-open module-open-${type}" href="${module.content_url}" title="${contentLabel}" aria-label="${contentLabel}">${iconFor(type)}</a>`;
+        : (type === 'lesson'
+            ? `<a class="module-open module-open-${type}" href="${module.content_url}" title="${contentLabel}" aria-label="${contentLabel}">${iconFor(type)}</a>`
+            : `<button type="button" class="module-open module-open-${type}" data-module-id="${module.id}" title="${contentLabel}" aria-label="${contentLabel}">${iconFor(type)}</button>`);
 
       const completionHtml = isPreview
         ? `<span class="preview-locked">🔒 Enrollment required</span>`
@@ -206,6 +212,18 @@ async function loadModulesForCourse(courseId) {
       `;
 
       moduleList.appendChild(li);
+    });
+
+    // Non-lesson content cards open inline (modal) instead of leaving
+    // the course page. Only rendered for non-lesson types.
+    moduleList.addEventListener('click', function (e) {
+      const btn = e.target.closest('.module-open[data-module-id]');
+      if (!btn) return;
+      const mod = moduleById.get(Number(btn.dataset.moduleId));
+      if (mod && mod.content_type && mod.content_type !== 'lesson' && window.ContentRenderer) {
+        e.preventDefault();
+        ContentRenderer.open(mod);
+      }
     });
 
     // Course-completion banner: once every module is done, offer the

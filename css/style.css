@@ -480,6 +480,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
   margin-left: auto;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
+button.module-open {
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+}
 .module-open:hover {
   background: #f6ece0;
   border-color: var(--copper);

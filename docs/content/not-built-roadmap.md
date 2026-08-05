@@ -7,7 +7,7 @@ Features we're building now. Everything else in the original checklist was revie
 
 ## 2. Mentor escalation / manual mentor sessions
 - ✅ **Manual mentor sessions UI**: log form + timeline + resolve-follow-up on `student-profile.html` (wired `log_mentor_session`, `get_mentor_sessions_for_student`, `resolve_mentor_followup`). AI Mentor topic summaries already visible there ("AI Mentor Chats").
-- ⏳ **Escalation flags** (student-consented flagging → instructor "open flag" list) not built — needs an `ai_mentor_flags` table + AI mentor "want me to flag it?" offer + resolve/dismiss in dashboard. See `docs/content/16-ai-mentor-escalation-instructor-visibility.md`.
+- ✅ **Escalation flags** (sql/42 + js/ai-mentor.js + js/mentor-sessions.js + student-profile.html): `ai_mentor_flags` table + consent-only "want me to flag it?" offer in the chat + "Flagged Topics" panel with resolve/dismiss on the student profile.
 
 ## 3. Per-module quiz scoring
 - Persist quiz results in the DB (per student per module), score display, and results retrieval for instructors.
@@ -21,7 +21,8 @@ Features we're building now. Everything else in the original checklist was revie
 - See `docs/ACHIEVEMENTS.md`, `docs/content/overall-achievements.md`.
 
 ## 5. Video/PDF/interactive content types
-- Render non-`lesson` `content_type` modules (`video | pdf | interactive | text`) on course pages.
+- ✅ Render non-`lesson` `content_type` modules (`video | pdf | interactive | text`) on course pages.
+- ✅ `js/content-renderer.js` modal overlay: video (html5/.mp4 + YouTube), pdf (iframe), interactive (iframe tool), text (fetched article). Non-lesson cards open the modal; `sql/43-demo-content-modules.sql` seeds one demo of each for preview.
 
 ## 6. Admin course/module editor
 - In-dashboard CRUD for courses and modules (replaces SQL-migration-only editing).
