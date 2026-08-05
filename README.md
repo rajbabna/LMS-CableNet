@@ -8,6 +8,38 @@ Supabase — no hardcoding.
 
 ---
 
+## AI token usage & cost report
+
+This project is developed with an AI coding assistant (opencode). The report below
+shows the workload's token usage and what it **would have cost** if the same sessions
+had been billed on paid subscription tiers of DeepSeek, Gemini, ChatGPT and Claude —
+converted to Mauritian Rupees (1 USD = 47.04 MUR).
+
+![Token usage & cost chart](token-cost-chart.svg)
+
+| Provider       | Type  | Model              | Cost (USD) | Cost (MUR) |
+|----------------|-------|--------------------|-----------:|-----------:|
+| DeepSeek       | Free  | v4-flash-free      | $0.00      | Rs 0.00    |
+| DeepSeek       | Paid  | v4-flash           | $3.99      | Rs 187.59  |
+| DeepSeek       | Paid  | v4-pro             | $11.13     | Rs 523.46  |
+| Gemini         | Free  | Flash free tier    | $0.00      | Rs 0.00    |
+| Gemini         | Paid  | 2.5 Flash-Lite     | $5.17      | Rs 243.05  |
+| Gemini         | Paid  | 3.5 Flash          | $138.41    | Rs 6,510.74|
+| Gemini         | Paid  | 3.1 Pro            | $109.90    | Rs 5,169.47|
+| ChatGPT (OpenAI)| Paid | GPT-4o-mini        | $22.68     | Rs 1,066.88|
+| ChatGPT (OpenAI)| Paid | GPT-5.6 Luna       | $10.99     | Rs 516.95  |
+| ChatGPT (OpenAI)| Paid | GPT-5.6 Terra      | $109.90    | Rs 5,169.47|
+| ChatGPT (OpenAI)| Paid | GPT-5.6 Sol        | $274.74    | Rs 12,923.67|
+| Claude         | Free  | (no free tier)     | $0.00      | Rs 0.00    |
+| Claude         | Paid  | Haiku 4.5          | $53.31     | Rs 2,507.63|
+| Claude         | Paid  | Sonnet 5 (intro)   | $106.62    | Rs 5,015.26|
+| Claude         | Paid  | Opus 5             | $266.54    | Rs 12,538.16|
+
+> Full interactive report with per-session breakdown, timestamps and live-updating
+> numbers: [token-cost-report.html](https://rajbabna.github.io/LMS-CableNet/token-cost-report.html)
+
+---
+
 ## Features
 
 - **Dynamic landing page** — course cards load from Supabase with login-aware status
