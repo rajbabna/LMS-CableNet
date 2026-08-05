@@ -25,6 +25,11 @@ jobs:
       - name: Render report from JSON
         run: python render-report.py
 
+      - name: Stage artifacts
+        run: |
+          mkdir -p "$RUNNER_TEMP/report-artifacts"
+          cp token-cost-report.html token-cost-chart.svg "$RUNNER_TEMP/report-artifacts/"
+
       - name: Commit regenerated artifacts
         run: |
           git config user.name "github-actions[bot]"
@@ -41,7 +46,8 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout --detach origin/gh-pages
-          cp token-cost-report.html token-cost-chart.svg .
+          cp "$RUNNER_TEMP/report-artifacts/token-cost-report.html" .
+          cp "$RUNNER_TEMP/report-artifacts/token-cost-chart.svg" .
           git add token-cost-report.html token-cost-chart.svg
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
