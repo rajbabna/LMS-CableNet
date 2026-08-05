@@ -120,6 +120,7 @@ def main():
 
     html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <title>LMS token cost report — {datetime.date.today()}</title>
+<meta http-equiv="refresh" content="900">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
  :root{{--accent:#1a73e8;--ink:#202124;--muted:#5f6368;--line:#e8eaed}}
@@ -196,12 +197,15 @@ def main():
 
     # ---------- README table ----------
     def readme_table_rows():
-        rows = []
+        rows = [
+            "| Provider | Type | Model | Cost (USD) | Cost (MUR) |",
+            "|---|---|---|---|---:|",
+        ]
         for p in ORDER:
             for g in ("free", "paid"):
                 for m in MODELS[p][g]:
                     c = aggcost(m)
-                    rows.append(f"| {p:>15} | {'Free' if g=='free' else 'Paid':<5} | {m[0]:<26} | ${c:>9,.2f} | Rs {c*MUR:>10,.2f} |")
+                    rows.append(f"| {p} | {'Free' if g=='free' else 'Paid'} | {m[0]} | ${c:,.2f} | Rs {c*MUR:,.2f} |")
         return "\n".join(rows)
 
     with open(README, encoding="utf-8") as f:
