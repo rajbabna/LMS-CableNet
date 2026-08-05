@@ -153,16 +153,17 @@ class StudentDashboard {
   async loadUnitBreakdown() {
     this.unitData = {};
     try {
-      const enrolledIds = this.courses.filter(c => c.is_enrolled && !c.is_expired)
-        .map(c => c.course_id);
-      if (enrolledIds.length === 0) return;
+      // Load the unit breakdown for every course (enrolled AND preview),
+      // so unregistered cards also show the curriculum structure.
+      const courseIds = this.courses.map(c => c.course_id);
+      if (courseIds.length === 0) return;
 
       const [unitsRes, modulesRes, completionsRes] = await Promise.all([
         this.supabase.from("units").select("id, course_id, unit_number, title, sort_order")
-          .in("course_id", enrolledIds)
+          .in("course_id", courseIds)
           .order("sort_order", { ascending: true }).order("unit_number", { ascending: true }),
         this.supabase.from("modules").select("id, course_id, unit_id")
-          .in("course_id", enrolledIds),
+          .in("course_id", courseIds),
         this.supabase.from("module_completions")
           .select("module_id")
           .eq("user_id", this.currentUser.id)
@@ -229,9 +230,9 @@ class StudentDashboard {
         .filter(c => c.expires_at)
         .map(c => new Date(c.expires_at).getTime())
         .sort((a, b) => a - b)[0];
-      const accessLabel = allLifetime || !nearestExpiry
-        ? 'Lifetime access'
-        : Math.ceil((nearestExpiry - Date.now()) / 86400000) + ' days left';
+      const hasDeadline = !allLifetime && !!nearestExpiry;
+      const accessNum = hasDeadline ? Math.ceil((nearestExpiry - Date.now()) / 86400000) : '∞';
+      const accessLabel = hasDeadline ? 'days left' : 'lifetime access';
 
       const strip = document.createElement("div");
       strip.className = "stat-strip";
@@ -239,7 +240,7 @@ class StudentDashboard {
         <div class="stat-tile"><span class="stat-num">${done}</span><span class="stat-label">Modules complete</span></div>
         <div class="stat-tile"><span class="stat-num">${this.quizPassed || 0}</span><span class="stat-label">Quizzes passed</span></div>
         <div class="stat-tile"><span class="stat-num">${certificates}</span><span class="stat-label">Certificates</span></div>
-        <div class="stat-tile"><span class="stat-num">∞</span><span class="stat-label">${accessLabel}</span></div>
+        <div class="stat-tile"><span class="stat-num">${accessNum}</span><span class="stat-label">${accessLabel}</span></div>
       `;
       grid.appendChild(strip);
 
@@ -257,25 +258,35 @@ class StudentDashboard {
 
   renderHeroStats(active, overall, done, total) {
     const right = document.getElementById("heroRight");
-    if (!right) return;
+    const listEl = document.getElementById("heroResumeList");
+    if (!right || !listEl) return;
     const donut = document.getElementById("heroDonut");
     const pctEl = document.getElementById("heroDonutPct");
-    const resumeEl = document.getElementById("heroResume");
     if (donut && pctEl) {
       donut.style.setProperty("--p", overall + "%");
       pctEl.textContent = overall + "%";
     }
-    // Resume targets the active course with the most remaining work.
-    const resumeCourse = (active || [])
-      .slice()
-      .sort((a, b) => ((a.completed_modules || 0) / Math.max(a.total_modules || 1, 1)) - ((b.completed_modules || 0) / Math.max(b.total_modules || 1, 1)))[0];
-    if (resumeEl && resumeCourse) {
-      const link = "course.html?course=" + encodeURIComponent(resumeCourse.course_id);
-      const short = "PORT " + String(resumeCourse.port_number || 0).padStart(2, "0");
-      resumeEl.href = link;
-      resumeEl.textContent = done === total ? "Review completed" : ("Resume · " + short);
+    // One resume button per active course, so it works for students
+    // enrolled in several ports at once. The donut still shows overall %.
+    const courses = (active || []).slice();
+    if (courses.length === 0) {
+      // Not enrolled yet: keep the donut visible (0%) with a locked action.
+      if (donut && pctEl) {
+        donut.style.setProperty("--p", "0%");
+        pctEl.textContent = "0%";
+      }
+      listEl.innerHTML = '<span class="btn hero-resume locked" aria-disabled="true">Enrollment required</span>';
+      right.hidden = false;
+      return;
     }
-    right.hidden = !resumeCourse;
+    listEl.innerHTML = courses.map(c => {
+      const complete = (c.total_modules || 0) > 0 && (c.completed_modules || 0) >= (c.total_modules || 0);
+      const short = "PORT " + String(c.port_number || 0).padStart(2, "0");
+      const link = "course.html?course=" + encodeURIComponent(c.course_id);
+      const portClass = c.port_number === 2 ? "port-02" : "port-01";
+      return `<a class="btn btn-primary hero-resume ${portClass}" href="${link}">${complete ? "Review · " : "Resume · "}${short}</a>`;
+    }).join("");
+    right.hidden = false;
   }
 
   unitStripHtml(course) {
@@ -334,6 +345,8 @@ class StudentDashboard {
 
     // Access line — every enrolled card shows exactly one row so the
     // two cards stay aligned: a real expiry, or lifetime access.
+    // The text always reflects the student's status (remaining time +
+    // course progress).
     let accessLine = "";
     if (course.is_enrolled) {
       if (course.expires_at) {
@@ -342,11 +355,18 @@ class StudentDashboard {
         } else {
           const daysLeft = Math.ceil((new Date(course.expires_at).getTime() - Date.now()) / 86400000);
           const near = daysLeft <= 14;
-          accessLine = `<span class="expiry${near ? ' warning' : ''}">${near ? '⏳ ' : ''}Access until ${this.formatDate(course.expires_at)}</span>`;
+          const progressNote = progressPercent === 100
+            ? "complete"
+            : (progressPercent === 0 ? "not started" : progressPercent + "% complete");
+          accessLine = near
+            ? `<span class="expiry warning">⏳ ${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining · ${progressNote}</span>`
+            : `<span class="expiry">Access until ${this.formatDate(course.expires_at)}</span>`;
         }
       } else {
         accessLine = `<span class="expiry lifetime">✓ Lifetime access</span>`;
       }
+    } else {
+      accessLine = `<span class="expiry preview">Register to track your records</span>`;
     }
 
     // Determine course link (data-driven course dashboard)

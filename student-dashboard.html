@@ -51,7 +51,14 @@
     justify-content: center;
   }
   .donut-pct { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--teal); }
-  .hero-resume { font-size: 0.78rem; }
+  .hero-resume-list { display: flex; flex-direction: column; gap: 0.45rem; align-items: stretch; }
+  .hero-resume { font-size: 0.78rem; white-space: nowrap; text-align: center; }
+  .hero-resume.port-01 { background: var(--copper); }
+  .hero-resume.port-01:hover { background: var(--copper-dark); }
+  .hero-resume.port-02 { background: var(--blue); }
+  .hero-resume.port-02:hover { background: #283F51; }
+  .hero-resume.locked { background: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+  .hero-resume.locked:hover { background: var(--line); color: var(--ink-soft); }
 
   /* Quick stats strip (replaces overall-progress summary card) */
   .stat-strip {
@@ -67,7 +74,7 @@
   .stat-tile { text-align: center; padding: 0.4rem 0.6rem; border-right: 1px solid var(--line); }
   .stat-tile:last-child { border-right: none; }
   .stat-num { display: block; font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: var(--teal); }
-  .stat-label { font-size: 0.68rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-label { display: block; font-size: 0.68rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
 
   /* Feedback modal */
   .modal-overlay {
@@ -261,7 +268,7 @@
   }
 
   .course-status.not-started { background: #E8E5DC; color: var(--ink-soft); }
-  .course-status.in-progress  { background: #DDEBEC; color: var(--teal); }
+  .course-status.in-progress  { background: #E8F5E6; color: #357A38; }
   .course-status.completed    { background: #E4EEE1; color: var(--green); }
   .course-status.preview      { background: #E3EAF7; color: #3B5B92; }
   .course-status.expired      { background: #FBE8EE; color: #B03A5B; }
@@ -276,6 +283,18 @@
 
   .expiry.expired {
     color: #B03A5B;
+  }
+
+  /* Non-enrolled card: "register to track" prompt styled like the
+     expiry warning pill but in the preview theme */
+  .expiry.preview {
+    color: #3B5B92;
+    font-weight: 600;
+    background: #E3EAF7;
+    border-radius: 4px;
+    padding: 2px 6px;
+    display: inline-block;
+    font-style: normal;
   }
 
   /* Access expiry made prominent: amber warning when close to expiry */
@@ -535,7 +554,7 @@
       <div class="donut" id="heroDonut">
         <div class="donut-hole"><span class="donut-pct" id="heroDonutPct">0%</span></div>
       </div>
-      <a class="btn btn-primary hero-resume" id="heroResume" href="#">Resume</a>
+      <div class="hero-resume-list" id="heroResumeList"></div>
     </div>
   </section>
   
@@ -794,7 +813,7 @@
 </script>
 
 <!-- Load student's enrolled courses (same pattern as landing page, but from enrollments table) -->
-<script src="js/progress/student-dashboard.js?v=CE4F1AB6"></script>
+<script src="js/progress/student-dashboard.js?v=565BC5A6"></script>
 <script src="js/menu.js?v=06BC2CFB"></script>
 
 </body>
