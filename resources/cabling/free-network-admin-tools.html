@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Network Admin Tools — Student Toolkit — Cable&Net Courses</title>
+  <meta name="description" content="Curated from free/open-source network administration tool lists">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="cabling" data-resource="free-network-admin-tools">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=cabling">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · CABLING</span>
+      <h1>Free Network Admin Tools — Student Toolkit</h1>
+      <p class="course-desc">Curated from free/open-source network administration tool lists</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: shared (both Part 1 &amp; Part 2) Curated from free/open-source network administration tool lists (infoworld.com). These are free tools students can install today.</aside>
+
+        <h2>1. Why a Tool Toolkit?</h2>
+
+        <p>Learning theory is one thing; being able to <strong>see</strong> packets, ports, and paths is what turns a student into a technician. All tools below are free / open-source.</p>
+
+        <h2>2. Packet Capture &amp; Analysis</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Tool</th><th>Platform</th><th>Best for</th></tr></thead>
+            <tbody>
+            <tr><td><strong>Wireshark</strong></td><td>Win / macOS / Linux</td><td>The gold standard packet analyzer. See every frame</td></tr>
+            <tr><td><strong>tcpdump</strong></td><td>Linux/macOS (CLI)</td><td>Headless / remote capture from the command line</td></tr>
+            <tr><td><strong>TShark</strong></td><td>All (CLI)</td><td>Wireshark's command-line sibling for scripting</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="rsrc-callout">Wireshark capture filter tip: <code>host 8.8.8.8</code>, <code>tcp port 443</code>, <code>icmp</code> — filter at capture to keep files small.</aside>
+
+        <h2>3. Scanning &amp; Discovery</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Tool</th><th>Best for</th></tr></thead>
+            <tbody>
+            <tr><td><strong>Nmap / Zenmap</strong></td><td>Host discovery, open ports, OS &amp; service detection</td></tr>
+            <tr><td><strong>Angry IP Scanner</strong></td><td>Quick friendly GUI scanning of a small LAN</td></tr>
+            <tr><td><strong>Advanced IP Scanner</strong></td><td>Simple LAN device discovery (Win)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="rsrc-callout">Nmap basics: <code>nmap -sn 192.168.1.0/24</code> (ping sweep — who's alive) <code>nmap -p 1-1000 192.168.1.50</code> (scan common ports on one host)</aside>
+
+        <h2>4. Bandwidth &amp; Monitoring</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Tool</th><th>Best for</th></tr></thead>
+            <tbody>
+            <tr><td><strong>iperf3</strong></td><td>Generate traffic and measure real throughput between two hosts</td></tr>
+            <tr><td><strong>ntopng</strong></td><td>Web-based traffic analysis / live flow monitoring</td></tr>
+            <tr><td><strong>Zabbix / PRTG Free</strong></td><td>Long-term health monitoring, alerts, dashboards</td></tr>
+            <tr><td><strong>GlassWire</strong></td><td>Desktop traffic monitor (free tier)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="rsrc-callout">iperf3 usage (server on host B, client on A): <code>iperf3 -s</code> on B; <code>iperf3 -c 192.168.1.50</code> on A → read the Mbps/Mbit result.</aside>
+
+        <h2>5. Connectivity &amp; Routing</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Tool</th><th>Best for</th></tr></thead>
+            <tbody>
+            <tr><td><strong>Putty / Termius / Windows Terminal</strong></td><td>SSH/telnet console access to routers &amp; switches</td></tr>
+            <tr><td><strong>GNS3</strong></td><td>Real network emulation (Cisco IOS images) for lab practice</td></tr>
+            <tr><td><strong>Packet Tracer (free for courses)</strong></td><td>Cisco's official teaching simulator — used in Part 2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="rsrc-callout">Packet Tracer is the exact lab simulator referenced by part2 modules 03/07.</aside>
+
+        <h2>6. Handy CLI Built-ins Worth Mastering First</h2>
+
+        <p>You already have these — master them before adding tools:</p>
+
+        <ul>
+          <li><code>ping</code>, <code>tracert</code>/<code>traceroute</code>, <code>pathping</code></li>
+          <li><code>ipconfig</code> / <code>ip addr</code> / <code>ip route</code></li>
+          <li><code>arp -a</code>, <code>netstat -an</code>, <code>route print</code></li>
+          <li><code>nslookup</code> / <code>dig</code>, <code>net</code></li>
+        </ul>
+
+        <h2>7. Responsible Use (lab only)</h2>
+
+        <ul>
+          <li>Scan <strong>only</strong> hosts you own or have written permission to test.</li>
+          <li>Packet capture on your own lab network.</li>
+          <li>Monitoring tools should be deployed with the network owner's approval. Practising on real production networks without permission is illegal everywhere — it's also a skill you lose if you only use a simulator.</li>
+        </ul>
+
+        <h2>8. Key Takeaways</h2>
+
+        <ol>
+          <li>Master the built-ins first (they're on every machine).</li>
+          <li>Wireshark + Nmap + iperf3 cover capture, discovery, and throughput — 90% of labs.</li>
+          <li>Packet Tracer/GNS3 let you practise routing without physical gear.</li>
+          <li>Never scan/capture anything you don't own or have permission for.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Cross-references: part2 modules 03/06/07 (simulators &amp; labs); cabling labs (physical) benefit from ipconfig/ping validation after termination.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=cabling">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

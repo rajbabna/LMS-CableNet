@@ -1,0 +1,111 @@
+{
+  "cabling": [
+    {
+      "slug": "cable-types-and-categories",
+      "title": "Networking Cables & Connections — Reference",
+      "description": "Derived from public learning material on cabling standards, connectors, and wiring.",
+      "category": "cabling",
+      "file": "resources/cabling/cable-types-and-categories.html"
+    },
+    {
+      "slug": "fiber-optics-fundamentals",
+      "title": "Fiber Optics Fundamentals — Student Reference",
+      "description": "Enrichment material (from fiberu.org, cablestogo.com connector guides).",
+      "category": "cabling",
+      "file": "resources/cabling/fiber-optics-fundamentals.html"
+    },
+    {
+      "slug": "rj45-crimping-field-guide",
+      "title": "RJ45 Connectors & Crimping — Step-by-Step Field Guide",
+      "description": "Deep dive supporting lessons 03 (RJ45 connectors) and 04–05 (crimping practice/marathon).",
+      "category": "cabling",
+      "file": "resources/cabling/rj45-crimping-field-guide.html"
+    },
+    {
+      "slug": "cisco-netacad-alignment-map",
+      "title": "Cisco NetAcad Curriculum Alignment Map",
+      "description": "Maps the three free Cisco Networking Academy courses (Network Technician",
+      "category": "shared",
+      "file": "resources/cabling/cisco-netacad-alignment-map.html"
+    },
+    {
+      "slug": "free-network-admin-tools",
+      "title": "Free Network Admin Tools — Student Toolkit",
+      "description": "Curated from free/open-source network administration tool lists",
+      "category": "shared",
+      "file": "resources/cabling/free-network-admin-tools.html"
+    },
+    {
+      "slug": "further-learning-directory",
+      "title": "Further Learning & Free Course Directory",
+      "description": "Aggregated from networkcomputing.com's \"8 free classes\" list, study-ccna.com,",
+      "category": "shared",
+      "file": "resources/cabling/further-learning-directory.html"
+    },
+    {
+      "slug": "source-brief-bridgecable-training-bookmarks",
+      "title": "Source Brief — BridgeCable \"Free Network Cabling Training Bookmarks\"",
+      "description": "Source: https://www.bridgecable.com/free-network-cabling-training-bookmarks-to-help-you/",
+      "category": "shared",
+      "file": "resources/cabling/source-brief-bridgecable-training-bookmarks.html"
+    }
+  ],
+  "networking": [
+    {
+      "slug": "ip-addressing-and-subnetting",
+      "title": "IP Addressing & Subnetting — Student Deep-Dive",
+      "description": "Core reference for part2 modules 01 (IP addressing) and 02 (subnetting),",
+      "category": "networking",
+      "file": "resources/networking/ip-addressing-and-subnetting.html"
+    },
+    {
+      "slug": "network-security-basics",
+      "title": "Network Security Basics — Student Reference",
+      "description": "Fills networking module 08 (security basics). Derived from Cisco Network",
+      "category": "networking",
+      "file": "resources/networking/network-security-basics.html"
+    },
+    {
+      "slug": "network-utilities-and-troubleshooting",
+      "title": "Network Utilities & Troubleshooting — Command Reference",
+      "description": "Supports part2 modules 04 (DHCP/DNS), 06 (troubleshooting methods),",
+      "category": "networking",
+      "file": "resources/networking/network-utilities-and-troubleshooting.html"
+    },
+    {
+      "slug": "routing-and-switching",
+      "title": "Routing & Switching Fundamentals — Student Reference",
+      "description": "Supports part2 modules 03 (packet-tracer IP), 05 (routing), and routing",
+      "category": "networking",
+      "file": "resources/networking/routing-and-switching.html"
+    },
+    {
+      "slug": "cisco-netacad-alignment-map",
+      "title": "Cisco NetAcad Curriculum Alignment Map",
+      "description": "Maps the three free Cisco Networking Academy courses (Network Technician",
+      "category": "shared",
+      "file": "resources/networking/cisco-netacad-alignment-map.html"
+    },
+    {
+      "slug": "free-network-admin-tools",
+      "title": "Free Network Admin Tools — Student Toolkit",
+      "description": "Curated from free/open-source network administration tool lists",
+      "category": "shared",
+      "file": "resources/networking/free-network-admin-tools.html"
+    },
+    {
+      "slug": "further-learning-directory",
+      "title": "Further Learning & Free Course Directory",
+      "description": "Aggregated from networkcomputing.com's \"8 free classes\" list, study-ccna.com,",
+      "category": "shared",
+      "file": "resources/networking/further-learning-directory.html"
+    },
+    {
+      "slug": "source-brief-bridgecable-training-bookmarks",
+      "title": "Source Brief — BridgeCable \"Free Network Cabling Training Bookmarks\"",
+      "description": "Source: https://www.bridgecable.com/free-network-cabling-training-bookmarks-to-help-you/",
+      "category": "shared",
+      "file": "resources/networking/source-brief-bridgecable-training-bookmarks.html"
+    }
+  ]
+}

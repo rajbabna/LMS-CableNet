@@ -277,8 +277,15 @@ async function loadModulesForCourse(courseId) {
     // ---- State ----
     let currentFilter = 'all';
     let currentUnit = 'all';
+    const moduleById = new Map();
     const openUnits = new Set(unitList.map(u => u.id));
     let orphanOpen = true;
+
+    // Resources tab state (built from resources/index.json)
+    let resourceManifest = null;
+    let resourcePromise = null;
+    const resourceEsc = s => String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
     const railList = document.getElementById('unitRailList');
     const railStats = document.getElementById('railStats');
@@ -381,6 +388,12 @@ async function loadModulesForCourse(courseId) {
     function renderGrid() {
       moduleList.innerHTML = '';
       moduleById.clear();
+
+      if (currentFilter === 'resources') {
+        renderResources();
+        return;
+      }
+
       visible.forEach(m => moduleById.set(m.id, m));
 
       let html = '';
@@ -420,6 +433,49 @@ async function loadModulesForCourse(courseId) {
       moduleList.innerHTML = html;
     }
 
+    // ---- Resources tab ----
+    function resourceCards(list) {
+      return (list || []).map(r => {
+        const locked = isPreview || isExpired;
+        return `
+          <li class="resource-card">
+            <div class="module-head-top">
+              <span class="mod-tag">RESOURCE</span>
+              <span class="mod-status mod-status-unlock">REFERENCE</span>
+            </div>
+            <strong class="module-card-title">${resourceEsc(r.title)}</strong>
+            ${r.description ? `<div class="module-desc">${resourceEsc(r.description)}</div>` : ''}
+            <div class="module-actions" style="justify-content: flex-end;">
+              ${locked
+                ? `<span class="preview-locked">🔒 Enrollment required</span>`
+                : `<a class="btn btn-primary resource-open" href="${r.file}" target="_blank" rel="noopener" style="font-size:0.76rem;">Open resource ↗</a>`}
+            </div>
+          </li>`;
+      }).join('');
+    }
+
+    function renderResources() {
+      if (resourceManifest) {
+        const list = resourceManifest[courseId] || [];
+        moduleList.innerHTML = list.length
+          ? resourceCards(list)
+          : '<li><span style="color: var(--ink-soft);">No resources for this course yet.</span></li>';
+        return;
+      }
+      // First visit: show a skeleton, fetch the manifest, then render.
+      moduleList.innerHTML = '<li class="skeleton"></li><li class="skeleton"></li>';
+      if (!resourcePromise) {
+        resourcePromise = fetch('resources/index.json')
+          .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(data => { resourceManifest = data; return data; })
+          .catch(err => { resourceManifest = {}; throw err; });
+      }
+      resourcePromise.then(() => renderResources())
+        .catch(() => {
+          moduleList.innerHTML = '<li><span style="color: #B91C1C;">Could not load resources.</span></li>';
+        });
+    }
+
     // ---- Filter tabs (types) ----
     function ensureFilterBar() {
       if (!moduleList.parentNode || moduleList.parentNode.querySelector('.module-filter')) return;
@@ -434,7 +490,8 @@ async function loadModulesForCourse(courseId) {
           const dis = enabled ? '' : ' disabled aria-disabled="true" title="No content of this type yet"';
           return `<button type="button" class="mf-btn${k === 'all' ? ' active' : ''}${enabled ? '' : ' mf-disabled'}" data-filter="${k}" role="tab" aria-selected="${k === 'all' ? 'true' : 'false'}"${dis}>${label}</button>`;
         }).join('');
-      bar.innerHTML = pills;
+      const resourcesBtn = `<span class="mf-sep" aria-hidden="true"></span><button type="button" class="mf-btn" data-filter="resources" role="tab" aria-selected="false">Resources</button>`;
+      bar.innerHTML = pills + resourcesBtn;
       moduleList.parentNode.insertBefore(bar, moduleList);
       bar.addEventListener('click', function (e) {
         const btn = e.target.closest('.mf-btn[data-filter]');

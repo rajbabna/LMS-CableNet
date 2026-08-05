@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cisco NetAcad Curriculum Alignment Map — Cable&Net Courses</title>
+  <meta name="description" content="Maps the three free Cisco Networking Academy courses (Network Technician">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="cabling" data-resource="cisco-netacad-alignment-map">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=cabling">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · CABLING</span>
+      <h1>Cisco NetAcad Curriculum Alignment Map</h1>
+      <p class="course-desc">Maps the three free Cisco Networking Academy courses (Network Technician</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: shared (both Part 1 &amp; Part 2) Maps the three free Cisco Networking Academy courses (Network Technician career path) onto Cable&amp;Net Courses modules. These are the main resource feeders for building in-depth lesson content.  Feeder courses: 1. <strong>Networking Basics</strong> (22 h) — netacad.com/courses/networking-basics 2. <strong>Network Addressing and Basic Troubleshooting</strong> (14 h) — netacad.com/courses/network-addressing-and-basic-troubleshooting 3. <strong>Network Support and Security</strong> (12 h) — netacad.com/courses/network-support-security</aside>
+
+        <h2>1. How the Cisco sequence maps to our course</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Cisco course</th><th>Role in our course</th></tr></thead>
+            <tbody>
+            <tr><td>Networking Basics</td><td>Foundation: communication, media, OSI/TCP-IP, IPv4/IPv6, DHCP, ARP, routing, TCP/UDP, apps, utilities</td></tr>
+            <tr><td>Network Addressing and Basic Troubleshooting</td><td>Physical/Data-Link/Network layer depth, IPv6, Cisco devices, troubleshooting</td></tr>
+            <tr><td>Network Support and Security</td><td>Help desk + troubleshooting practice, security basics, access control</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Taken together they align to the <strong>Cisco CCST Networking</strong> certification — our certification-prep module.</p>
+
+        <h2>2. Cabling course (Part 1) coverage</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Our module</th><th>Cisco feeder</th><th>Cisco module(s)</th></tr></thead>
+            <tbody>
+            <tr><td>01 OSI &amp; topologies</td><td>Networking Basics</td><td>M1 Communication, M5 Communication Principles (OSI vs TCP/IP), M7 Access Layer</td></tr>
+            <tr><td>02 Cabling standards</td><td>Networking Basics / Addressing</td><td>NetBasics M6 Network Media; Addressing M1 Physical Layer</td></tr>
+            <tr><td>03 RJ45 connectors</td><td>—</td><td>Not covered (Cisco covers cable types, not termination) — use our own RJ45 guide</td></tr>
+            <tr><td>04 Crimping practice</td><td>—</td><td>Not covered — use our own crimping field guide</td></tr>
+            <tr><td>05 Crimping marathon</td><td>—</td><td>Not covered — use our own crimping field guide</td></tr>
+            <tr><td>06 Troubleshooting</td><td>Addressing</td><td>M7 Troubleshoot Common Network Problems</td></tr>
+            <tr><td>07 Devices &amp; Packet Tracer</td><td>Addressing</td><td>M6 Cisco Switches and Routers</td></tr>
+            <tr><td>08 Certification prep</td><td>All three</td><td>CCST-aligned path (badges from each)</td></tr>
+            <tr><td>09 Final assessment</td><td>All three</td><td>Checkpoint + final exams in each course</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>3. Networking course (Part 2) coverage</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Our module</th><th>Cisco feeder</th><th>Cisco module(s)</th></tr></thead>
+            <tbody>
+            <tr><td>01 IP addressing</td><td>Networking Basics</td><td>M8 Internet Protocol, M9 IPv4 &amp; Network Segmentation</td></tr>
+            <tr><td>02 Subnetting</td><td>Networking Basics</td><td>M9 IPv4 &amp; Network Segmentation</td></tr>
+            <tr><td>03 Packet Tracer IP</td><td>Addressing</td><td>M3 Routing at Network Layer, M6 Cisco Devices</td></tr>
+            <tr><td>04 DHCP/DNS</td><td>Networking Basics</td><td>M11 Dynamic Addressing (DHCP), M16 Application Services (DNS)</td></tr>
+            <tr><td>05 Routing</td><td>Networking Basics / Addressing</td><td>NetBasics M14 Routing Between Networks; Addressing M3</td></tr>
+            <tr><td>06 Troubleshooting methods</td><td>Addressing / Support &amp; Security</td><td>Addressing M7; SupportSec M1 Diagnostics</td></tr>
+            <tr><td>07 Troubleshooting labs</td><td>Support &amp; Security</td><td>M1 Network Support (endpoint/network/remote)</td></tr>
+            <tr><td>08 Security basics</td><td>Support &amp; Security</td><td>M2 Cybersecurity Threats/Vulns/Attacks, M3 Network Security</td></tr>
+            <tr><td>09 Final assessment</td><td>All three</td><td>Checkpoint + final exams</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>4. Coverage verdict</h2>
+
+        <ul>
+          <li><strong>Networking course: 9/9 modules fully covered.</strong></li>
+          <li><strong>Cabling course: 6/9 covered by Cisco; modules 03–05 (RJ45, crimping, marathon) are hands-on termination — covered by our own authored resources</strong> (<code>docs/resources/cabling/rj45-crimping-field-guide.md</code>, <code>cable-types-and-categories.md</code>).</li>
+        </ul>
+
+        <aside class="rsrc-callout">No gap remains after combining Cisco feeders with our authored resources.</aside>
+
+        <h2>5. How to use this map when authoring lessons</h2>
+
+        <ol>
+          <li>Pick a lesson module from the tables above.</li>
+          <li>Open the mapped Cisco module(s) as the factual backbone.</li>
+          <li>Enrich with our resource MDs (pinouts, crimping steps, commands).</li>
+          <li>Follow <code>lesson-template.md</code> to produce <code>module-XX-<em>.md</code> / <code>part2-module-XX-</em>.md</code>.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Cross-references: source-brief-bridgecable-training-bookmarks, further-learning-directory, free-network-admin-tools.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=cabling">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

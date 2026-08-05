@@ -23,6 +23,9 @@
 
 * { box-sizing: border-box; }
 
+/* Anchor jumps (e.g. course CTA -> #moduleList) must clear the sticky header */
+html { scroll-padding-top: 92px; }
+
 body {
   margin: 0;
   background: var(--bg);
@@ -597,6 +600,11 @@ button.module-open {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 0 0 1.4rem;
+}
+.mf-sep {
+  width: 1px;
+  background: var(--line);
+  margin: 0 0.4rem;
 }
 .mf-btn {
   font-family: var(--font-mono);

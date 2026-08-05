@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Networking Cables &amp; Connections — Reference — Cable&Net Courses</title>
+  <meta name="description" content="Derived from public learning material on cabling standards, connectors, and wiring.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="cabling" data-resource="cable-types-and-categories">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=cabling">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · CABLING</span>
+      <h1>Networking Cables &amp; Connections — Reference</h1>
+      <p class="course-desc">Derived from public learning material on cabling standards, connectors, and wiring.</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: Network Foundations — Cabling &amp; Infrastructure (Part 1) Derived from public learning material on cabling standards, connectors, and wiring. Purpose: in-depth, student-facing download that expands on lesson modules 01–06.</aside>
+
+        <h2>1. The Cable Hierarchy</h2>
+
+        <p>A network cable exactly matches a <strong>physical layer (Layer 1)</strong> link. Data converted to electrical, light, or radio signals travels over a medium. Three families:</p>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Family</th><th>Medium</th><th>Typical use</th><th>Reach limit</th></tr></thead>
+            <tbody>
+            <tr><td>Copper (UTP)</td><td>Twisted copper pairs</td><td>Office LANs (local area)</td><td>~100 m</td></tr>
+            <tr><td>Copper (shielded)</td><td>Twisted pairs + foil/braid</td><td>Noisy industrial environments</td><td>~100 m</td></tr>
+            <tr><td>Fiber optic</td><td>Glass/plastic core</td><td>Backbones, campus, WAN, data centers</td><td>100 m – 40 km+</td></tr>
+            <tr><td>Coaxial</td><td>Central conductor + shield</td><td>Legacy cable TV, older LANs</td><td>~500 m</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Why twisted pairs?</strong> Twisting the two wires of a circuit cancels electromagnetic interference from adjacent pairs and the environment, which is what lets Cat5e/Cat6 run fast without each pair radiating into another.</p>
+
+        <h2>2. UTP Categories (Ethernet Copper)</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Category</th><th>Max speed</th><th>Notes</th><th>Pairs</th></tr></thead>
+            <tbody>
+            <tr><td>Cat5e</td><td>1 Gbps</td><td>Minimum for modern LANs, 100 MHz</td><td>4 (8 wires total)</td></tr>
+            <tr><td>Cat6</td><td>10 Gbps (≤55 m)</td><td>250 MHz, tighter twist, spline</td><td>4</td></tr>
+            <tr><td>Cat6a</td><td>10 Gbps (100 m)</td><td>500 MHz, improved crosstalk</td><td>4</td></tr>
+            <tr><td>Cat7 / Cat7a</td><td>10 Gbps (shielding)</td><td>Shielded, older standard</td><td>4</td></tr>
+            <tr><td>Cat8</td><td>40 Gbps (≤30 m)</td><td>Data-center short links</td><td>4</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Practical installer rule:</strong></p>
+
+        <ul>
+          <li>Residential / office drops: Cat5e or Cat6e</li>
+          <li>New structured installations today: <strong>Cat6a</strong> is the safe future-proof choice</li>
+          <li>Cat8 is niche — only very short, high-speed switches-to-servers runs</li>
+        </ul>
+
+        <h2>3. Wiring Standards: T568A vs T568B</h2>
+
+        <p>Both T568A and T568B define the pin-to-color mapping of an 8-position (RJ45) connector. The physical difference is only swapping pairs 2 and 3:</p>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Pin</th><th>T568A</th><th>T568B</th></tr></thead>
+            <tbody>
+            <tr><td>1</td><td>White-Green</td><td>White-Orange</td></tr>
+            <tr><td>2</td><td>Green</td><td>Orange</td></tr>
+            <tr><td>3</td><td>White-Orange</td><td>White-Green</td></tr>
+            <tr><td>4</td><td>Blue</td><td>Blue</td></tr>
+            <tr><td>5</td><td>White-Blue</td><td>White-Blue</td></tr>
+            <tr><td>6</td><td>Orange</td><td>Green</td></tr>
+            <tr><td>7</td><td>White-Brown</td><td>White-Brown</td></tr>
+            <tr><td>8</td><td>Brown</td><td>Brown</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Rule:</strong> pick <strong>one</strong> standard and use it consistently. For a <strong>straight-through</strong> cable both ends use the same scheme; for a <strong>crossover</strong> cable (rare today — auto-MDI-X) one end is T568A and the other T568B.</p>
+
+        <h2>4. Connectors &amp; Pinouts</h2>
+
+        <ul>
+          <li><strong>RJ45 (8P8C)</strong> — the plug on UTP cables. Crimped with a crimp tool; wires must seat in the correct pin order.</li>
+          <li><strong>RJ11 (6P)</strong> — older telephony 2-pair, not Ethernet.</li>
+          <li><strong>Keystone jack / patch panel</strong> — fixed receptacle the cable terminates into at the wall or wiring closet.</li>
+          <li><strong>Fiber connectors</strong> — LC (small, common), SC (push-pull), ST (bayonet), MTP/MPO (multi-fiber).</li>
+          <li><strong>Coaxial</strong> — BNC / F-type connectors.</li>
+        </ul>
+
+        <p><strong>Pinout cheat (T568B visual, tip-left):</strong></p>
+
+        <pre class="rsrc-pre"><code>1 2  |  3 6  |  4 5  |  7 8
+W Or|W Gr|Bl  Bl|W Br  Br</code></pre>
+
+        <p>Only pairs <strong>1-2</strong> and <strong>3-6</strong> need to be correct for 100 Mbps; 8 conductors for 1 Gbps+.</p>
+
+        <h2>5. Reading Performance Specs (why &quot;tight twist&quot; matters these days)</h2>
+
+        <p>Two signals fighting within the same cable cause errors:</p>
+
+        <ul>
+          <li><strong>NEXT (Near-End Crosstalk):</strong> a strong signal leaking into a neighbouring pair at the near end. Measured dB; higher (less negative) is better.</li>
+          <li><strong>Return Loss:</strong> — reflected energy back toward the source.</li>
+          <li>**Skew / Fire design measure low for shielded copper won't buy you speed by itself; proper termination and category rating matter more.</li>
+        </ul>
+
+        <h2>6. Safety &amp; Code (installer essentials)</h2>
+
+        <ul>
+          <li><strong>Never install above ceiling tiles without plenum/jacket rating printed on the cable.</strong> Plenum-rated cable uses low-smoke, low-flame materials.</li>
+          <li><strong>Building codes (e.g. NEC in the US) apply to pathways, fire ratings, and separation from power.</strong> Follow all codes.</li>
+          <li><strong>Never run data cable parallel and alongside mains power for long distances</strong> (induction noise).</li>
+          <li><strong>Wear appropriate PPE</strong> and pull the cable gently to avoid exceeding its bend radius / tension rating.</li>
+        </ul>
+
+        <h2>7. Key Takeaways for Students</h2>
+
+        <ol>
+          <li>UTP twisted pairs exist to cancel interference (that's why they're twisted).</li>
+          <li>Cat5e/Cat6a are the practical backbone choices today.</li>
+          <li>Choose T568A OR T568B — consistency is more important than which one.</li>
+          <li>The RJ45 plug must be terminated in exact pin order or the link fails.</li>
+          <li>Safety + code (plenum, fire rating, power separation) governs real installs.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Cross-references: lesson-cabling-01 (OSI/topologies), 02 (cabling standards), 03 (RJ45), 04–06 (crimping &amp; troubleshooting), handout-t568b-pinout-cheatsheet.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=cabling">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

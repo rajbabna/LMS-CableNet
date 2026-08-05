@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RJ45 Connectors &amp; Crimping — Step-by-Step Field Guide — Cable&Net Courses</title>
+  <meta name="description" content="Deep dive supporting lessons 03 (RJ45 connectors) and 04–05 (crimping practice/marathon).">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="cabling" data-resource="rj45-crimping-field-guide">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=cabling">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · CABLING</span>
+      <h1>RJ45 Connectors &amp; Crimping — Step-by-Step Field Guide</h1>
+      <p class="course-desc">Deep dive supporting lessons 03 (RJ45 connectors) and 04–05 (crimping practice/marathon).</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: Network Foundations — Cabling &amp; Infrastructure (Part 1) Deep dive supporting lessons 03 (RJ45 connectors) and 04–05 (crimping practice/marathon).</aside>
+
+        <h2>1. Anatomy of an RJ45 Connector</h2>
+
+        <p>The RJ45 (8P8C) modular plug is what terminates a UTP cable. Three parts matter when crimping:</p>
+
+        <ol>
+          <li><strong>The 8 gold contact pins</strong> — each pierces one conductor of the cable.</li>
+          <li><strong>The body / housing</strong> — transparent plastic; you verify colours through it.</li>
+          <li><strong>The locking tab</strong> — clicks into the keystone jack / port so the plug stays seated.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Always inspect the plug: if any pin is not aligned with its conductor, the link may test &quot;up&quot; but fail under PoE or high throughput.</aside>
+
+        <h2>2. Tools You Need</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+            <tbody>
+            <tr><td>Crimp tool (crimper)</td><td>Terminates RJ45 plugs with a ratcheting press</td></tr>
+            <tr><td>Cable stripper</td><td>Removes the outer jacket without nicking wires</td></tr>
+            <tr><td>Wire cutter</td><td>Trims the bundle to exact length</td></tr>
+            <tr><td>Cable tester</td><td>Verifies continuity &amp; pin order (mandatory before install)</td></tr>
+            <tr><td>Punch-down tool</td><td>Terminates keystone jacks / patch panels (110-style)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>3. Crimping Process (T568B example, end-to-end)</h2>
+
+        <ol>
+          <li><strong>Strip</strong> the jacket ~13 mm (about half an inch). Do not nick the inner wires.</li>
+          <li><strong>Untwist &amp; arrange</strong> the 4 pairs into the T568B order: W-Orange, Orange, W-Green, Blue, W-Blue, Green, W-Brown, Brown.</li>
+          <li><strong>Flatten &amp; align</strong> the 8 wires in one plane; keep the untwisted section as short as possible (&lt;13 mm) so crosstalk stays low.</li>
+          <li><strong>Trim</strong> the ends so all 8 wires are perfectly flush.</li>
+          <li><strong>Insert into the plug</strong> (tab facing away from you / clip down). Push until the jacket goes past the plug's strain-relief barb and wires reach the front.</li>
+          <li><strong>Crimp</strong> with one firm squeeze of the ratchet until it releases.</li>
+          <li><strong>Test</strong> on a cable tester — every pin must light in order.</li>
+        </ol>
+
+        <h2>4. The &quot;Front View&quot; Pinout to Memorise</h2>
+
+        <p>Holding the plug with the <strong>clip facing down</strong> (contacts up, facing you):</p>
+
+        <pre class="rsrc-pre"><code>Pin:  1     2     3     4     5     6     7     8
+     W-Or  Or   W-Gr  Bl   W-Bl  Gr   W-Br  Br   (T568B)</code></pre>
+
+        <p>Pair-to-pin reality check: <strong>only pairs 1-2, 3-6, 4-5, 7-8</strong> are the real circuits. Pins 1-2 and 3-6 are the critical ones for 100 Mbps.</p>
+
+        <h2>5. Common Mistakes &amp; How to Avoid Them</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Mistake</th><th>Symptom</th><th>Fix</th></tr></thead>
+            <tbody>
+            <tr><td>Wires in wrong order</td><td>Tester shows crossed/missing pins</td><td>Re-crimp, verify colour order</td></tr>
+            <tr><td>Jacket not inserted past barb</td><td>Pull test fails; plug comes loose</td><td>Push cable deeper before crimping</td></tr>
+            <tr><td>Untwisted too far</td><td>Flaky gigabit links</td><td>Keep twist as close to plug as possible</td></tr>
+            <tr><td>Trimming not flush</td><td>Some pins don't make contact</td><td>Cut again, re-insert</td></tr>
+            <tr><td>Using the wrong plug for solid vs stranded cable</td><td>Bad contact</td><td>Use the correct RJ45 type (solid/stranded)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>6. Keystones &amp; Patch Panels (the &quot;other end&quot; of the run)</h2>
+
+        <ul>
+          <li>A <strong>keystone jack</strong> is where the horizontal cable terminates at the wall plate.</li>
+          <li>Punch-down (110/IDC) tool seats each conductor into its slot; the slot's metal teeth cut the insulation — no stripping required for each wire.</li>
+          <li>Colour labels on the keystone (T568A / T568B) tell you the pin mapping; <strong>match the wall end to the same standard used at the patch panel.</strong></li>
+        </ul>
+
+        <h2>7. Quick Checklist Before Every Install</h2>
+
+        <ul class="rsrc-checklist">
+          <li class="ck"><span class="ck-box"></span>Correct cable category for the run</li>
+          <li class="ck"><span class="ck-box"></span>Consistent T568A or T568B on BOTH ends</li>
+          <li class="ck"><span class="ck-box"></span>Jacket inside the connector (strain relief engaged)</li>
+          <li class="ck"><span class="ck-box"></span>All 8 pins test in order (tester PASS)</li>
+          <li class="ck"><span class="ck-box"></span>No staples/kinks beyond bend radius</li>
+          <li class="ck"><span class="ck-box"></span>Plenum/fire rating matches ceiling pathway</li>
+        </ul>
+
+        <aside class="rsrc-callout">Cross-references: lesson-cabling-03 (RJ45 connectors), 04–05 (crimping practice), handout-t568b-pinout-cheatsheet.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=cabling">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

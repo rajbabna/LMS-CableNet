@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiber Optics Fundamentals — Student Reference — Cable&Net Courses</title>
+  <meta name="description" content="Enrichment material (from fiberu.org, cablestogo.com connector guides).">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="cabling" data-resource="fiber-optics-fundamentals">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=cabling">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · CABLING</span>
+      <h1>Fiber Optics Fundamentals — Student Reference</h1>
+      <p class="course-desc">Enrichment material (from fiberu.org, cablestogo.com connector guides).</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: Network Foundations — Cabling &amp; Infrastructure (Part 1) Enrichment material (from fiberu.org, cablestogo.com connector guides). Introduces fiber so students know when to move beyond copper.</aside>
+
+        <h2>1. Why Fiber?</h2>
+
+        <p>Fiber optics carry data as <strong>light pulses</strong> through a glass/plastic core.</p>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Benefit</th><th>Why it matters</th></tr></thead>
+            <tbody>
+            <tr><td>Distance</td><td>Reaches 100 m (multi-mode) to 40 km+ (single-mode) vs copper's ~100 m</td></tr>
+            <tr><td>Bandwidth</td><td>Far higher capacity, easily 100 Gbps</td></tr>
+            <tr><td>Immunity</td><td>No electromagnetic interference (EMI), no crosstalk</td></tr>
+            <tr><td>Security</td><td>Harder to tap without detection</td></tr>
+            <tr><td>Light weight</td><td>Smaller &amp; lighter for large runs</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>2. Multi-Mode vs Single-Mode</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Type</th><th>Core size</th><th>Light path</th><th>Distance</th><th>Colour guide</th></tr></thead>
+            <tbody>
+            <tr><td>OM2</td><td>50 µm</td><td>Multiple modes (rays)</td><td>~300 m</td><td>Orange jacket</td></tr>
+            <tr><td>OM3/OM4 (aqua)</td><td>50 µm</td><td>Multiple, laser-optimised</td><td>300–550 m</td><td>Aqua jacket</td></tr>
+            <tr><td>OS2 Single-mode</td><td>9 µm</td><td>One straight ray</td><td>Up to 40 km+</td><td>Yellow jacket</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul>
+          <li><strong>Multi-mode</strong> = short, high-speed links inside a building/campus.</li>
+          <li><strong>Single-mode</strong> = long-haul, carriers, inter-building WAN.</li>
+        </ul>
+
+        <h2>3. Fiber Connectors</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Connector</th><th>Style</th><th>Typical use</th></tr></thead>
+            <tbody>
+            <tr><td>LC</td><td>Small &quot;Lucent/click&quot; 1.25 mm ferrule</td><td>Modern equipment, high density</td></tr>
+            <tr><td>SC</td><td>Square push-pull 2.5 mm</td><td>Patch panels, simple snap</td></tr>
+            <tr><td>ST</td><td>Round bayonet</td><td>Legacy installs</td></tr>
+            <tr><td>MTP/MPO</td><td>Multi-fibre (up to 32)</td><td>High-density trunk, data center</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="rsrc-callout">LC is today the de-facto default for switches and servers; MTP/MPO dominates dense data-center trunks.</aside>
+
+        <h2>4. Components of a Fiber Link</h2>
+
+        <ol>
+          <li><strong>Transmitter</strong> — LED (multi-mode) or laser (single-mode) at one end.</li>
+          <li><strong>Fiber cable</strong> — the core + cladding guiding the light.</li>
+          <li><strong>Connectors &amp; patch panels</strong> — join cable segments.</li>
+          <li><strong>Transceiver (SFP/SFP+/QSFP)</strong> — pluggable module converting electrical &lt;-&gt; optical.</li>
+          <li><strong>Receiver</strong> — detects the light pulses (photodetector).</li>
+        </ol>
+
+        <h2>5. Handling Rules (why fiber is &quot;delicate but tough&quot;)</h2>
+
+        <ul>
+          <li><strong>Bend radius:</strong> never bend tighter than the cable's rated minimum radius (typically ~10× the diameter for the cable, ~20× for patch cords when installed).</li>
+          <li><strong>Tensile load:</strong> fiber is strong in tension when pulled by its Kevlar/yarn strength members, NOT by the glass itself. Pull on the members.</li>
+          <li><strong>Never view the transmit end / never stare into a laser</strong> — invisible and can damage eyes.</li>
+          <li><strong>Clean before you connect:</strong> microscopic dust causes back-reflection and loss. Use fiber cleaning tools / one-click cleaners before mating connectors.</li>
+        </ul>
+
+        <h2>6. Two Key Optical Measurements</h2>
+
+        <ul>
+          <li><strong>Insertion Loss (dB):</strong> light lost through a connection; a good mated pair is &lt;0.5 dB.</li>
+          <li><strong>Return Loss / Reflectance (dB):</strong> light reflected back toward the source; higher magnitude = better.</li>
+        </ul>
+
+        <p>A technician validates links with an <strong>OLTS</strong> (optical loss test set) or an <strong>OTDR</strong> (optical time-domain reflectometer), which maps events (splices, bends, cleanliness) along the fibre length.</p>
+
+        <h2>7. When to Choose Fiber vs Copper (decision aid)</h2>
+
+        <ul>
+          <li><strong>≤100 m, standard office/house:</strong> copper Cat6a — cheaper, easier, tools everyone has.</li>
+          <li><strong>&gt;100 m, runs across buildings:</strong> single-mode fiber.</li>
+          <li><strong>High EMI (factory floor, alongside motors):</strong> fiber removes the noise problem.</li>
+          <li><strong>High-density data center:</strong> multi-mode OM4 or MPO trunks for short, fast links; single-mode for longer spine links.</li>
+        </ul>
+
+        <aside class="rsrc-callout">Cross-references: handout appeal — similar to handout-subnetting-cheatsheet model; can pair with a future fiber course module.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=cabling">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

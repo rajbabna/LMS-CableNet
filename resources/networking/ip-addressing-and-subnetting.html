@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Addressing &amp; Subnetting — Student Deep-Dive — Cable&Net Courses</title>
+  <meta name="description" content="Core reference for part2 modules 01 (IP addressing) and 02 (subnetting),">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="networking" data-resource="ip-addressing-and-subnetting">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=networking">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · NETWORKING</span>
+      <h1>IP Addressing &amp; Subnetting — Student Deep-Dive</h1>
+      <p class="course-desc">Core reference for part2 modules 01 (IP addressing) and 02 (subnetting),</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: Network Operations — Configuration &amp; Troubleshooting (Part 2) Core reference for part2 modules 01 (IP addressing) and 02 (subnetting), derived from free CCNA learning (study-ccna.com) concepts.</aside>
+
+        <h2>1. Why IPv4 Needs Subnetting</h2>
+
+        <p>An IPv4 address is a 32-bit number, written as four octets (0–255) for humans:</p>
+
+        <pre class="rsrc-pre"><code>192.168.1.10</code></pre>
+
+        <p>An address has two logical parts:</p>
+
+        <ul>
+          <li><strong>Network portion</strong> — identifies the network.</li>
+          <li><strong>Host portion</strong> — identifies a specific device on that network.</li>
+        </ul>
+
+        <p>The <strong>subnet mask</strong> tells you how many leading bits belong to the network part.</p>
+
+        <h2>2. Subnet Masks &amp; CIDR</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Notation</th><th>Address</th><th>Subnet mask</th><th>Network bits</th><th>Host bits</th><th>Usable hosts</th></tr></thead>
+            <tbody>
+            <tr><td>/8</td><td>255.0.0.0</td><td>8</td><td>24</td><td>16,777,214</td></tr>
+            <tr><td>/16</td><td>255.255.0.0</td><td>16</td><td>16</td><td>65,534</td></tr>
+            <tr><td>/24</td><td>255.255.255.0</td><td>24</td><td>8</td><td>254</td></tr>
+            <tr><td>/25</td><td>255.255.255.128</td><td>25</td><td>7</td><td>126</td></tr>
+            <tr><td>/26</td><td>255.255.255.192</td><td>26</td><td>6</td><td>62</td></tr>
+            <tr><td>/27</td><td>255.255.255.224</td><td>27</td><td>5</td><td>30</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Host formula:</strong> usable hosts = <strong>2^(32 - prefix) - 2</strong> (the &quot;minus 2&quot; = network address plus broadcast address).</p>
+
+        <h2>3. Special Addresses on Any Subnet</h2>
+
+        <p>Given network <code>192.168.1.0/24</code>:</p>
+
+        <ul>
+          <li><strong>Network address:</strong> <code>192.168.1.0</code> (all host bits 0)</li>
+          <li><strong>Broadcast address:</strong> <code>192.168.1.255</code> (all host bits 1)</li>
+          <li><strong>Usable range:</strong> <code>192.168.1.1</code> – <code>192.168.1.254</code></li>
+          <li><strong>Gateway</strong> (default gateway) is usually the first usable host → <code>192.168.1.1</code></li>
+        </ul>
+
+        <h2>4. Subnetting Step-by-Step (method)</h2>
+
+        <p><strong>Task:</strong> break <code>192.168.1.0/24</code> into 4 equal subnets for 4 departments (Accounting, Sales, Support, Backend), each 60 usable hosts.</p>
+
+        <ol>
+          <li>Find borrow bits: we need 4 subnets → <strong>2^2 = 4 → borrow 2 host bits</strong>.</li>
+          <li>New prefix: /24 + 2 = <strong>/26</strong> (mask 255.255.255.192).</li>
+          <li>Host bits = 32 − 26 = 6 → usable = 2^6 − 2 = <strong>62 hosts</strong> each (plenty for 30).</li>
+          <li>Block size = 2^(6) = 64. - Subnet ports start at 0, increment by 64: - <code>192.168.1.0</code>  /26 → usable <code>192.168.1.1</code>–<code>192.168.1.62</code> - <code>192.168.1.64</code> /26 → usable <code>192.168.1.65</code>–<code>192.168.1.126</code> - <code>192.168.1.128</code> /26 → usable <code>192.168.1.129</code>–<code>192.168.1.190</code> - <code>192.168.1.192</code> /26 → usable <code>192.168.1.193</code>–<code>192.168.1.254</code></li>
+        </ol>
+
+        <h2>5. Quick Reference Tables</h2>
+
+        <p><strong>Hosts by prefix (for common /24–/30):</strong></p>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Prefix</th><th>Mask</th><th>Block</th><th>Usable hosts</th></tr></thead>
+            <tbody>
+            <tr><td>/24</td><td>255.255.255.0</td><td>256</td><td>254</td></tr>
+            <tr><td>/25</td><td>255.255.255.128</td><td>128</td><td>126</td></tr>
+            <tr><td>/26</td><td>255.255.255.192</td><td>64</td><td>62</td></tr>
+            <tr><td>/27</td><td>255.255.255.224</td><td>32</td><td>30</td></tr>
+            <tr><td>/28</td><td>255.255.255.240</td><td>16</td><td>14</td></tr>
+            <tr><td>/29</td><td>255.255.255.248</td><td>8</td><td>6</td></tr>
+            <tr><td>/30</td><td>255.255.255.252</td><td>4</td><td>2 (point-to-point)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>A /30 is the standard for a point-to-point link</strong> (router to router) — only 2 usable addresses.</p>
+
+        <h2>6. IPv6 in One Minute</h2>
+
+        <ul>
+          <li>128-bit address, written in <strong>hextets</strong> separated by colons: <code>2001:db8::1</code>.</li>
+          <li>No broadcast; uses <strong>multicast / anycast</strong> instead.</li>
+          <li>Auto-configuration via <strong>SLAAC</strong>; loopback is <code>::1</code>.</li>
+          <li><code>::</code> collapses consecutive zero groups (only once per address).</li>
+        </ul>
+
+        <h2>7. Practical Tips</h2>
+
+        <ol>
+          <li><strong>Always reserve the gateway</strong> (often <code>.1</code>) for routers/access points.</li>
+          <li><strong>Never assign the network or broadcast address to a device.</strong></li>
+          <li>Use a consistent scheme: e.g. <code>192.168.10.x</code> for LAN, <code>.1</code> gateway, <code>.2–.10</code> servers, DHCP scope <code>.100–.200</code> for clients.</li>
+          <li>When a subnet must hold N hosts, always compute <code>2^(32 - mask) - 2 ≥ N</code> — then round up to the next clean block.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Cross-references: part2-module-01 (IP addressing), 02 (subnetting), handout-subnetting-cheatsheet.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=networking">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Routing &amp; Switching Fundamentals — Student Reference — Cable&Net Courses</title>
+  <meta name="description" content="Supports part2 modules 03 (packet-tracer IP), 05 (routing), and routing">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="networking" data-resource="routing-and-switching">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=networking">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · NETWORKING</span>
+      <h1>Routing &amp; Switching Fundamentals — Student Reference</h1>
+      <p class="course-desc">Supports part2 modules 03 (packet-tracer IP), 05 (routing), and routing</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: Network Operations — Configuration &amp; Troubleshooting (Part 2) Supports part2 modules 03 (packet-tracer IP), 05 (routing), and routing concepts from study-ccna.com.</aside>
+
+        <h2>1. The Difference: Switch vs Router</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Device</th><th>Layer</th><th>Job</th><th>Key behaviour</th></tr></thead>
+            <tbody>
+            <tr><td>Switch</td><td>2 (Data Link)</td><td>Signs; forwards frames by MAC address within a LAN/VLAN</td><td>Maintains a MAC address table</td></tr>
+            <tr><td>Router</td><td>3 (Network)</td><td>Routes packets between networks by IP address</td><td>Maintains a routing table</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul>
+          <li><strong>Switches</strong> segment a single network (more bandwidth per segment).</li>
+          <li><strong>Routers</strong> connect separate networks and choose the best path.</li>
+        </ul>
+
+        <h2>2. How a Switch Forwards Frames</h2>
+
+        <ol>
+          <li>Receives a frame; records the source MAC -&gt; port (learn).</li>
+          <li>Looks up destination MAC. - <strong>Known:</strong> forwards out only that port (forward/filter). - <strong>Unknown:</strong> <strong>floods</strong> out all ports except the source (toward the destination).</li>
+          <li>Broadcast/multicast frames are also flooded.</li>
+        </ol>
+
+        <p>That MAC table is what makes a switch efficient — one switch can carry full bandwidth to many ports simultaneously.</p>
+
+        <h2>3. How a Router Selects a Path</h2>
+
+        <ol>
+          <li>Router examines the destination IP in the packet.</li>
+          <li>Finds the <strong>longest (most specific) matching route</strong> in its routing table.</li>
+          <li>Forwards the packet out the matching interface / next hop.</li>
+        </ol>
+
+        <p>The routing table is built two ways:</p>
+
+        <ul>
+          <li><strong>Static routes</strong> — configured by hand.</li>
+          <li><strong>Dynamic protocols</strong> — router learns routes by talking to neighbours.</li>
+        </ul>
+
+        <h2>4. Routing Protocols Quick Map</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Protocol</th><th>Type</th><th>Metric</th><th>Distance-vector</th><th>Typical use</th></tr></thead>
+            <tbody>
+            <tr><td>RIP</td><td>Distance-vector</td><td>Hop count (max 15)</td><td>Yes</td><td>Small legacy networks</td></tr>
+            <tr><td>EIGRP</td><td>Advanced distance-vector</td><td>Composite (bandwidth/delay)</td><td>No (hybrid)</td><td>Cisco enterprise</td></tr>
+            <tr><td>OSPF</td><td>Link-state</td><td>Cost (based on bandwidth)</td><td>No</td><td>Enterprise, scalable, industry common</td></tr>
+            <tr><td>BGP</td><td>Path-vector</td><td>Path attributes</td><td>No</td><td>Internet routing between ASes</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul>
+          <li><strong>Distance-vector:</strong> &quot;I know the direction + distance to each network (tell your neighbours).&quot;</li>
+          <li><strong>Link-state:</strong> every router knows the whole network topology (build a map) and runs SPF to compute shortest paths.</li>
+        </ul>
+
+        <h2>5. Administrative Distance (which route wins first)</h2>
+
+        <p>When a router has multiple routes to the same network, it uses <strong>AD</strong> (lower wins) to prefer the &quot;more trusted&quot; source, then the metric.</p>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Source</th><th>Default AD</th></tr></thead>
+            <tbody>
+            <tr><td>Connected interface</td><td>0</td></tr>
+            <tr><td>Static route</td><td>1</td></tr>
+            <tr><td>EIGRP</td><td>90</td></tr>
+            <tr><td>OSPF</td><td>110</td></tr>
+            <tr><td>RIP</td><td>120</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>6. VLANs (why switches aren't one big flat network)</h2>
+
+        <ul>
+          <li>VLANs split a physical switch into multiple <strong>logical Layer-2 networks</strong>, isolating traffic (security + performance).</li>
+          <li>Frames carry a <strong>802.1Q VLAN tag</strong> between switches.</li>
+          <li><strong>Trunk links</strong> carry many VLANs; <strong>access ports</strong> carry one untagged VLAN.</li>
+          <li>Routing between VLANs happens at Layer 3 (router-on-a-stick or L3 switch).</li>
+        </ul>
+
+        <p>Example: VL10-Marketing (192.168.10.0/24), VL20-Sales (192.168.20.0/24).</p>
+
+        <h2>7. STP: Why Broadcast Storms Don't Melt a Switch</h2>
+
+        <ul>
+          <li><strong>STP (Spanning Tree Protocol)</strong> prevents Layer-2 loops.</li>
+          <li>It builds a loop-free tree: one <strong>root bridge</strong>, blocked ports are put in Blocking state.</li>
+          <li>If a link fails, STP recomputes and unblocks a path automatically.</li>
+        </ul>
+
+        <h2>8. Key Takeaways</h2>
+
+        <ol>
+          <li>Switch = MAC, inside the network; Router = IP, between networks.</li>
+          <li>Longest-match routing + AD (trust) + metric (cost) = the winning route.</li>
+          <li>OSPF is the enterprise workhorse; BGP is the internet.</li>
+          <li>VLANs isolate traffic; trunks carry multiple VLANs between switches.</li>
+          <li>STP keeps redundant topologies loop-free.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Cross-references: part2-module-03 (packet-tracer IP), 05 (routing), 07 (troubleshooting labs).</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=networking">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>

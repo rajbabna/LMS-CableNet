@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Security Basics — Student Reference — Cable&Net Courses</title>
+  <meta name="description" content="Fills networking module 08 (security basics). Derived from Cisco Network">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+
+  <style>
+    .resource { max-width: 820px; margin: 0 auto; }
+    .resource-header { padding-bottom: 0.6rem; margin-bottom: 1.6rem; }
+    .resource-header .port-num { margin-bottom: 0.8rem; }
+    .resource-header h1 { margin: 0 0 0.5rem; font-size: 1.7rem; line-height: 1.2; }
+    .resource-crumb { color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.8rem; }
+    .resource-section { padding: 1.1rem 0; }
+    .resource-section:not(:last-child) { border-bottom: 1px solid var(--line); }
+    .resource-section h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+    .resource p { line-height: 1.6; }
+    .rsrc-callout {
+      background: #EDF2F6; border-left: 4px solid var(--blue);
+      padding: 0.7rem 1rem; border-radius: 6px; color: var(--ink);
+      margin: 1rem 0;
+    }
+    .rsrc-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+    .rsrc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .rsrc-table th, .rsrc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; }
+    .rsrc-table th { background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .rsrc-table tr:nth-child(even) td { background: #FAF8F2; }
+    .rsrc-pre { background: #1F2933; color: #E6EDF3; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    .rsrc-checklist { list-style: none; padding: 0; margin: 0.9rem 0; }
+    .rsrc-checklist li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.35rem 0; }
+    .ck-box { flex: 0 0 1.1rem; height: 1.1rem; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); font-size: 0.8rem; }
+    @media (max-width: 640px) { .resource-header h1 { font-size: 1.35rem; } }
+  </style>
+</head>
+<body data-course="networking" data-resource="network-security-basics">
+
+<header class="site-header">
+  <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
+  <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+    <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+  </button>
+  <nav class="nav-actions" id="primary-nav">
+    <a href="../../student-dashboard.html">Dashboard</a>
+    <a href="../../course.html?course=networking">&larr; Back to course</a>
+    <span data-user-name style="margin-left:1.4rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft);"></span>
+    <a href="#" data-action="logout" style="margin-left:1.4rem;">Log out</a>
+  </nav>
+</header>
+
+<div class="wire-divider">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<main>
+  <article class="resource">
+    <header class="resource-header">
+      <span class="resource-crumb">STUDY RESOURCE · NETWORKING</span>
+      <h1>Network Security Basics — Student Reference</h1>
+      <p class="course-desc">Fills networking module 08 (security basics). Derived from Cisco Network</p>
+    </header>
+
+        <aside class="rsrc-callout">Course: Network Operations — Configuration &amp; Troubleshooting (Part 2) Fills networking module 08 (security basics). Derived from Cisco Network Support and Security (Modules 2–3): threats, vulnerabilities, and defense.</aside>
+
+        <h2>1. The Security Triad (CIA)</h2>
+
+        <ul>
+          <li><strong>Confidentiality</strong> — only authorized people can read data.</li>
+          <li><strong>Integrity</strong> — data is accurate and unchanged.</li>
+          <li><strong>Availability</strong> — systems are up and usable when needed.</li>
+        </ul>
+
+        <p>Every security control exists to protect one or more of these.</p>
+
+        <h2>2. Common Threats</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Threat</th><th>What it is</th></tr></thead>
+            <tbody>
+            <tr><td>Malware</td><td>Software designed to harm: viruses, worms, trojans, ransomware, spyware</td></tr>
+            <tr><td>Phishing / social engineering</td><td>Tricking people into revealing credentials or clicking bad links</td></tr>
+            <tr><td>Botnets</td><td>Compromised devices used in coordinated attacks</td></tr>
+            <tr><td>Denial of Service (DoS/DDoS)</td><td>Flooding a service so it's unavailable</td></tr>
+            <tr><td>Man-in-the-middle</td><td>Eavesdropping / altering traffic between two parties</td></tr>
+            <tr><td>Zero-day</td><td>Attack on a vulnerability the vendor hasn't patched yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>3. Types of Attacks</h2>
+
+        <ul>
+          <li><strong>Deception attacks</strong> — spoofing emails, fake websites, pretexting (fake identities). Often the entry point.</li>
+          <li><strong>Network attacks</strong> — packet sniffing, ARP spoofing, DNS poisoning, session hijacking.</li>
+          <li><strong>Wireless/mobile attacks</strong> — evil twin APs, rogue access points, Bluetooth attacks, app-based malware.</li>
+          <li><strong>Application attacks</strong> — SQL injection, cross-site scripting (XSS), buffer overflow, privilege escalation.</li>
+        </ul>
+
+        <aside class="rsrc-callout">Rule: <strong>the human is often the weakest link</strong> — most breaches start with a phishing email, not a firewall.</aside>
+
+        <h2>4. Defense Foundations</h2>
+
+        <ol>
+          <li><strong>Access Control</strong> — authenticate (who), authorize (what), and audit (log). Principle of <strong>least privilege</strong>: give users only the access they need.</li>
+          <li><strong>Patch management</strong> — keep OS and apps updated; most attacks exploit known, already-patched holes.</li>
+          <li><strong>Strong credentials</strong> — long passphrases + multi-factor authentication (MFA).</li>
+          <li><strong>Antimalware</strong> — signature-based + behaviour/heuristic detection on endpoints.</li>
+          <li><strong>Firewalls</strong> — filter traffic between networks by rule (allow/deny IPs, ports, protocols).</li>
+          <li><strong>Host-based intrusion prevention (HIPS)</strong> — monitors a single endpoint for malicious behaviour.</li>
+          <li><strong>Secure wireless</strong> — WPA2/WPA3 (never WEP), hidden SSID is not security, disable WPS, strong passphrase, change default admin credentials.</li>
+        </ol>
+
+        <h2>5. Firewall Basics</h2>
+
+        <div class="rsrc-table-wrap">
+          <table class="rsrc-table">
+            <thead><tr><th>Type</th><th>Where</th><th>What it does</th></tr></thead>
+            <tbody>
+            <tr><td>Host firewall</td><td>On the endpoint</td><td>Filters that device's traffic</td></tr>
+            <tr><td>Network firewall</td><td>Between networks</td><td>Filters all traffic crossing the boundary</td></tr>
+            <tr><td>Next-gen firewall (NGFW)</td><td>Network edge</td><td>Adds app awareness, intrusion prevention, TLS inspection</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Rule model (simplified): <strong>Source IP : Port → Dest IP : Port → Action</strong> (allow/deny). Default should be <strong>deny</strong>; explicitly allow what's needed.</p>
+
+        <h2>6. Securing User Access on a Home/Small Router (lab task)</h2>
+
+        <ol>
+          <li>Change the <strong>default admin username/password</strong> immediately.</li>
+          <li>Enable <strong>WPA2/WPA3</strong> with a long passphrase.</li>
+          <li>Update the router <strong>firmware</strong>.</li>
+          <li>Disable remote admin access from the internet.</li>
+          <li>Set a strong router admin password + change the default SSID.</li>
+          <li>Review connected-device lists for unknown hosts.</li>
+        </ol>
+
+        <h2>7. Help Desk &amp; Support Perspective (mod 08 context)</h2>
+
+        <ul>
+          <li><strong>Document</strong> every ticket: symptom, tests run, resolution (repeatable troubleshooting).</li>
+          <li>Verify a device before trusting it: check for unexpected network connections, installed software, and login events.</li>
+          <li>Escalate suspected security incidents (phishing, ransomware) per policy — do NOT &quot;just fix it&quot; silently.</li>
+        </ul>
+
+        <h2>8. Key Takeaways</h2>
+
+        <ol>
+          <li>CIA triad → every control maps to confidentiality, integrity, or availability.</li>
+          <li>Human error / phishing is the top attack vector.</li>
+          <li>Least privilege + patching + MFA cover most real-world risk.</li>
+          <li>WPA3/WPA2, not WEP; change defaults; default-deny firewalls.</li>
+          <li>Support work needs documentation and an incident-escalation mindset.</li>
+        </ol>
+
+        <aside class="rsrc-callout">Cross-references: part2-module-08 (security basics), part2-module-06/07 (troubleshooting labs), Cisco Network Support and Security modules 2–3.</aside>
+
+    <nav class="lesson-nav">
+      <a class="btn btn-primary" href="../../course.html?course=networking">&larr; Back to course</a>
+    </nav>
+  </article>
+</main>
+
+<footer>&copy; 2026 Raj Babna &middot; Cable&amp;Net Courses</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js?v=9A0E5BF5"></script>
+<script src="../../js/supabase-client.js?v=17E25610"></script>
+<script src="../../js/auth-guard.js?v=2EB80F4C"></script>
+<script src="../../js/menu.js?v=06BC2CFB"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('[data-user-name]');
+      if (nameEl) nameEl.textContent = user.email;
+    }
+  });
+</script>
+
+</body>
+</html>
