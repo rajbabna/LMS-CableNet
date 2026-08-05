@@ -116,6 +116,25 @@ async function loadModulesForCourse(courseId) {
       text: 'Article'
     };
 
+    // ---- Grid grouping + filtering (Step 5 redesign) ----
+    // 'all' shows "Core Lessons" plus a collapsible "Resources & Extras"
+    // section; other filters show a single content family. Cards keep the
+    // same style; grouping/filtering just control which are on screen.
+    let currentFilter = 'all';
+    let resourcesOpen = false;
+    const moduleById = new Map();
+
+    function filterMatches(t) {
+      switch (currentFilter) {
+        case 'lessons':   return t === 'lesson';
+        case 'videos':    return t === 'video';
+        case 'pdfs':      return t === 'pdf';
+        case 'tools':     return t === 'interactive';
+        case 'articles':  return t === 'text';
+        default:          return true;
+      }
+    }
+
     // Feather-style stroke icons per content type.
     const TYPE_ICONS = {
       lesson: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
@@ -126,35 +145,16 @@ async function loadModulesForCourse(courseId) {
     };
     function iconFor(type) { return TYPE_ICONS[type] || TYPE_ICONS.lesson; }
 
-    // Lookup for non-lesson content cards -> open inline modal (Step 5).
-    const moduleById = new Map();
-
-    visible.forEach(module => {
-      const li = document.createElement('li');
-      li.setAttribute('data-module-id', module.id);
-      moduleById.set(module.id, module);
-
-      const type = module.content_type || 'lesson';
+    // Build the list of <li> card HTML for one content family.
+    function cardHtml(module) {
+      const type     = module.content_type || 'lesson';
       const typeBadge = `<span class="mod-type-badge mod-type-${type}">${typeDisplayNames[type] || type}</span>`;
 
-      // Determine action label based on content type
       let contentLabel = 'open lesson';
-      switch(type) {
-        case 'pdf':
-          contentLabel = 'open pdf';
-          break;
-        case 'video':
-          contentLabel = 'watch video';
-          break;
-        case 'interactive':
-          contentLabel = 'launch tool';
-          break;
-        case 'text':
-          contentLabel = 'read article';
-          break;
-        default:
-          contentLabel = 'open lesson';
-      }
+      if (type === 'pdf') contentLabel = 'open pdf';
+      else if (type === 'video') contentLabel = 'watch video';
+      else if (type === 'interactive') contentLabel = 'launch tool';
+      else if (type === 'text') contentLabel = 'read article';
 
       const completed = completedIds.has(String(module.id)) || completedIds.has(module.id);
 
@@ -170,8 +170,6 @@ async function loadModulesForCourse(courseId) {
             ${completed ? '✓ Completed' : 'Mark Complete'}
           </button>`;
 
-      // Practice + Final quiz cards for this module. Practice is always open;
-      // Final is locked until the course-completion threshold is reached.
       const qEnc = encodeURIComponent(module.title || '');
       const qParams = `module=${module.id}&course=${courseId}&mode=practice&title=${qEnc}`;
       const practiceHtml =
@@ -191,32 +189,97 @@ async function loadModulesForCourse(courseId) {
           <div class="module-quiz-pair">${practiceHtml}${finalHtml}</div>
         </div>`;
 
-      li.innerHTML = `
-        <div class="module-head-top">
-          <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
-          ${typeBadge}
-        </div>
-        <strong class="module-card-title">${module.title}</strong>
-        ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
-        <div class="module-progress">
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
+      return `
+        <li data-module-id="${module.id}">
+          <div class="module-head-top">
+            <span class="mod-tag">MOD ${String(module.module_number).padStart(2, '0')}</span>
+            ${typeBadge}
           </div>
-          <div class="progress-text">${completed ? '100%' : '0%'}</div>
-        </div>
-        <div class="module-actions">
-          ${completionHtml}
-          ${resourceHtml}
-        </div>
-        ${quizRow}
-      `;
+          <strong class="module-card-title">${module.title}</strong>
+          ${module.description ? `<div class="module-desc">${module.description}</div>` : ''}
+          <div class="module-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${completed ? '100' : '0'}%"></div>
+            </div>
+            <div class="progress-text">${completed ? '100%' : '0%'}</div>
+          </div>
+          <div class="module-actions">
+            ${completionHtml}
+            ${resourceHtml}
+          </div>
+          ${quizRow}
+        </li>`;
+    }
 
-      moduleList.appendChild(li);
-    });
+    function groupHead(title, count, toggle) {
+      return `<li class="module-group-head${toggle ? ' mg-toggle' : ''}"${toggle ? ' data-toggle="resources"' : ''}>
+        <span class="mg-title">${title}</span>
+        <span class="mg-count">${count}</span>
+        ${toggle ? `<span class="mg-caret">${resourcesOpen ? '▾' : '▸'}</span>` : ''}
+      </li>`;
+    }
 
-    // Non-lesson content cards open inline (modal) instead of leaving
-    // the course page. Only rendered for non-lesson types.
+    // Re-renders the grid based on the active filter / resources state.
+    function renderGrid() {
+      moduleList.innerHTML = '';
+      moduleById.clear();
+      const lessons = [];
+      const resources = [];
+      (visible || []).forEach(m => {
+        moduleById.set(m.id, m);
+        const t = m.content_type || 'lesson';
+        (t === 'lesson' ? lessons : resources).push(m);
+      });
+
+      let html = '';
+      if (currentFilter === 'all') {
+        html += groupHead('Core Lessons', lessons.length, false) + lessons.map(cardHtml).join('');
+        if (resources.length) {
+          html += groupHead('Resources & Extras', resources.length, true);
+          if (resourcesOpen) html += resources.map(cardHtml).join('');
+        }
+      } else {
+        const shown = (visible || []).filter(m => filterMatches(m.content_type || 'lesson'));
+        const title = currentFilter === 'lessons' ? 'Lessons'
+          : currentFilter === 'videos' ? 'Videos'
+          : currentFilter === 'pdfs' ? 'PDFs'
+          : currentFilter === 'tools' ? 'Tools' : 'Articles';
+        html += groupHead(title, shown.length, false) + shown.map(cardHtml).join('');
+      }
+      moduleList.innerHTML = html;
+    }
+
+    // Sticky filter bar (mobile-friendly horizontal scroll).
+    function ensureFilterBar() {
+      if (!moduleList.parentNode || moduleList.parentNode.querySelector('.module-filter')) return;
+      const bar = document.createElement('div');
+      bar.className = 'module-filter';
+      bar.setAttribute('role', 'tablist');
+      bar.setAttribute('aria-label', 'Filter modules by type');
+      const pills = [
+        ['all', 'All'], ['lessons', 'Lessons'], ['videos', 'Videos'],
+        ['pdfs', 'PDFs'], ['tools', 'Tools'], ['articles', 'Articles']
+      ].map(([k, label]) =>
+        `<button type="button" class="mf-btn${k === 'all' ? ' active' : ''}" data-filter="${k}" role="tab" aria-selected="${k === 'all' ? 'true' : 'false'}">${label}</button>`
+      ).join('');
+      bar.innerHTML = pills;
+      moduleList.parentNode.insertBefore(bar, moduleList);
+      bar.addEventListener('click', function (e) {
+        const btn = e.target.closest('.mf-btn[data-filter]');
+        if (!btn) return;
+        currentFilter = btn.dataset.filter;
+        bar.querySelectorAll('.mf-btn').forEach(b => {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+        });
+        renderGrid();
+      });
+    }
+
+    // Resources section toggle + non-lesson content cards open inline.
     moduleList.addEventListener('click', function (e) {
+      const toggle = e.target.closest('.module-group-head[data-toggle="resources"]');
+      if (toggle) { resourcesOpen = !resourcesOpen; renderGrid(); return; }
       const btn = e.target.closest('.module-open[data-module-id]');
       if (!btn) return;
       const mod = moduleById.get(Number(btn.dataset.moduleId));
@@ -225,6 +288,9 @@ async function loadModulesForCourse(courseId) {
         ContentRenderer.open(mod);
       }
     });
+
+    ensureFilterBar();
+    renderGrid();
 
     // Course-completion banner: once every module is done, offer the
     // certificate. Matches the final-quiz unlock threshold.
