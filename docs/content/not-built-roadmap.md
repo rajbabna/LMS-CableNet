@@ -28,7 +28,7 @@ Features we're building now. Everything else in the original checklist was revie
 - In-dashboard CRUD for courses and modules (replaces SQL-migration-only editing).
 
 ## 7. Hosted video
-- Real video hosting/embeds for video-type modules.
+- ✅ Real video hosting via **Supabase Storage**: `sql/44` creates a public `course-videos` bucket + staff upload policies; the module editor's video modal gains an "Upload .mp4" control that uploads and auto-fills the Content URL; the course-page renderer plays the `.mp4` inline.
 
 ## 8. Certificate issuance
 - Generate certificates when a course is completed (all modules complete).

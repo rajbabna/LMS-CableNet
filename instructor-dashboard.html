@@ -916,6 +916,18 @@
         <label for="ceModuleUrl">Content URL</label>
         <input type="text" id="ceModuleUrl" placeholder="https://..." autocomplete="off">
       </div>
+      <div class="field" id="videoUploadRow" style="display:none;">
+        <label for="ceVideoFile">Upload video (Supabase Storage)</label>
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost" id="uploadVideoBtn">Upload .mp4</button>
+          <input type="file" id="ceVideoFile" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" style="display:none;">
+          <span id="videoUploadStatus" style="font-size:0.8rem; color:var(--ink-soft);"></span>
+        </div>
+        <div style="font-size:0.75rem; color:var(--ink-soft); margin-top:0.4rem;">
+          The video is stored in the <code>course-videos</code> bucket and its public URL is
+          pasted into Content URL automatically. Then press Save Module.
+        </div>
+      </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModuleModal()">Cancel</button>
         <button class="btn btn-primary" onclick="submitModule()">Save Module</button>
@@ -2044,6 +2056,7 @@
       document.getElementById('ceModuleType').value = editing ? type : 'lesson';
       document.getElementById('ceModuleUrl').value = editing ? url : '';
       document.getElementById('ceModuleNum').focus();
+      toggleVideoUpload();
     }
     function closeModuleModal() { document.getElementById('moduleModal').classList.remove('active'); }
 
@@ -2096,6 +2109,52 @@
         showAlert('Could not delete module: ' + err.message, 'error');
       }
     }
+
+    // ---- Video upload (Step 7: Supabase Storage) ----
+    function toggleVideoUpload() {
+      const type = document.getElementById('ceModuleType').value;
+      document.getElementById('videoUploadRow').style.display = type === 'video' ? '' : 'none';
+    }
+
+    async function uploadVideo() {
+      const fileInput = document.getElementById('ceVideoFile');
+      const status = document.getElementById('videoUploadStatus');
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+
+      if (!ceCurrentCourseId) { status.textContent = 'Select a course first.'; return; }
+      if (file.size > 50 * 1024 * 1024) { status.textContent = 'Max upload size is 50 MB.'; return; }
+
+      const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const base = file.name.replace(/\.[a-zA-Z0-9]+$/, '').replace(/[^a-zA-Z0-9._-]/g, '_') || 'video';
+      const path = ceCurrentCourseId + '/' + base + '-' + Date.now() + '.' + ext;
+
+      status.textContent = 'Uploading…';
+      const { error } = await supabaseClient.storage
+        .from('course-videos')
+        .upload(path, file, { contentType: file.type || 'video/mp4', upsert: false });
+
+      if (error) {
+        console.error('uploadVideo error:', error);
+        status.textContent = 'Upload failed: ' + (error.message || 'check that the course-videos bucket/policy exists');
+        return;
+      }
+
+      const { data: pub } = supabaseClient.storage.from('course-videos').getPublicUrl(path);
+      document.getElementById('ceModuleUrl').value = pub.publicUrl;
+      status.textContent = '✓ Uploaded — URL filled in above. Save the module.';
+      fileInput.value = '';
+    }
+
+    function initVideoUpload() {
+      const typeSel = document.getElementById('ceModuleType');
+      const btn = document.getElementById('uploadVideoBtn');
+      const fileInput = document.getElementById('ceVideoFile');
+      if (typeSel) typeSel.addEventListener('change', toggleVideoUpload);
+      if (btn) btn.addEventListener('click', function () { fileInput && fileInput.click(); });
+      if (fileInput) fileInput.addEventListener('change', uploadVideo);
+    }
+    initVideoUpload();
 
     // ============================================
     // UTILITY
