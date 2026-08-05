@@ -19,21 +19,21 @@ converted to Mauritian Rupees (1 USD = 47.04 MUR).
 
 <!-- COST-TABLE-START -->
 |        DeepSeek | Free  | v4-flash-free (opencode)   | $     0.00 | Rs       0.00 |
-|        DeepSeek | Paid  | v4-flash                   | $     4.09 | Rs     192.46 |
-|        DeepSeek | Paid  | v4-pro                     | $    11.42 | Rs     537.43 |
+|        DeepSeek | Paid  | v4-flash                   | $     4.09 | Rs     192.51 |
+|        DeepSeek | Paid  | v4-pro                     | $    11.43 | Rs     537.53 |
 |          Gemini | Free  | Flash free tier (rate-limited, AI Studio) | $     0.00 | Rs       0.00 |
-|          Gemini | Paid  | 2.5 Flash-Lite             | $     5.29 | Rs     248.71 |
-|          Gemini | Paid  | 3.5 Flash                  | $   141.42 | Rs   6,652.35 |
-|          Gemini | Paid  | 3.1 Pro                    | $   112.45 | Rs   5,289.44 |
+|          Gemini | Paid  | 2.5 Flash-Lite             | $     5.29 | Rs     248.85 |
+|          Gemini | Paid  | 3.5 Flash                  | $   141.53 | Rs   6,657.34 |
+|          Gemini | Paid  | 3.1 Pro                    | $   112.51 | Rs   5,292.45 |
 | ChatGPT (OpenAI) | Free  | No prod free tier (web ai.com only) | $     0.00 | Rs       0.00 |
-| ChatGPT (OpenAI) | Paid  | GPT-4o-mini                | $    23.15 | Rs   1,089.13 |
-| ChatGPT (OpenAI) | Paid  | GPT-5.6 Luna               | $    11.24 | Rs     528.94 |
-| ChatGPT (OpenAI) | Paid  | GPT-5.6 Terra              | $   112.45 | Rs   5,289.44 |
-| ChatGPT (OpenAI) | Paid  | GPT-5.6 Sol                | $   281.11 | Rs  13,223.61 |
+| ChatGPT (OpenAI) | Paid  | GPT-4o-mini                | $    23.17 | Rs   1,090.08 |
+| ChatGPT (OpenAI) | Paid  | GPT-5.6 Luna               | $    11.25 | Rs     529.25 |
+| ChatGPT (OpenAI) | Paid  | GPT-5.6 Terra              | $   112.51 | Rs   5,292.45 |
+| ChatGPT (OpenAI) | Paid  | GPT-5.6 Sol                | $   281.27 | Rs  13,231.13 |
 |          Claude | Free  | No free tier (trial credit only) | $     0.00 | Rs       0.00 |
-|          Claude | Paid  | Haiku 4.5                  | $    54.55 | Rs   2,565.91 |
-|          Claude | Paid  | Sonnet 5 (intro)           | $   109.09 | Rs   5,131.81 |
-|          Claude | Paid  | Opus 5                     | $   272.74 | Rs  12,829.53 |
+|          Claude | Paid  | Haiku 4.5                  | $    54.58 | Rs   2,567.37 |
+|          Claude | Paid  | Sonnet 5 (intro)           | $   109.16 | Rs   5,134.75 |
+|          Claude | Paid  | Opus 5                     | $   272.89 | Rs  12,836.87 |
 <!-- COST-TABLE-END -->
 
 > Full interactive report with per-session breakdown, timestamps and live-updating
