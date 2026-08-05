@@ -2,21 +2,21 @@
   "project": "LMS - V2.0",
   "project_id": "74a341db257f9697b63cbd1b3beb682dbc29a25b",
   "mur": 47.04,
-  "captured_ms": 1785918771543,
+  "captured_ms": 1785920383788,
   "project_started_ms": 1785493028489,
-  "llm_seconds": 55435.714999999866,
+  "llm_seconds": 56943.18999999986,
   "dominant": {
     "title": "Docs folder access",
-    "input": 18398816,
-    "output": 898689,
-    "reasoning": 666464,
-    "cache": 230533504
+    "input": 18609728,
+    "output": 915115,
+    "reasoning": 676714,
+    "cache": 234103936
   },
   "aggregate": {
     "sessions": 4,
-    "input": 20845741,
-    "output_billed": 1700149,
-    "cache": 256303872
+    "input": 21466033,
+    "output_billed": 1745051,
+    "cache": 265734528
   },
   "models": {
     "DeepSeek": {
