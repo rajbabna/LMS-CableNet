@@ -1,0 +1,143 @@
+{
+  "project": "LMS - V2.0",
+  "project_id": "74a341db257f9697b63cbd1b3beb682dbc29a25b",
+  "mur": 47.04,
+  "captured_ms": 1785918771543,
+  "project_started_ms": 1785493028489,
+  "llm_seconds": 55435.714999999866,
+  "dominant": {
+    "title": "Docs folder access",
+    "input": 18398816,
+    "output": 898689,
+    "reasoning": 666464,
+    "cache": 230533504
+  },
+  "aggregate": {
+    "sessions": 4,
+    "input": 20845741,
+    "output_billed": 1700149,
+    "cache": 256303872
+  },
+  "models": {
+    "DeepSeek": {
+      "free": [
+        [
+          "v4-flash-free (opencode)",
+          0,
+          0,
+          0
+        ]
+      ],
+      "paid": [
+        [
+          "v4-flash",
+          0.14,
+          0.28,
+          0.0028
+        ],
+        [
+          "v4-pro",
+          0.435,
+          0.87,
+          0.003625
+        ]
+      ]
+    },
+    "Gemini": {
+      "free": [
+        [
+          "Flash free tier (rate-limited, AI Studio)",
+          0,
+          0,
+          0
+        ]
+      ],
+      "paid": [
+        [
+          "2.5 Flash-Lite",
+          0.1,
+          0.4,
+          0.01
+        ],
+        [
+          "3.5 Flash",
+          1.5,
+          9.0,
+          0.375
+        ],
+        [
+          "3.1 Pro",
+          2.0,
+          12.0,
+          0.2
+        ]
+      ]
+    },
+    "ChatGPT (OpenAI)": {
+      "free": [
+        [
+          "No prod free tier (web ai.com only)",
+          0,
+          0,
+          0
+        ]
+      ],
+      "paid": [
+        [
+          "GPT-4o-mini",
+          0.15,
+          0.6,
+          0.075
+        ],
+        [
+          "GPT-5.6 Luna",
+          0.2,
+          1.2,
+          0.02
+        ],
+        [
+          "GPT-5.6 Terra",
+          2.0,
+          12.0,
+          0.2
+        ],
+        [
+          "GPT-5.6 Sol",
+          5.0,
+          30.0,
+          0.5
+        ]
+      ]
+    },
+    "Claude": {
+      "free": [
+        [
+          "No free tier (trial credit only)",
+          0,
+          0,
+          0
+        ]
+      ],
+      "paid": [
+        [
+          "Haiku 4.5",
+          1.0,
+          5.0,
+          0.1
+        ],
+        [
+          "Sonnet 5 (intro)",
+          2.0,
+          10.0,
+          0.2
+        ],
+        [
+          "Opus 5",
+          5.0,
+          25.0,
+          0.5
+        ]
+      ]
+    }
+  }
+}
