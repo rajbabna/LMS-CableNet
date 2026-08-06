@@ -8,6 +8,8 @@ class StudentDashboard {
     this.supabase = supabaseClient;
     this.currentUser = null;
     this.courses = [];
+    this._refreshTimer = null; // debounce timer for visibility refreshes
+    this._refreshing = false;  // guard against overlapping refreshes
     this.init();
   }
 
@@ -62,6 +64,10 @@ class StudentDashboard {
 
       // Bind logout button
       this.bindLogout();
+
+      // Silently re-fetch when the student returns to this tab, so progress
+      // made elsewhere (e.g. a module reset on the course page) is reflected.
+      this.bindVisibilityRefresh();
 
     } catch (error) {
       console.error("Dashboard init error:", error);
@@ -463,6 +469,42 @@ class StudentDashboard {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
+  }
+
+  // When the student is previewing/resetting in another tab, the already-open
+  // dashboard would otherwise show stale numbers until a manual refresh. This
+  // re-fetches course progress whenever the tab becomes visible again, then
+  // re-renders. Debounced + guarded so a burst of tab flips or overlapping
+  // refreshes never hammer Supabase or blank the page.
+  bindVisibilityRefresh() {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+
+      if (this._refreshTimer) clearTimeout(this._refreshTimer);
+      this._refreshTimer = setTimeout(() => this.refreshProgress(), 350);
+    });
+  }
+
+  async refreshProgress() {
+    if (this._refreshing) return;
+
+    const { data: { session } } = await this.supabase.auth.getSession();
+    if (!session) return;
+
+    this._refreshing = true;
+    try {
+      await this.fetchCourses();
+      await this.loadQuizStats();
+      await this.loadUnitBreakdown();
+      // Only re-render if the user is still looking at the tab.
+      if (document.visibilityState === "visible") this.renderDashboard();
+    } catch (err) {
+      // Quiet failure: keep the existing data on screen rather than disturbing
+      // the page. A transient network blip can be resolved by a manual refresh.
+      console.warn("Background progress refresh failed:", err);
+    } finally {
+      this._refreshing = false;
+    }
   }
 
   escapeHtml(text) {
