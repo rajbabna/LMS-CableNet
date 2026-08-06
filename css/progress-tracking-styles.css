@@ -67,11 +67,14 @@
   cursor: default;
 }
 
-/* Completed State */
+/* Completed State — kept interactive so a student can click to reset */
 .btn-complete.completed {
   background: var(--ink-soft);
-  cursor: default;
-  opacity: 0.8;
+  cursor: pointer;
+  opacity: 0.9;
+}
+.btn-complete.completed:hover {
+  background: var(--copper-dark);
 }
 
 /* Completed Module Row */
@@ -133,9 +136,30 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   animation: slideIn 0.3s ease;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(74, 122, 82, 0.3);
+}
+
+/* Action button inside a toast (e.g. Undo after Mark Complete) */
+.toast-action {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 0.4em 1em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.38);
 }
 
 .toast-notification.error {

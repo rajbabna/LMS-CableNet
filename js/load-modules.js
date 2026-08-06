@@ -44,6 +44,17 @@ function phaseIndexFor(moduleNumber, ranges) {
   return ranges.length - 1;
 }
 
+// ---- Completion-change hooks ----
+// progress-tracker.js calls window.recomputeCourseUI({ moduleId, completed })
+// after a module is marked complete or reset. The currently-loaded course
+// registers render closures here so the derived UI (course %, phase donuts,
+// completion banner) stays in sync without a full page reload.
+let activeCourseHooks = null;
+
+window.recomputeCourseUI = function (delta) {
+  if (activeCourseHooks) activeCourseHooks.applyChange(delta);
+};
+
 async function loadModulesForCourse(courseId) {
   const moduleList = document.querySelector('.module-list');
 
@@ -142,9 +153,18 @@ async function loadModulesForCourse(courseId) {
     // course modules). Defaults to ALL modules (i.e. at course completion).
     const FINAL_QUIZ_THRESHOLD = 1.0;
     const totalModules = visible.length;
-    const completedCount = visible.filter(isCompleted).length;
-    const courseProgress = totalModules ? completedCount / totalModules : 0;
-    const finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+    let completedCount = visible.filter(isCompleted).length;
+    let courseProgress = totalModules ? completedCount / totalModules : 0;
+    let finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+
+    // Recomputes progress-derived values after a module is marked complete
+    // or reset (progress-tracker.js calls back into these via the hooks
+    // registered below). Everything else reads from these live values.
+    function recalcProgress() {
+      completedCount = visible.filter(isCompleted).length;
+      courseProgress = totalModules ? completedCount / totalModules : 0;
+      finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+    }
 
     if (!visible || visible.length === 0) {
       const li = document.createElement('li');
@@ -239,7 +259,7 @@ async function loadModulesForCourse(courseId) {
 
       const completionHtml = isPreview || status === 'coming-soon'
         ? `<span class="preview-locked">${status === 'coming-soon' ? '👷 Coming soon' : '🔒 Enrollment required'}</span>`
-        : `<button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
+        : `<button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}"${completed ? ' title="Reset: un-complete this module" aria-label="Reset this module to incomplete"' : ''}>
             ${completed ? '✓ Completed' : 'Mark Complete'}
           </button>`;
 
@@ -662,27 +682,47 @@ async function loadModulesForCourse(courseId) {
       }
     }
 
+    // ---- Completion-change hooks ----
+    // progress-tracker.js calls window.recomputeCourseUI() after marking a
+    // module complete or resetting one; we keep the derived UI in sync.
+    activeCourseHooks = {
+      applyChange(delta) {
+        const id = String(delta.moduleId);
+        if (delta.completed) completedIds.add(id);
+        else completedIds.delete(id);
+        recalcProgress();
+        renderCourseHead();
+        renderPhaseTabs();
+        renderGrid();
+        renderCompletionBanner();
+      }
+    };
+
+    function renderCompletionBanner() {
+      const container = moduleList.parentNode;
+      if (!container) return;
+      container.querySelectorAll('.course-complete').forEach(el => el.remove());
+      if (finalQuizUnlocked && !isPreview) {
+        const banner = document.createElement('div');
+        banner.className = 'course-complete';
+        banner.innerHTML = `
+          <div class="cc-badge">🎓</div>
+          <div class="cc-copy">
+            <strong>Course complete — congratulations!</strong>
+            <span>You've finished every module. Claim your certificate of completion.</span>
+          </div>
+          <a class="btn btn-primary cc-btn" href="certificate.html?course=${courseId}">View certificate</a>
+        `;
+        container.insertBefore(banner, moduleList);
+      }
+    }
+
     renderCourseHead();
     readHashState();
     renderPhaseTabs();
     ensureFilterBar();
     renderGrid();
-
-    // Course-completion banner: once every module is done, offer the
-    // certificate. Matches the final-quiz unlock threshold.
-    if (finalQuizUnlocked && !isPreview && moduleList.parentNode) {
-      const banner = document.createElement('div');
-      banner.className = 'course-complete';
-      banner.innerHTML = `
-        <div class="cc-badge">🎓</div>
-        <div class="cc-copy">
-          <strong>Course complete — congratulations!</strong>
-          <span>You've finished every module. Claim your certificate of completion.</span>
-        </div>
-        <a class="btn btn-primary cc-btn" href="certificate.html?course=${courseId}">View certificate</a>
-      `;
-      moduleList.parentNode.insertBefore(banner, moduleList);
-    }
+    renderCompletionBanner();
 
   } catch (err) {
     console.error('Exception loading modules:', err);
