@@ -918,7 +918,7 @@ button.module-open {
 
 .course-dash-body {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: start;
 }
@@ -983,120 +983,66 @@ button.module-open {
   background: #EDF2F6;
 }
 
-.course-rail {
-  position: sticky;
-  top: 1rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--paper);
-  padding: 1rem 0.9rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-}
-.rail-title {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0.4rem 0.7rem;
-}
-.rail-units {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Curriculum phase tabs (course page restructure) - replaces the unit
+   rail: foundations / practice / capstone with a per-phase progress meter */
+.phase-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px dashed var(--line);
 }
-.rail-unit-btn {
+.phase-tab {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 0.45rem 0.5rem;
-  cursor: pointer;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
   color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45em 0.9em;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
-.rail-unit-btn:hover {
-  background: #f6ece0;
-  border-color: var(--line);
-}
-.rail-unit.active .rail-unit-btn {
+.phase-tab:hover { border-color: var(--teal); color: var(--teal); }
+.phase-tab.active {
   background: var(--teal);
   border-color: var(--teal);
   color: #fff;
 }
-.rail-unit.active .rail-unit-btn .rail-unit-label { color: #fff; }
-.rail-unit-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.rail-unit-btn:hover .rail-unit-label {
-  white-space: normal;
-  overflow: visible;
-}
-.rail-unit-bar {
-  flex: 0 0 42px;
+.phase-tab-label { font-weight: 600; }
+.phase-tab-progress {
+  flex: 0 0 34px;
   height: 4px;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.14);
   border-radius: 2px;
   overflow: hidden;
 }
-.rail-unit.active .rail-unit-bar { background: rgba(255, 255, 255, 0.3); }
-.rail-unit-bar span {
+.phase-tab.active .phase-tab-progress { background: rgba(255, 255, 255, 0.3); }
+.phase-tab-progress span {
   display: block;
   height: 100%;
   background: var(--copper);
 }
-.rail-unit.active .rail-unit-bar span { background: #fff; }
-.rail-unit-count {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--teal);
-  border-radius: 999px;
-  padding: 0.12em 0.6em;
-  white-space: nowrap;
-}
-.rail-unit.active .rail-unit-count { background: rgba(255, 255, 255, 0.25); }
-.rail-stats {
-  margin-top: 0.8rem;
-  padding-top: 0.7rem;
-  border-top: 1px dashed var(--line);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+.phase-tab.active .phase-tab-progress span { background: #fff; }
+.phase-tab-count {
+  font-size: 0.66rem;
+  font-weight: 700;
   color: var(--ink-soft);
-  text-align: center;
 }
-
-@media (max-width: 980px) {
-  .course-dash-body { grid-template-columns: 1fr; }
-  .course-rail {
-    position: static;
-    margin-bottom: 1.2rem;
+.phase-tab.active .phase-tab-count { color: #fff; }
+@media (max-width: 520px) {
+  .phase-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
   }
-  .rail-units {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-  .rail-unit-btn {
-    width: auto;
-    white-space: nowrap;
-  }
-  .rail-unit-bar { display: none; }
-  .rail-stats { display: none; }
+  .phase-tab { flex: 0 0 auto; white-space: nowrap; }
 }
 
 footer {

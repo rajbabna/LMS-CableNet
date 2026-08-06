@@ -14,6 +14,36 @@
 // flat lessons + resources layout instead.
 // ===========================================================
 
+// ---- Phase curriculum layout (course page restructure) ----
+// Each course maps its modules (by `module_number`) into learning
+// phases shown as tabs, so students scan a short curriculum (Foundations
+// / Practice / Capstone) instead of one long list. Ranges are
+// `[startModuleNumber, endModuleNumber, title]`. Any module whose number
+// falls outside every range goes into the LAST phase, so demo/extra
+// modules (91+) stay grouped with the capstone rather than vanishing.
+const COURSE_PHASES = {
+  cabling: [
+    [1, 3, 'Foundations'],
+    [4, 7, 'Practice'],
+    [8, 10, 'Capstone']
+  ],
+  networking: [
+    [1, 3, 'Fundamentals'],
+    [4, 6, 'Operations'],
+    [7, 10, 'Advanced']
+  ]
+};
+
+function phaseIndexFor(moduleNumber, ranges) {
+  if (!ranges || ranges.length === 0) return -1;
+  const n = Number(moduleNumber || 0);
+  for (let i = 0; i < ranges.length; i++) {
+    if (n >= ranges[i][0] && n <= ranges[i][1]) return i;
+  }
+  if (n < ranges[0][0]) return 0;
+  return ranges.length - 1;
+}
+
 async function loadModulesForCourse(courseId) {
   const moduleList = document.querySelector('.module-list');
 
@@ -274,11 +304,20 @@ async function loadModulesForCourse(courseId) {
       </li>`;
     }
 
+    function phaseHead(idx, title, count, open) {
+      return `<li class="module-group-head mg-toggle${open ? ' mg-open' : ''}" data-unit-head="phase-${idx}">
+        <span class="mg-title">PHASE ${pad2(idx + 1)} — ${title}</span>
+        <span class="mg-count">${count}</span>
+        <span class="mg-caret">${open ? '▾' : '▸'}</span>
+      </li>`;
+    }
+
     // ---- State ----
     let currentFilter = 'all';
-    let currentUnit = 'all';
+    let currentPhase = 'all';
     const moduleById = new Map();
     const openUnits = new Set(unitList.map(u => u.id));
+    const openPhases = new Set(phaseRanges ? phaseRanges.map((_, i) => i) : []);
     let orphanOpen = true;
 
     // Resources tab state (built from resources/index.json)
@@ -287,20 +326,26 @@ async function loadModulesForCourse(courseId) {
     const resourceEsc = s => String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-    const railList = document.getElementById('unitRailList');
-    const railStats = document.getElementById('railStats');
-    const courseRail = document.getElementById('courseRail');
+    // Phase curriculum (course page restructure): modules are grouped into
+    // learning phases shown as tabs. Courses without a phase map fall back
+    // to the unit layout, then to the legacy flat list, so nothing breaks.
+    const phaseTabsEl = document.getElementById('phaseTabs');
+    const hasTabs = phaseRanges !== null || unitList.length > 0 || orphanModules.length > 0;
 
     function filterMatches(t) {
       if (currentFilter === 'all') return true;
       return typeToTab[t] === currentFilter;
     }
 
+    function phaseFor(m) {
+      return phaseIndexFor(m.module_number, phaseRanges);
+    }
+
     function unitModules(unit) {
       return unit.id === 'none' ? orphanModules : (modulesByUnit.get(unit.id) || []);
     }
 
-    // ---- Render: course header + unit rail ----
+    // ---- Render: course header ----
     function renderCourseHead() {
       const head = document.getElementById('courseHead');
       if (!head || !course) return;
@@ -324,7 +369,7 @@ async function loadModulesForCourse(courseId) {
       document.title = (course.title || 'Course') + ' — Cable&Net Courses';
 
       // Primary CTA: Start Course at 0%, otherwise Continue at the first
-      // incomplete module (C7). Targets the current unit section.
+      // incomplete module (C7). Scrolls to the module list.
       const footer = document.getElementById('courseHeadFooter');
       if (footer) {
         const firstOpen = visible.find(m => !isCompleted(m) && m.content_url && !isPreview);
@@ -335,54 +380,61 @@ async function loadModulesForCourse(courseId) {
       }
     }
 
-    function parseMinutes(str) {
-      if (!str) return 0;
-      const m = String(str).match(/(\d+(?:\.\d+)?)\s*(min|mins|minute|minutes|hr|hrs|hour|hours)/i);
-      if (!m) return 0;
-      const n = parseFloat(m[1]);
-      return m[2][0].toLowerCase() === 'm' ? n : n * 60;
-    }
-    function estimatedStudyTime(modules) {
-      const mins = (modules || []).reduce((s, mod) => s + parseMinutes(mod.duration), 0);
-      if (!mins) return null;
-      if (mins < 60) return `Est. ~${Math.round(mins)} min total`;
-      const hrs = mins / 60;
-      return `Est. ~${hrs < 10 ? hrs.toFixed(1) : Math.round(hrs)} hrs total`;
+    function syncHash(kind, val) {
+      const h = '#' + kind + '-' + encodeURIComponent(String(val));
+      if (window.history && window.history.replaceState && location.hash !== h) {
+        history.replaceState(null, '', h);
+      }
     }
 
-    function renderRail() {
-      if (!railList) return;
+    function readHashState() {
+      const m = (location.hash || '').match(/^#(phase|filter)-([^&]+)$/);
+      if (!m) return;
+      const val = decodeURIComponent(m[2]);
+      if (m[1] === 'phase') {
+        const ok = val === 'all'
+          || (phaseRanges && phaseRanges.some((_, i) => String(i) === val))
+          || (!phaseRanges && (val === 'none' || unitList.some(u => u.id === val)));
+        if (ok) currentPhase = val;
+      } else if (m[1] === 'filter') {
+        const ok = val === 'all' || val === 'resources'
+          || Object.keys(typeToTab).some(t => typeToTab[t] === val);
+        if (ok) currentFilter = val;
+      }
+    }
+
+    function renderPhaseTabs() {
+      if (!phaseTabsEl) return;
       const pct = p => Math.round((p || 0) * 100);
-      const items = [];
-      items.push(railItem('all', 'All units', totalModules, completedCount, courseProgress));
-      unitList.forEach(u => {
-        const mods = modulesByUnit.get(u.id) || [];
-        const done = mods.filter(isCompleted).length;
-        items.push(railItem(u.id, `UNIT ${pad2(u.unit_number)} — ${u.title}`, mods.length, done, mods.length ? done / mods.length : 0));
-      });
-      if (orphanModules.length) {
-        const done = orphanModules.filter(isCompleted).length;
-        items.push(railItem('none', 'Extras', orphanModules.length, done, orphanModules.length ? done / orphanModules.length : 0));
+      const mk = (id, label, count, done) => {
+        const prog = count ? done / count : 0;
+        return `<button type="button" class="phase-tab${currentPhase === id ? ' active' : ''}" data-phase="${id}" role="tab" aria-selected="${currentPhase === id ? 'true' : 'false'}" title="${label}">
+          <span class="phase-tab-label">${label}</span>
+          <span class="phase-tab-progress"><span style="width:${pct(prog)}%"></span></span>
+          <span class="phase-tab-count">${done}/${count}</span>
+        </button>`;
+      };
+      const tabs = [mk('all', 'All', totalModules, completedCount)];
+      if (phaseRanges) {
+        phaseRanges.forEach((r, i) => {
+          const mods = visible.filter(m => phaseFor(m) === i);
+          const done = mods.filter(isCompleted).length;
+          tabs.push(mk(i, r[2], mods.length, done));
+        });
+      } else {
+        unitList.forEach(u => {
+          const mods = modulesByUnit.get(u.id) || [];
+          const done = mods.filter(isCompleted).length;
+          tabs.push(mk(u.id, `UNIT ${pad2(u.unit_number)} — ${u.title}`, mods.length, done));
+        });
+        if (orphanModules.length) {
+          const done = orphanModules.filter(isCompleted).length;
+          tabs.push(mk('none', 'Extras', orphanModules.length, done));
+        }
       }
-      railList.innerHTML = items.join('');
-      if (railStats) {
-        const study = estimatedStudyTime(visible);
-        railStats.innerHTML = study ? `${study}` : '';
-        railStats.style.display = study ? 'block' : 'none';
-      }
+      phaseTabsEl.innerHTML = tabs.join('');
+      phaseTabsEl.hidden = !hasTabs;
     }
-
-    function railItem(id, label, total, done, progress) {
-      return `<li class="rail-unit${currentUnit === id ? ' active' : ''}" data-unit="${id}">
-        <button type="button" class="rail-unit-btn" title="${label}">
-          <span class="rail-unit-label">${label}</span>
-          <span class="rail-unit-bar"><span style="width:${Math.round(progress * 100)}%"></span></span>
-          <span class="rail-unit-count">${done}/${total}</span>
-        </button>
-      </li>`;
-    }
-
-    if (courseRail) courseRail.hidden = legacy;
 
     // ---- Render: module grid ----
     function renderGrid() {
@@ -398,7 +450,22 @@ async function loadModulesForCourse(courseId) {
 
       let html = '';
 
-      if (legacy) {
+      if (phaseRanges) {
+        // Phase-driven layout: curriculum tabs (Foundations → practice →
+        // capstone). Clamps any phase index against the configured ranges.
+        const phaseIds = currentPhase === 'all'
+          ? phaseRanges.map((_, i) => i)
+          : [Number(currentPhase)];
+        phaseIds.forEach(idx => {
+          if (Number.isNaN(idx) || idx < 0 || idx >= phaseRanges.length) return;
+          const title = phaseRanges[idx][2];
+          const mods = visible.filter(m => phaseFor(m) === idx && filterMatches(m.content_type || 'lesson'));
+          if (mods.length === 0) return;
+          const open = openPhases.has(idx);
+          html += phaseHead(idx, title, mods.length, open);
+          if (open) html += mods.map(cardHtml).join('');
+        });
+      } else if (legacy) {
         // Pre-units fallback: flat lessons + resources split.
         const lessons = visible.filter(m => (m.content_type || 'lesson') === 'lesson');
         const resources = visible.filter(m => (m.content_type || 'lesson') !== 'lesson');
@@ -415,9 +482,9 @@ async function loadModulesForCourse(courseId) {
         }
       } else {
         // Unit-driven layout.
-        const unitIds = currentUnit === 'all'
+        const unitIds = currentPhase === 'all'
           ? unitList.map(u => u.id).concat(orphanModules.length ? ['none'] : [])
-          : [currentUnit];
+          : [currentPhase];
 
         unitIds.forEach(id => {
           const unit = id === 'none' ? { id: 'none', title: 'Extras', unit_number: (unitList.length || 0) + 1 } : unitById.get(id);
@@ -488,9 +555,11 @@ async function loadModulesForCourse(courseId) {
         .concat(TAB_DEFS.map(([type, k, label]) => [k, label, present.has(type)]))
         .map(([k, label, enabled]) => {
           const dis = enabled ? '' : ' disabled aria-disabled="true" title="No content of this type yet"';
-          return `<button type="button" class="mf-btn${k === 'all' ? ' active' : ''}${enabled ? '' : ' mf-disabled'}" data-filter="${k}" role="tab" aria-selected="${k === 'all' ? 'true' : 'false'}"${dis}>${label}</button>`;
+          const act = currentFilter === k;
+          return `<button type="button" class="mf-btn${act ? ' active' : ''}${enabled ? '' : ' mf-disabled'}" data-filter="${k}" role="tab" aria-selected="${act ? 'true' : 'false'}"${dis}>${label}</button>`;
         }).join('');
-      const resourcesBtn = `<span class="mf-sep" aria-hidden="true"></span><button type="button" class="mf-btn" data-filter="resources" role="tab" aria-selected="false">Resources</button>`;
+      const resAct = currentFilter === 'resources';
+      const resourcesBtn = `<span class="mf-sep" aria-hidden="true"></span><button type="button" class="mf-btn${resAct ? ' active' : ''}" data-filter="resources" role="tab" aria-selected="${resAct ? 'true' : 'false'}">Resources</button>`;
       bar.innerHTML = pills + resourcesBtn;
       moduleList.parentNode.insertBefore(bar, moduleList);
       bar.addEventListener('click', function (e) {
@@ -501,29 +570,54 @@ async function loadModulesForCourse(courseId) {
           b.classList.toggle('active', b === btn);
           b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
         });
+        syncHash('filter', currentFilter);
         renderGrid();
       });
     }
 
-    // ---- Unit rail interactions ----
-    if (railList) {
-      railList.addEventListener('click', function (e) {
-        const item = e.target.closest('.rail-unit[data-unit]');
-        if (!item) return;
-        currentUnit = item.dataset.unit;
-        renderRail();
+    function updateFilterActive() {
+      const bar = document.querySelector('.module-filter');
+      if (!bar) return;
+      bar.querySelectorAll('.mf-btn[data-filter]').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === currentFilter);
+        b.setAttribute('aria-selected', b.dataset.filter === currentFilter ? 'true' : 'false');
+      });
+    }
+
+    // ---- Phase tab interactions ----
+    if (phaseTabsEl) {
+      phaseTabsEl.addEventListener('click', function (e) {
+        const btn = e.target.closest('.phase-tab[data-phase]');
+        if (!btn) return;
+        currentPhase = btn.dataset.phase;
+        syncHash('phase', currentPhase);
+        renderPhaseTabs();
         renderGrid();
       });
     }
+    window.addEventListener('hashchange', () => {
+      readHashState();
+      renderPhaseTabs();
+      updateFilterActive();
+      renderGrid();
+    });
 
     // ---- Unit section toggles + card interactions ----
     moduleList.addEventListener('click', function (e) {
       const toggle = e.target.closest('.module-group-head[data-unit-head]');
       if (toggle) {
         const id = toggle.dataset.unitHead;
-        if (id === 'none') orphanOpen = !orphanOpen;
-        else if (openUnits.has(id)) openUnits.delete(id);
-        else openUnits.add(id);
+        if (id.startsWith('phase-')) {
+          const idx = Number(id.slice(6));
+          if (openPhases.has(idx)) openPhases.delete(idx);
+          else openPhases.add(idx);
+        } else if (id === 'none') {
+          orphanOpen = !orphanOpen;
+        } else if (openUnits.has(id)) {
+          openUnits.delete(id);
+        } else {
+          openUnits.add(id);
+        }
         renderGrid();
         return;
       }
@@ -555,7 +649,8 @@ async function loadModulesForCourse(courseId) {
     }
 
     renderCourseHead();
-    renderRail();
+    readHashState();
+    renderPhaseTabs();
     ensureFilterBar();
     renderGrid();
 
