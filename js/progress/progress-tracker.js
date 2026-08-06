@@ -29,8 +29,22 @@ class ProgressTracker {
 
   setupEventDelegation() {
     document.addEventListener('click', (e) => {
+      // Reset icon (↺) next to a completed module's button — a deliberate,
+      // confirmed action to un-complete a module.
+      const resetBtn = e.target.closest('.btn-complete-reset');
+      if (resetBtn) {
+        e.preventDefault();
+        const moduleId = resetBtn.dataset.moduleId;
+        const courseId = resetBtn.closest('[data-course-id]')?.dataset.courseId;
+        if (moduleId && courseId) this.resetModuleComplete(moduleId, courseId, { confirm: true });
+        return;
+      }
+
       const button = e.target.closest('.btn-complete');
       if (!button) return;
+      // Completed buttons are disabled — resetting happens via the reset icon,
+      // never by clicking the "✓ Completed" button itself.
+      if (button.classList.contains('completed')) return;
 
       e.preventDefault();
 
@@ -38,13 +52,7 @@ class ProgressTracker {
       const courseId = button.closest('[data-course-id]')?.dataset.courseId;
       if (!moduleId || !courseId) return;
 
-      if (button.classList.contains('completed')) {
-        // Completed buttons stay interactive so a student can re-do a module;
-        // clicking one asks for confirmation and then resets it.
-        this.resetModuleComplete(moduleId, courseId, { confirm: true });
-      } else {
-        this.markModuleComplete(moduleId, courseId, button);
-      }
+      this.markModuleComplete(moduleId, courseId, button);
     });
   }
 

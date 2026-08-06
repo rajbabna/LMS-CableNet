@@ -67,14 +67,33 @@
   cursor: default;
 }
 
-/* Completed State — kept interactive so a student can click to reset */
+/* Completed State — disabled; resetting happens via the adjacent reset icon */
 .btn-complete.completed {
   background: var(--ink-soft);
-  cursor: pointer;
-  opacity: 0.9;
+  cursor: default;
+  opacity: 0.8;
 }
-.btn-complete.completed:hover {
-  background: var(--copper-dark);
+
+/* Reset icon (↺) next to a completed module's button */
+.btn-complete-reset {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55em 0.7em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-complete-reset:hover,
+.btn-complete-reset:focus-visible {
+  border-color: var(--copper);
+  color: var(--copper-dark);
+  background: #fbf1e6;
+  outline: none;
 }
 
 /* Completed Module Row */
