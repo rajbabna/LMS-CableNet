@@ -316,6 +316,7 @@ async function loadModulesForCourse(courseId) {
     let currentFilter = 'all';
     let currentPhase = 'all';
     const moduleById = new Map();
+    const phaseRanges = COURSE_PHASES[courseId] || null;
     const openUnits = new Set(unitList.map(u => u.id));
     const openPhases = new Set(phaseRanges ? phaseRanges.map((_, i) => i) : []);
     let orphanOpen = true;
