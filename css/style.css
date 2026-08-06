@@ -674,8 +674,8 @@ button.module-open {
   justify-content: center;
 }
 .module-group-head .mg-donut-hole {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--paper);
   display: flex;
@@ -684,9 +684,10 @@ button.module-open {
 }
 .module-group-head .mg-donut-num {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.55rem;
   font-weight: 700;
   line-height: 1;
+  white-space: nowrap;
   color: rgb(var(--ph));
 }
 .module-group-head .mg-count {
