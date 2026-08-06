@@ -1,7 +1,13 @@
 // ===========================================================
-// js/progress/progress-tracker.js (FIXED)
-// Handles "Mark Complete" button clicks
-// Uses event delegation to work with dynamically-loaded modules
+// js/progress/progress-tracker.js
+// Handles "Mark Complete" and "Reset" on the course page.
+//
+// Uses event delegation over the document so it works with the
+// dynamically-rendered module list. Marking complete upserts a
+// module_completions row; resetting (clicking a completed button,
+// or the toast's Undo action) deletes it. After either change the
+// tracker asks load-modules.js to recompute the derived UI (course %,
+// phase donuts, completion banner) via window.recomputeCourseUI.
 // ===========================================================
 
 class ProgressTracker {
@@ -12,39 +18,54 @@ class ProgressTracker {
   }
 
   async init() {
-    // Get current user
     const { data: { user } } = await this.supabase.auth.getUser();
-    
-    if (!user) {
-      console.log('ProgressTracker: No authenticated user');
-      this.currentUserId = null;
-    } else {
-      this.currentUserId = user.id;
-      console.log('ProgressTracker: Initialized for user', this.currentUserId);
-    }
-    
-    // Use event delegation to listen for button clicks
+    this.currentUserId = user ? user.id : null;
+    console.log(this.currentUserId
+      ? 'ProgressTracker: Initialized for user ' + this.currentUserId
+      : 'ProgressTracker: No authenticated user');
+
     this.setupEventDelegation();
   }
 
   setupEventDelegation() {
-    // Listen for clicks anywhere on the document
-    // Then check if the clicked element is a .btn-complete button
     document.addEventListener('click', (e) => {
+      // Reset icon (↺) next to a completed module's button — a deliberate,
+      // confirmed action to un-complete a module.
+      const resetBtn = e.target.closest('.btn-complete-reset');
+      if (resetBtn) {
+        e.preventDefault();
+        const moduleId = resetBtn.dataset.moduleId;
+        const courseId = resetBtn.closest('[data-course-id]')?.dataset.courseId;
+        if (moduleId && courseId) this.resetModuleComplete(moduleId, courseId, { confirm: true });
+        return;
+      }
+
       const button = e.target.closest('.btn-complete');
-      
-      if (!button) return; // Clicked something else, ignore
-      if (button.classList.contains('completed')) return; // Already completed, ignore
-      
+      if (!button) return;
+      // Completed buttons are disabled — resetting happens via the reset icon,
+      // never by clicking the "✓ Completed" button itself.
+      if (button.classList.contains('completed')) return;
+
       e.preventDefault();
-      
+
       const moduleId = button.dataset.moduleId;
       const courseId = button.closest('[data-course-id]')?.dataset.courseId;
-      
-      if (moduleId && courseId) {
-        this.markModuleComplete(moduleId, courseId, button);
-      }
+      if (!moduleId || !courseId) return;
+
+      this.markModuleComplete(moduleId, courseId, button);
     });
+  }
+
+  // Forward a completion change to load-modules.js so the derived UI
+  // (course %, phase donuts, completion banner) recomputes. A fallback
+  // full reload is used if the page never registered the hooks.
+  applyChange(delta) {
+    if (typeof window.recomputeCourseUI === 'function') {
+      window.recomputeCourseUI(delta);
+    } else {
+      console.warn('ProgressTracker: recomputeCourseUI not registered');
+      window.location.reload();
+    }
   }
 
   async markModuleComplete(moduleId, courseId, buttonElement) {
@@ -53,16 +74,12 @@ class ProgressTracker {
       return;
     }
 
+    const originalText = buttonElement.textContent;
+    buttonElement.disabled = true;
+    buttonElement.textContent = 'Saving...';
+
     try {
-      // Show loading state
-      buttonElement.disabled = true;
-      const originalText = buttonElement.textContent;
-      buttonElement.textContent = 'Saving...';
-
-      console.log('Marking module complete:', { moduleId, courseId, userId: this.currentUserId });
-
-      // Update module_completions table
-      const { data, error } = await this.supabase
+      const { error } = await this.supabase
         .from('module_completions')
         .upsert({
           user_id: this.currentUserId,
@@ -70,81 +87,89 @@ class ProgressTracker {
           status: 'completed',
           completion_percentage: 100,
           completed_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,module_id'
-        });
+        }, { onConflict: 'user_id,module_id' });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Successfully marked module complete:', data);
-
-      // Update UI
-      this.updateModuleUI(buttonElement, moduleId);
-      
-      // Show success message
-      this.showToast('Module marked complete! ✓', 'success');
-
-    } catch (error) {
-      console.error('Error marking module complete:', error);
+      this.applyChange({ moduleId, completed: true });
+      this.showToast('Module marked complete ✓', 'success', {
+        label: 'Undo',
+        handler: () => this.resetModuleComplete(moduleId, courseId, { confirm: false })
+      });
+    } catch (err) {
+      console.error('Error marking module complete:', err);
       this.showToast('Error saving progress. Try again.', 'error');
       buttonElement.disabled = false;
       buttonElement.textContent = originalText;
     }
   }
 
-  updateModuleUI(buttonElement, moduleId) {
-    // Update button
-    buttonElement.classList.add('completed');
-    buttonElement.disabled = true;
-    buttonElement.textContent = '✓ Completed';
+  // Deletes the completion record. With confirm:true (direct clicks) it
+  // warns first because it can re-lock the final quiz / drop badge counts.
+  // With confirm:false (toast Undo) it is an instant reversal of an action
+  // the student just took, so no prompt is shown.
+  async resetModuleComplete(moduleId, courseId, opts) {
+    const { confirm = false } = opts || {};
+    if (!this.currentUserId) {
+      this.showToast('Please log in first', 'error');
+      return;
+    }
 
-    // Update progress bar to 100%
-    const moduleRow = buttonElement.closest('[data-module-id]');
-    if (moduleRow) {
-      moduleRow.classList.add('completed');
-      
-      // Update progress fill
-      const progressFill = moduleRow.querySelector('.progress-fill');
-      if (progressFill) {
-        progressFill.style.width = '100%';
-      }
+    if (confirm && !window.confirm(
+      'Reset this module? It will be marked incomplete and your course ' +
+      'progress and badge counts will recalculate.'
+    )) {
+      return;
+    }
 
-      // Update progress text
-      const progressText = moduleRow.querySelector('.progress-text');
-      if (progressText) {
-        progressText.textContent = '100% · 0 min';
-      }
+    try {
+      const { error } = await this.supabase
+        .from('module_completions')
+        .delete()
+        .eq('user_id', this.currentUserId)
+        .eq('module_id', moduleId);
+
+      if (error) throw error;
+
+      this.applyChange({ moduleId, completed: false });
+      this.showToast('Module reset — mark it complete when you’re ready', 'info');
+    } catch (err) {
+      console.error('Error resetting module:', err);
+      this.showToast('Error resetting progress. Try again.', 'error');
     }
   }
 
-  showToast(message, type = 'info') {
-    // Create toast element
+  showToast(message, type = 'info', action) {
     const toast = document.createElement('div');
-    toast.className = `toast-notification ${type}`;
+    toast.className = 'toast-notification ' + type;
     toast.textContent = message;
-    
-    // Add to page
+
+    if (action) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toast-action';
+      btn.textContent = action.label;
+      btn.addEventListener('click', () => {
+        toast.remove();
+        action.handler();
+      });
+      toast.appendChild(btn);
+    }
+
     document.body.appendChild(toast);
 
-    console.log('Toast shown:', message, type);
-
-    // Remove after 3 seconds
+    // Auto-dismiss; give the toast with an action a couple extra seconds.
+    const dismissMs = action ? 6000 : 3000;
     setTimeout(() => {
       toast.style.animation = 'slideOut 0.3s ease';
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, dismissMs);
   }
 }
 
 // Initialize when DOM is ready
-// Note: Event delegation setup happens immediately,
-// so it doesn't matter if buttons exist yet or not
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof supabaseClient !== 'undefined') {
-    console.log('Initializing ProgressTracker...');
     window.progressTracker = new ProgressTracker(supabaseClient);
   } else {
     console.warn('ProgressTracker: supabaseClient not available');

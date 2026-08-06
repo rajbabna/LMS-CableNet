@@ -638,47 +638,84 @@ button.module-open {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  margin: 0.7rem 0 0.4rem;
-  padding: 0;
+  gap: 0.5rem;
+  margin: 0.55rem 0 0.45rem;
+  padding: 0.22rem 0.7rem;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
+  color: var(--ink);
+  /* Theme hue baked into an rgba triplet; phase rules override it so each
+     phase paints a slightly different light gradient:
+     foundations (green) → practice (copper) → capstone (blue). */
+  --ph: 70, 162, 95;
+  background: linear-gradient(90deg, rgba(var(--ph), 0.13), rgba(var(--ph), 0.05) 60%, transparent);
+  border: 1px solid rgba(var(--ph), 0.16);
+  border-radius: 8px;
 }
-.module-group-head::before,
-.module-group-head::after {
-  content: '';
-  flex: 1 1 auto;
-  height: 1px;
-  min-width: 1.2rem;
-  background: var(--line);
-}
+.module-group-head[data-unit-head="phase-1"] { --ph: 194, 98, 45; }  /* copper */
+.module-group-head[data-unit-head="phase-2"] { --ph: 52, 87, 107; }   /* blue */
 .module-group-head .mg-title {
   color: var(--ink);
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
+}
+.module-group-head .mg-donut {
+  margin-left: auto;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: conic-gradient(rgb(var(--ph)) var(--p, 0%), rgba(var(--ph), 0.16) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.module-group-head .mg-donut-hole {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.module-group-head .mg-donut-num {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: rgb(var(--ph));
 }
 .module-group-head .mg-count {
+  margin-left: auto;
   font-family: var(--font-mono);
   font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  text-transform: none;
   color: var(--ink-soft);
-  border: 1px solid var(--line);
-  background: var(--paper);
-  border-radius: 999px;
-  padding: 0.1em 0.55em;
 }
 .module-group-head .mg-caret {
-  color: var(--ink-soft);
-  font-size: 0.8rem;
+  flex: 0 0 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(var(--ph), 0.14);
+  border: 1px solid rgba(var(--ph), 0.32);
+  color: rgb(var(--ph));
+  font-size: 0.62rem;
   line-height: 1;
-  letter-spacing: 0;
 }
 .module-group-head.mg-toggle { cursor: pointer; user-select: none; }
-.module-group-head.mg-toggle:hover .mg-title { color: var(--teal); }
+.module-group-head.mg-toggle:hover .mg-title { color: rgb(var(--ph)); }
+.module-group-head.mg-toggle:hover {
+  background: linear-gradient(90deg, rgba(var(--ph), 0.2), rgba(var(--ph), 0.07) 60%, transparent);
+  border-color: rgba(var(--ph), 0.32);
+}
 
 /* Compact quiz row */
 .module-quiz {
@@ -880,7 +917,12 @@ button.module-open {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 1.4rem 1.5rem 1.2rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 2rem;
 }
+.course-head-main { min-width: 0; }
 .course-head h1 {
   font-family: var(--font-display);
   font-size: 1.7rem;
@@ -916,9 +958,53 @@ button.module-open {
   background: var(--teal);
 }
 
+/* Overall-progress donut in the course header (matches the phase donut
+   pattern but larger). Tracks the same courseProgress as the bar above. */
+.course-head-donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-left: 2rem;
+  border-left: 1px solid var(--line);
+}
+.donut-ring {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: conic-gradient(var(--teal) var(--p, 0%), #e6e1d6 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-hole {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-num {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.donut-caption {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
 .course-dash-body {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: start;
 }
@@ -947,6 +1033,7 @@ button.module-open {
 
 /* Header primary CTA (Start / Continue) */
 .course-head-footer {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   margin-top: 1.2rem;
@@ -983,120 +1070,66 @@ button.module-open {
   background: #EDF2F6;
 }
 
-.course-rail {
-  position: sticky;
-  top: 1rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--paper);
-  padding: 1rem 0.9rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-}
-.rail-title {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0.4rem 0.7rem;
-}
-.rail-units {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Curriculum phase tabs (course page restructure) - replaces the unit
+   rail: foundations / practice / capstone with a per-phase progress meter */
+.phase-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px dashed var(--line);
 }
-.rail-unit-btn {
+.phase-tab {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 0.45rem 0.5rem;
-  cursor: pointer;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
   color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45em 0.9em;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
-.rail-unit-btn:hover {
-  background: #f6ece0;
-  border-color: var(--line);
-}
-.rail-unit.active .rail-unit-btn {
+.phase-tab:hover { border-color: var(--teal); color: var(--teal); }
+.phase-tab.active {
   background: var(--teal);
   border-color: var(--teal);
   color: #fff;
 }
-.rail-unit.active .rail-unit-btn .rail-unit-label { color: #fff; }
-.rail-unit-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.rail-unit-btn:hover .rail-unit-label {
-  white-space: normal;
-  overflow: visible;
-}
-.rail-unit-bar {
-  flex: 0 0 42px;
+.phase-tab-label { font-weight: 600; }
+.phase-tab-progress {
+  flex: 0 0 34px;
   height: 4px;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.14);
   border-radius: 2px;
   overflow: hidden;
 }
-.rail-unit.active .rail-unit-bar { background: rgba(255, 255, 255, 0.3); }
-.rail-unit-bar span {
+.phase-tab.active .phase-tab-progress { background: rgba(255, 255, 255, 0.3); }
+.phase-tab-progress span {
   display: block;
   height: 100%;
   background: var(--copper);
 }
-.rail-unit.active .rail-unit-bar span { background: #fff; }
-.rail-unit-count {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--teal);
-  border-radius: 999px;
-  padding: 0.12em 0.6em;
-  white-space: nowrap;
-}
-.rail-unit.active .rail-unit-count { background: rgba(255, 255, 255, 0.25); }
-.rail-stats {
-  margin-top: 0.8rem;
-  padding-top: 0.7rem;
-  border-top: 1px dashed var(--line);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+.phase-tab.active .phase-tab-progress span { background: #fff; }
+.phase-tab-count {
+  font-size: 0.66rem;
+  font-weight: 700;
   color: var(--ink-soft);
-  text-align: center;
 }
-
-@media (max-width: 980px) {
-  .course-dash-body { grid-template-columns: 1fr; }
-  .course-rail {
-    position: static;
-    margin-bottom: 1.2rem;
+.phase-tab.active .phase-tab-count { color: #fff; }
+@media (max-width: 520px) {
+  .phase-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
   }
-  .rail-units {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-  .rail-unit-btn {
-    width: auto;
-    white-space: nowrap;
-  }
-  .rail-unit-bar { display: none; }
-  .rail-stats { display: none; }
+  .phase-tab { flex: 0 0 auto; white-space: nowrap; }
 }
 
 footer {
@@ -1105,6 +1138,23 @@ footer {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--ink-soft);
+}
+
+@media (max-width: 720px) {
+  .course-head {
+    grid-template-columns: 1fr;
+    row-gap: 1.2rem;
+  }
+  .course-head-donut {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding-left: 0;
+    border-left: none;
+  }
+  .donut-ring { width: 64px; height: 64px; }
+  .donut-hole { width: 48px; height: 48px; }
+  .donut-num { font-size: 0.9rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -151,11 +151,6 @@
         padding-top: 0;
         border-top: 0;
       }
-      .cr-info-url {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        word-break: break-all;
-      }
       .cr-foot {
         display: flex;
         justify-content: flex-end;
@@ -305,10 +300,11 @@
     closeBtn.focus();
   }
 
-  // Info view: shows the module's type, description, duration and URL
-  // instead of embedding content. Backed by a plain-text DOM build to
-  // avoid rendering anything unsafe from the description.
-  function openInfo(module) {
+  // Info view: shows the module's type, status, description and number in
+  // a clean panel. The raw content URL is deliberately NOT printed here —
+  // opening the content is the job of the module's Open button and the
+  // footer action, not a read-only text row.
+  function openInfo(module, statusLabel) {
     if (!module) return;
     var type = (module.content_type || 'lesson');
     var title = module.title || 'Module info';
@@ -325,6 +321,9 @@
     badgeEl.textContent = type.charAt(0).toUpperCase() + type.slice(1);
     titleEl.textContent = title;
     extEl.href = module.content_url || '';
+    extEl.textContent = (type === 'lesson'
+      ? 'Open lesson'
+      : 'Open in new tab') + '\u00A0\u2197';
 
     bodyEl.innerHTML = '';
     var box = document.createElement('div');
@@ -334,10 +333,17 @@
       var p = document.createElement('p');
       p.textContent = module.description;
       box.appendChild(p);
+    } else {
+      var none = document.createElement('p');
+      none.textContent = 'No additional details are available for this module.';
+      none.style.color = 'var(--ink-soft)';
+      none.style.fontStyle = 'italic';
+      box.appendChild(none);
     }
+
     var meta = [
       module.module_number ? 'Module ' + module.module_number : null,
-      module.duration ? 'Time: ' + module.duration : null
+      statusLabel ? 'Status: ' + statusLabel : null
     ].filter(Boolean);
     if (meta.length) {
       var row = document.createElement('div');
@@ -345,12 +351,7 @@
       row.textContent = meta.join(' · ');
       box.appendChild(row);
     }
-    if (module.content_url) {
-      var urlRow = document.createElement('div');
-      urlRow.className = 'cr-info-row cr-info-url';
-      urlRow.textContent = module.content_url;
-      box.appendChild(urlRow);
-    }
+
     bodyEl.appendChild(box);
 
     lastFocused = document.activeElement;

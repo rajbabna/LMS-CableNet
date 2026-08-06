@@ -14,6 +14,47 @@
 // flat lessons + resources layout instead.
 // ===========================================================
 
+// ---- Phase curriculum layout (course page restructure) ----
+// Each course maps its modules (by `module_number`) into learning
+// phases shown as tabs, so students scan a short curriculum (Foundations
+// / Practice / Capstone) instead of one long list. Ranges are
+// `[startModuleNumber, endModuleNumber, title]`. Any module whose number
+// falls outside every range goes into the LAST phase, so demo/extra
+// modules (91+) stay grouped with the capstone rather than vanishing.
+const COURSE_PHASES = {
+  cabling: [
+    [1, 3, 'Foundations'],
+    [4, 7, 'Practice'],
+    [8, 10, 'Capstone']
+  ],
+  networking: [
+    [1, 3, 'Fundamentals'],
+    [4, 6, 'Operations'],
+    [7, 10, 'Advanced']
+  ]
+};
+
+function phaseIndexFor(moduleNumber, ranges) {
+  if (!ranges || ranges.length === 0) return -1;
+  const n = Number(moduleNumber || 0);
+  for (let i = 0; i < ranges.length; i++) {
+    if (n >= ranges[i][0] && n <= ranges[i][1]) return i;
+  }
+  if (n < ranges[0][0]) return 0;
+  return ranges.length - 1;
+}
+
+// ---- Completion-change hooks ----
+// progress-tracker.js calls window.recomputeCourseUI({ moduleId, completed })
+// after a module is marked complete or reset. The currently-loaded course
+// registers render closures here so the derived UI (course %, phase donuts,
+// completion banner) stays in sync without a full page reload.
+let activeCourseHooks = null;
+
+window.recomputeCourseUI = function (delta) {
+  if (activeCourseHooks) activeCourseHooks.applyChange(delta);
+};
+
 async function loadModulesForCourse(courseId) {
   const moduleList = document.querySelector('.module-list');
 
@@ -112,9 +153,18 @@ async function loadModulesForCourse(courseId) {
     // course modules). Defaults to ALL modules (i.e. at course completion).
     const FINAL_QUIZ_THRESHOLD = 1.0;
     const totalModules = visible.length;
-    const completedCount = visible.filter(isCompleted).length;
-    const courseProgress = totalModules ? completedCount / totalModules : 0;
-    const finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+    let completedCount = visible.filter(isCompleted).length;
+    let courseProgress = totalModules ? completedCount / totalModules : 0;
+    let finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+
+    // Recomputes progress-derived values after a module is marked complete
+    // or reset (progress-tracker.js calls back into these via the hooks
+    // registered below). Everything else reads from these live values.
+    function recalcProgress() {
+      completedCount = visible.filter(isCompleted).length;
+      courseProgress = totalModules ? completedCount / totalModules : 0;
+      finalQuizUnlocked = courseProgress >= FINAL_QUIZ_THRESHOLD;
+    }
 
     if (!visible || visible.length === 0) {
       const li = document.createElement('li');
@@ -168,6 +218,7 @@ async function loadModulesForCourse(courseId) {
       open: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
       info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
     };
+    const RESET_ICON = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
 
     // ---- Card HTML ----
     function cardHtml(module) {
@@ -209,9 +260,16 @@ async function loadModulesForCourse(courseId) {
 
       const completionHtml = isPreview || status === 'coming-soon'
         ? `<span class="preview-locked">${status === 'coming-soon' ? '👷 Coming soon' : '🔒 Enrollment required'}</span>`
-        : `<button class="btn-complete${completed ? ' completed' : ''}" data-module-id="${module.id}" ${completed ? 'disabled' : ''}>
-            ${completed ? '✓ Completed' : 'Mark Complete'}
-          </button>`;
+        : completed
+          // Completed: disabled "✓ Completed" state + a separate reset icon.
+          // The reset icon is its own element so students never confuse it with
+          // the button, and the button instantly returns to "Mark Complete".
+          ? `<button class="btn-complete completed" data-module-id="${module.id}" disabled>
+              ✓ Completed
+            </button>
+            <button type="button" class="btn-complete-reset" data-module-id="${module.id}"
+              title="Reset: un-complete this module" aria-label="Reset this module to incomplete">${RESET_ICON}</button>`
+          : `<button class="btn-complete" data-module-id="${module.id}">Mark Complete</button>`;
 
       const progressLabel = completed ? 'Complete' : (status === 'in-progress' ? 'In progress' : 'Not started');
 
@@ -274,11 +332,25 @@ async function loadModulesForCourse(courseId) {
       </li>`;
     }
 
+    function phaseHead(idx, title, done, total, open) {
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const donut = `<span class="mg-donut" style="--p:${pct}%" role="img" aria-label="${done} of ${total} complete">
+        <span class="mg-donut-hole"><span class="mg-donut-num">${pct}%</span></span>
+      </span>`;
+      return `<li class="module-group-head mg-toggle${open ? ' mg-open' : ''}" data-unit-head="phase-${idx}">
+        <span class="mg-title">PHASE ${pad2(idx + 1)} — ${title}</span>
+        ${donut}
+        <span class="mg-caret">${open ? '▾' : '▸'}</span>
+      </li>`;
+    }
+
     // ---- State ----
     let currentFilter = 'all';
-    let currentUnit = 'all';
+    let currentPhase = 'all';
     const moduleById = new Map();
+    const phaseRanges = COURSE_PHASES[courseId] || null;
     const openUnits = new Set(unitList.map(u => u.id));
+    const openPhases = new Set(phaseRanges ? phaseRanges.map((_, i) => i) : []);
     let orphanOpen = true;
 
     // Resources tab state (built from resources/index.json)
@@ -287,20 +359,26 @@ async function loadModulesForCourse(courseId) {
     const resourceEsc = s => String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-    const railList = document.getElementById('unitRailList');
-    const railStats = document.getElementById('railStats');
-    const courseRail = document.getElementById('courseRail');
+    // Phase curriculum (course page restructure): modules are grouped into
+    // learning phases shown as tabs. Courses without a phase map fall back
+    // to the unit layout, then to the legacy flat list, so nothing breaks.
+    const phaseTabsEl = document.getElementById('phaseTabs');
+    const hasTabs = phaseRanges !== null || unitList.length > 0 || orphanModules.length > 0;
 
     function filterMatches(t) {
       if (currentFilter === 'all') return true;
       return typeToTab[t] === currentFilter;
     }
 
+    function phaseFor(m) {
+      return phaseIndexFor(m.module_number, phaseRanges);
+    }
+
     function unitModules(unit) {
       return unit.id === 'none' ? orphanModules : (modulesByUnit.get(unit.id) || []);
     }
 
-    // ---- Render: course header + unit rail ----
+    // ---- Render: course header ----
     function renderCourseHead() {
       const head = document.getElementById('courseHead');
       if (!head || !course) return;
@@ -323,8 +401,20 @@ async function loadModulesForCourse(courseId) {
       if (fillEl) fillEl.style.width = pct + '%';
       document.title = (course.title || 'Course') + ' — Cable&Net Courses';
 
+      // Overall-progress donut in the header — mirrors the progress bar above.
+      const donut = document.getElementById('courseDonut');
+      const donutPct = document.getElementById('courseDonutPct');
+      const donutCaption = document.getElementById('courseDonutCaption');
+      if (donut) {
+        donut.hidden = false;
+        const ring = donut.querySelector('.donut-ring');
+        if (ring) ring.style.setProperty('--p', pct + '%');
+      }
+      if (donutPct) donutPct.textContent = pct + '%';
+      if (donutCaption) donutCaption.textContent = `${completedCount} of ${totalModules} modules`;
+
       // Primary CTA: Start Course at 0%, otherwise Continue at the first
-      // incomplete module (C7). Targets the current unit section.
+      // incomplete module (C7). Scrolls to the module list.
       const footer = document.getElementById('courseHeadFooter');
       if (footer) {
         const firstOpen = visible.find(m => !isCompleted(m) && m.content_url && !isPreview);
@@ -335,54 +425,61 @@ async function loadModulesForCourse(courseId) {
       }
     }
 
-    function parseMinutes(str) {
-      if (!str) return 0;
-      const m = String(str).match(/(\d+(?:\.\d+)?)\s*(min|mins|minute|minutes|hr|hrs|hour|hours)/i);
-      if (!m) return 0;
-      const n = parseFloat(m[1]);
-      return m[2][0].toLowerCase() === 'm' ? n : n * 60;
-    }
-    function estimatedStudyTime(modules) {
-      const mins = (modules || []).reduce((s, mod) => s + parseMinutes(mod.duration), 0);
-      if (!mins) return null;
-      if (mins < 60) return `Est. ~${Math.round(mins)} min total`;
-      const hrs = mins / 60;
-      return `Est. ~${hrs < 10 ? hrs.toFixed(1) : Math.round(hrs)} hrs total`;
+    function syncHash(kind, val) {
+      const h = '#' + kind + '-' + encodeURIComponent(String(val));
+      if (window.history && window.history.replaceState && location.hash !== h) {
+        history.replaceState(null, '', h);
+      }
     }
 
-    function renderRail() {
-      if (!railList) return;
+    function readHashState() {
+      const m = (location.hash || '').match(/^#(phase|filter)-([^&]+)$/);
+      if (!m) return;
+      const val = decodeURIComponent(m[2]);
+      if (m[1] === 'phase') {
+        const ok = val === 'all'
+          || (phaseRanges && phaseRanges.some((_, i) => String(i) === val))
+          || (!phaseRanges && (val === 'none' || unitList.some(u => u.id === val)));
+        if (ok) currentPhase = val;
+      } else if (m[1] === 'filter') {
+        const ok = val === 'all' || val === 'resources'
+          || Object.keys(typeToTab).some(t => typeToTab[t] === val);
+        if (ok) currentFilter = val;
+      }
+    }
+
+    function renderPhaseTabs() {
+      if (!phaseTabsEl) return;
       const pct = p => Math.round((p || 0) * 100);
-      const items = [];
-      items.push(railItem('all', 'All units', totalModules, completedCount, courseProgress));
-      unitList.forEach(u => {
-        const mods = modulesByUnit.get(u.id) || [];
-        const done = mods.filter(isCompleted).length;
-        items.push(railItem(u.id, `UNIT ${pad2(u.unit_number)} — ${u.title}`, mods.length, done, mods.length ? done / mods.length : 0));
-      });
-      if (orphanModules.length) {
-        const done = orphanModules.filter(isCompleted).length;
-        items.push(railItem('none', 'Extras', orphanModules.length, done, orphanModules.length ? done / orphanModules.length : 0));
+      const mk = (id, label, count, done) => {
+        const prog = count ? done / count : 0;
+        return `<button type="button" class="phase-tab${currentPhase === id ? ' active' : ''}" data-phase="${id}" role="tab" aria-selected="${currentPhase === id ? 'true' : 'false'}" title="${label}">
+          <span class="phase-tab-label">${label}</span>
+          <span class="phase-tab-progress"><span style="width:${pct(prog)}%"></span></span>
+          <span class="phase-tab-count">${done}/${count}</span>
+        </button>`;
+      };
+      const tabs = [mk('all', 'All', totalModules, completedCount)];
+      if (phaseRanges) {
+        phaseRanges.forEach((r, i) => {
+          const mods = visible.filter(m => phaseFor(m) === i);
+          const done = mods.filter(isCompleted).length;
+          tabs.push(mk(i, r[2], mods.length, done));
+        });
+      } else {
+        unitList.forEach(u => {
+          const mods = modulesByUnit.get(u.id) || [];
+          const done = mods.filter(isCompleted).length;
+          tabs.push(mk(u.id, `UNIT ${pad2(u.unit_number)} — ${u.title}`, mods.length, done));
+        });
+        if (orphanModules.length) {
+          const done = orphanModules.filter(isCompleted).length;
+          tabs.push(mk('none', 'Extras', orphanModules.length, done));
+        }
       }
-      railList.innerHTML = items.join('');
-      if (railStats) {
-        const study = estimatedStudyTime(visible);
-        railStats.innerHTML = study ? `${study}` : '';
-        railStats.style.display = study ? 'block' : 'none';
-      }
+      phaseTabsEl.innerHTML = tabs.join('');
+      phaseTabsEl.hidden = !hasTabs;
     }
-
-    function railItem(id, label, total, done, progress) {
-      return `<li class="rail-unit${currentUnit === id ? ' active' : ''}" data-unit="${id}">
-        <button type="button" class="rail-unit-btn" title="${label}">
-          <span class="rail-unit-label">${label}</span>
-          <span class="rail-unit-bar"><span style="width:${Math.round(progress * 100)}%"></span></span>
-          <span class="rail-unit-count">${done}/${total}</span>
-        </button>
-      </li>`;
-    }
-
-    if (courseRail) courseRail.hidden = legacy;
 
     // ---- Render: module grid ----
     function renderGrid() {
@@ -398,7 +495,23 @@ async function loadModulesForCourse(courseId) {
 
       let html = '';
 
-      if (legacy) {
+      if (phaseRanges) {
+        // Phase-driven layout: curriculum tabs (Foundations → practice →
+        // capstone). Clamps any phase index against the configured ranges.
+        const phaseIds = currentPhase === 'all'
+          ? phaseRanges.map((_, i) => i)
+          : [Number(currentPhase)];
+        phaseIds.forEach(idx => {
+          if (Number.isNaN(idx) || idx < 0 || idx >= phaseRanges.length) return;
+          const title = phaseRanges[idx][2];
+          const mods = visible.filter(m => phaseFor(m) === idx && filterMatches(m.content_type || 'lesson'));
+          if (mods.length === 0) return;
+          const open = openPhases.has(idx);
+          const done = mods.filter(isCompleted).length;
+          html += phaseHead(idx, title, done, mods.length, open);
+          if (open) html += mods.map(cardHtml).join('');
+        });
+      } else if (legacy) {
         // Pre-units fallback: flat lessons + resources split.
         const lessons = visible.filter(m => (m.content_type || 'lesson') === 'lesson');
         const resources = visible.filter(m => (m.content_type || 'lesson') !== 'lesson');
@@ -415,9 +528,9 @@ async function loadModulesForCourse(courseId) {
         }
       } else {
         // Unit-driven layout.
-        const unitIds = currentUnit === 'all'
+        const unitIds = currentPhase === 'all'
           ? unitList.map(u => u.id).concat(orphanModules.length ? ['none'] : [])
-          : [currentUnit];
+          : [currentPhase];
 
         unitIds.forEach(id => {
           const unit = id === 'none' ? { id: 'none', title: 'Extras', unit_number: (unitList.length || 0) + 1 } : unitById.get(id);
@@ -488,9 +601,11 @@ async function loadModulesForCourse(courseId) {
         .concat(TAB_DEFS.map(([type, k, label]) => [k, label, present.has(type)]))
         .map(([k, label, enabled]) => {
           const dis = enabled ? '' : ' disabled aria-disabled="true" title="No content of this type yet"';
-          return `<button type="button" class="mf-btn${k === 'all' ? ' active' : ''}${enabled ? '' : ' mf-disabled'}" data-filter="${k}" role="tab" aria-selected="${k === 'all' ? 'true' : 'false'}"${dis}>${label}</button>`;
+          const act = currentFilter === k;
+          return `<button type="button" class="mf-btn${act ? ' active' : ''}${enabled ? '' : ' mf-disabled'}" data-filter="${k}" role="tab" aria-selected="${act ? 'true' : 'false'}"${dis}>${label}</button>`;
         }).join('');
-      const resourcesBtn = `<span class="mf-sep" aria-hidden="true"></span><button type="button" class="mf-btn" data-filter="resources" role="tab" aria-selected="false">Resources</button>`;
+      const resAct = currentFilter === 'resources';
+      const resourcesBtn = `<span class="mf-sep" aria-hidden="true"></span><button type="button" class="mf-btn${resAct ? ' active' : ''}" data-filter="resources" role="tab" aria-selected="${resAct ? 'true' : 'false'}">Resources</button>`;
       bar.innerHTML = pills + resourcesBtn;
       moduleList.parentNode.insertBefore(bar, moduleList);
       bar.addEventListener('click', function (e) {
@@ -501,29 +616,54 @@ async function loadModulesForCourse(courseId) {
           b.classList.toggle('active', b === btn);
           b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
         });
+        syncHash('filter', currentFilter);
         renderGrid();
       });
     }
 
-    // ---- Unit rail interactions ----
-    if (railList) {
-      railList.addEventListener('click', function (e) {
-        const item = e.target.closest('.rail-unit[data-unit]');
-        if (!item) return;
-        currentUnit = item.dataset.unit;
-        renderRail();
+    function updateFilterActive() {
+      const bar = document.querySelector('.module-filter');
+      if (!bar) return;
+      bar.querySelectorAll('.mf-btn[data-filter]').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === currentFilter);
+        b.setAttribute('aria-selected', b.dataset.filter === currentFilter ? 'true' : 'false');
+      });
+    }
+
+    // ---- Phase tab interactions ----
+    if (phaseTabsEl) {
+      phaseTabsEl.addEventListener('click', function (e) {
+        const btn = e.target.closest('.phase-tab[data-phase]');
+        if (!btn) return;
+        currentPhase = btn.dataset.phase;
+        syncHash('phase', currentPhase);
+        renderPhaseTabs();
         renderGrid();
       });
     }
+    window.addEventListener('hashchange', () => {
+      readHashState();
+      renderPhaseTabs();
+      updateFilterActive();
+      renderGrid();
+    });
 
     // ---- Unit section toggles + card interactions ----
     moduleList.addEventListener('click', function (e) {
       const toggle = e.target.closest('.module-group-head[data-unit-head]');
       if (toggle) {
         const id = toggle.dataset.unitHead;
-        if (id === 'none') orphanOpen = !orphanOpen;
-        else if (openUnits.has(id)) openUnits.delete(id);
-        else openUnits.add(id);
+        if (id.startsWith('phase-')) {
+          const idx = Number(id.slice(6));
+          if (openPhases.has(idx)) openPhases.delete(idx);
+          else openPhases.add(idx);
+        } else if (id === 'none') {
+          orphanOpen = !orphanOpen;
+        } else if (openUnits.has(id)) {
+          openUnits.delete(id);
+        } else {
+          openUnits.add(id);
+        }
         renderGrid();
         return;
       }
@@ -531,7 +671,15 @@ async function loadModulesForCourse(courseId) {
       if (infoBtn) {
         e.preventDefault();
         const mod = moduleById.get(Number(infoBtn.dataset.info));
-        if (mod && window.ContentRenderer) ContentRenderer.openInfo(mod);
+        if (mod && window.ContentRenderer) {
+          let statusLabel;
+          if (isPreview) statusLabel = 'Locked — enrollment required';
+          else if (!mod.content_url) statusLabel = 'Coming soon';
+          else if (isCompleted(mod)) statusLabel = 'Completed';
+          else if (startedIds.has(String(mod.id)) || startedIds.has(mod.id)) statusLabel = 'In progress';
+          else statusLabel = 'Not started';
+          ContentRenderer.openInfo(mod, statusLabel);
+        }
         return;
       }
       const btn = e.target.closest('.module-open[data-module-id]');
@@ -554,26 +702,54 @@ async function loadModulesForCourse(courseId) {
       }
     }
 
+    // ---- Completion-change hooks ----
+    // progress-tracker.js calls window.recomputeCourseUI() after marking a
+    // module complete or resetting one; we keep the derived UI in sync.
+    activeCourseHooks = {
+      applyChange(delta) {
+        // completedIds may hold either a numeric id (loaded from the DB) or a
+        // string id (added by a previous mark-complete this session), so clear
+        // both representations on reset.
+        const id = String(delta.moduleId);
+        if (delta.completed) {
+          completedIds.add(id);
+        } else {
+          completedIds.delete(id);
+          completedIds.delete(Number(delta.moduleId));
+        }
+        recalcProgress();
+        renderCourseHead();
+        renderPhaseTabs();
+        renderGrid();
+        renderCompletionBanner();
+      }
+    };
+
+    function renderCompletionBanner() {
+      const container = moduleList.parentNode;
+      if (!container) return;
+      container.querySelectorAll('.course-complete').forEach(el => el.remove());
+      if (finalQuizUnlocked && !isPreview) {
+        const banner = document.createElement('div');
+        banner.className = 'course-complete';
+        banner.innerHTML = `
+          <div class="cc-badge">🎓</div>
+          <div class="cc-copy">
+            <strong>Course complete — congratulations!</strong>
+            <span>You've finished every module. Claim your certificate of completion.</span>
+          </div>
+          <a class="btn btn-primary cc-btn" href="certificate.html?course=${courseId}">View certificate</a>
+        `;
+        container.insertBefore(banner, moduleList);
+      }
+    }
+
     renderCourseHead();
-    renderRail();
+    readHashState();
+    renderPhaseTabs();
     ensureFilterBar();
     renderGrid();
-
-    // Course-completion banner: once every module is done, offer the
-    // certificate. Matches the final-quiz unlock threshold.
-    if (finalQuizUnlocked && !isPreview && moduleList.parentNode) {
-      const banner = document.createElement('div');
-      banner.className = 'course-complete';
-      banner.innerHTML = `
-        <div class="cc-badge">🎓</div>
-        <div class="cc-copy">
-          <strong>Course complete — congratulations!</strong>
-          <span>You've finished every module. Claim your certificate of completion.</span>
-        </div>
-        <a class="btn btn-primary cc-btn" href="certificate.html?course=${courseId}">View certificate</a>
-      `;
-      moduleList.parentNode.insertBefore(banner, moduleList);
-    }
+    renderCompletionBanner();
 
   } catch (err) {
     console.error('Exception loading modules:', err);

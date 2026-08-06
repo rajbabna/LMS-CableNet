@@ -67,11 +67,33 @@
   cursor: default;
 }
 
-/* Completed State */
+/* Completed State — disabled; resetting happens via the adjacent reset icon */
 .btn-complete.completed {
   background: var(--ink-soft);
   cursor: default;
   opacity: 0.8;
+}
+
+/* Reset icon (↺) next to a completed module's button */
+.btn-complete-reset {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55em 0.7em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-complete-reset:hover,
+.btn-complete-reset:focus-visible {
+  border-color: var(--copper);
+  color: var(--copper-dark);
+  background: #fbf1e6;
+  outline: none;
 }
 
 /* Completed Module Row */
@@ -133,9 +155,30 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   animation: slideIn 0.3s ease;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(74, 122, 82, 0.3);
+}
+
+/* Action button inside a toast (e.g. Undo after Mark Complete) */
+.toast-action {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 0.4em 1em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.38);
 }
 
 .toast-notification.error {

@@ -8,8 +8,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=1BF3DA7F">
-  <link rel="stylesheet" href="css/progress-tracking-styles.css?v=8763A535">
+  <link rel="stylesheet" href="css/style.css?v=FE2EB4E9">
+  <link rel="stylesheet" href="css/progress-tracking-styles.css?v=17288379">
 </head>
 <body data-course="">
 
@@ -40,26 +40,33 @@
     <span class="breadcrumb-current" id="breadcrumbCurrent">Course</span>
   </nav>
 
-  <!-- Course dashboard: header + unit rail + content. Populated by load-modules.js -->
+  <!-- Course dashboard: header + phase tabs + content. Populated by load-modules.js -->
   <section class="course-head" id="courseHead" hidden>
-    <span class="port-num" id="coursePort"></span>
-    <h1 id="courseTitle"></h1>
-    <p class="course-desc" id="courseDesc"></p>
-    <div class="course-progress">
-      <div class="progress-label"><span>Course progress</span><span id="coursePct">Loading…</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="courseFill" style="width:0%"></div></div>
+    <div class="course-head-main">
+      <span class="port-num" id="coursePort"></span>
+      <h1 id="courseTitle"></h1>
+      <p class="course-desc" id="courseDesc"></p>
+      <div class="course-progress">
+        <div class="progress-label"><span>Course progress</span><span id="coursePct">Loading…</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="courseFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="course-head-donut" id="courseDonut" hidden>
+      <div class="donut-ring">
+        <div class="donut-hole">
+          <span class="donut-num" id="courseDonutPct">0%</span>
+        </div>
+      </div>
+      <span class="donut-caption" id="courseDonutCaption">Loading…</span>
     </div>
     <div class="course-head-footer" id="courseHeadFooter"></div>
   </section>
 
   <div class="course-dash-body">
-    <aside class="course-rail" id="courseRail" hidden>
-      <div class="rail-title">Units</div>
-      <ul class="rail-units" id="unitRailList"></ul>
-      <div class="rail-stats" id="railStats"></div>
-    </aside>
-
     <div class="course-content">
+      <!-- Curriculum phase tabs (Foundations / Practice / Capstone). Populated by load-modules.js -->
+      <div class="phase-tabs" id="phaseTabs" role="tablist" aria-label="Course phases" hidden></div>
+
       <!-- Notice banner - preview / expired, set by load-modules.js -->
       <div id="previewBanner" class="preview-banner" style="display:none;"></div>
 
@@ -78,9 +85,9 @@
 <script src="js/config.js?v=9A0E5BF5"></script>
 <script src="js/supabase-client.js?v=17E25610"></script>
 <script src="js/auth-guard.js?v=2EB80F4C"></script>
-<script src="js/content-renderer.js?v=D6658A32"></script>
-<script src="js/load-modules.js?v=97E3F247"></script>
-<script src="js/progress/progress-tracker.js?v=CC2E5DDC"></script>
+<script src="js/content-renderer.js?v=5E980387"></script>
+<script src="js/load-modules.js?v=2C6B3776"></script>
+<script src="js/progress/progress-tracker.js?v=5ABF9CDA"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="js/ai-mentor.js?v=7DE7964F"></script>
 <script src="js/menu.js?v=06BC2CFB"></script>
