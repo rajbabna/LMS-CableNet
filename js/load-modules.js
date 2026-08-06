@@ -695,9 +695,16 @@ async function loadModulesForCourse(courseId) {
     // module complete or resetting one; we keep the derived UI in sync.
     activeCourseHooks = {
       applyChange(delta) {
+        // completedIds may hold either a numeric id (loaded from the DB) or a
+        // string id (added by a previous mark-complete this session), so clear
+        // both representations on reset.
         const id = String(delta.moduleId);
-        if (delta.completed) completedIds.add(id);
-        else completedIds.delete(id);
+        if (delta.completed) {
+          completedIds.add(id);
+        } else {
+          completedIds.delete(id);
+          completedIds.delete(Number(delta.moduleId));
+        }
         recalcProgress();
         renderCourseHead();
         renderPhaseTabs();
