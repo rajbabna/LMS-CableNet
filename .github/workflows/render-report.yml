@@ -27,8 +27,8 @@ jobs:
 
       - name: Stage artifacts
         run: |
-          mkdir -p "/report-artifacts"
-          cp token-cost-report.html token-cost-chart.svg "/report-artifacts/"
+          mkdir -p "$RUNNER_TEMP/report-artifacts"
+          cp token-cost-report.html token-cost-chart.svg "$RUNNER_TEMP/report-artifacts/"
 
       - name: Commit regenerated artifacts
         run: |
