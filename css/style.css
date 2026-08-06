@@ -647,10 +647,15 @@ button.module-open {
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--ink);
-  background: linear-gradient(90deg, rgba(44, 107, 117, 0.12), rgba(44, 107, 117, 0.04) 55%, transparent);
-  border: 1px solid rgba(44, 107, 117, 0.14);
+  /* Theme hue baked into an rgba triplet; phase rules override it so each
+     phase paints a slightly different light gradient (teal → copper → blue). */
+  --ph: 44, 107, 117;
+  background: linear-gradient(90deg, rgba(var(--ph), 0.13), rgba(var(--ph), 0.05) 60%, transparent);
+  border: 1px solid rgba(var(--ph), 0.16);
   border-radius: 8px;
 }
+.module-group-head[data-unit-head="phase-1"] { --ph: 194, 98, 45; }  /* copper */
+.module-group-head[data-unit-head="phase-2"] { --ph: 52, 87, 107; }   /* blue */
 .module-group-head .mg-title {
   color: var(--ink);
   font-weight: 600;
@@ -671,10 +676,10 @@ button.module-open {
   letter-spacing: 0;
 }
 .module-group-head.mg-toggle { cursor: pointer; user-select: none; }
-.module-group-head.mg-toggle:hover .mg-title { color: var(--teal); }
+.module-group-head.mg-toggle:hover .mg-title { color: rgb(var(--ph)); }
 .module-group-head.mg-toggle:hover {
-  background: linear-gradient(90deg, rgba(44, 107, 117, 0.18), rgba(44, 107, 117, 0.06) 55%, transparent);
-  border-color: rgba(44, 107, 117, 0.28);
+  background: linear-gradient(90deg, rgba(var(--ph), 0.2), rgba(var(--ph), 0.07) 60%, transparent);
+  border-color: rgba(var(--ph), 0.32);
 }
 
 /* Compact quiz row */
