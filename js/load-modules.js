@@ -304,10 +304,14 @@ async function loadModulesForCourse(courseId) {
       </li>`;
     }
 
-    function phaseHead(idx, title, count, open) {
+    function phaseHead(idx, title, done, total, open) {
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const donut = `<span class="mg-donut" style="--p:${pct}%" role="img" aria-label="${done} of ${total} complete">
+        <span class="mg-donut-hole"><span class="mg-donut-num">${pct}%</span></span>
+      </span>`;
       return `<li class="module-group-head mg-toggle${open ? ' mg-open' : ''}" data-unit-head="phase-${idx}">
         <span class="mg-title">PHASE ${pad2(idx + 1)} — ${title}</span>
-        <span class="mg-count">${count}</span>
+        ${donut}
         <span class="mg-caret">${open ? '▾' : '▸'}</span>
       </li>`;
     }
@@ -463,7 +467,8 @@ async function loadModulesForCourse(courseId) {
           const mods = visible.filter(m => phaseFor(m) === idx && filterMatches(m.content_type || 'lesson'));
           if (mods.length === 0) return;
           const open = openPhases.has(idx);
-          html += phaseHead(idx, title, mods.length, open);
+          const done = mods.filter(isCompleted).length;
+          html += phaseHead(idx, title, done, mods.length, open);
           if (open) html += mods.map(cardHtml).join('');
         });
       } else if (legacy) {

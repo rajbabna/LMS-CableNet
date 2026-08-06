@@ -648,8 +648,9 @@ button.module-open {
   white-space: nowrap;
   color: var(--ink);
   /* Theme hue baked into an rgba triplet; phase rules override it so each
-     phase paints a slightly different light gradient (teal → copper → blue). */
-  --ph: 44, 107, 117;
+     phase paints a slightly different light gradient:
+     foundations (green) → practice (copper) → capstone (blue). */
+  --ph: 70, 162, 95;
   background: linear-gradient(90deg, rgba(var(--ph), 0.13), rgba(var(--ph), 0.05) 60%, transparent);
   border: 1px solid rgba(var(--ph), 0.16);
   border-radius: 8px;
@@ -661,19 +662,51 @@ button.module-open {
   font-weight: 600;
   letter-spacing: 0.1em;
 }
+.module-group-head .mg-donut {
+  margin-left: auto;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: conic-gradient(rgb(var(--ph)) var(--p, 0%), rgba(var(--ph), 0.16) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.module-group-head .mg-donut-hole {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.module-group-head .mg-donut-num {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: rgb(var(--ph));
+}
 .module-group-head .mg-count {
   margin-left: auto;
   font-family: var(--font-mono);
   font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  text-transform: none;
   color: var(--ink-soft);
 }
 .module-group-head .mg-caret {
-  color: var(--ink-soft);
-  font-size: 0.8rem;
+  flex: 0 0 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(var(--ph), 0.14);
+  border: 1px solid rgba(var(--ph), 0.32);
+  color: rgb(var(--ph));
+  font-size: 0.62rem;
   line-height: 1;
-  letter-spacing: 0;
 }
 .module-group-head.mg-toggle { cursor: pointer; user-select: none; }
 .module-group-head.mg-toggle:hover .mg-title { color: rgb(var(--ph)); }
