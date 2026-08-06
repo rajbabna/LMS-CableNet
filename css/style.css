@@ -636,29 +636,26 @@ button.module-open {
 /* Group headers: terminal-divider style ─ LABEL ── count */
 .module-group-head {
   grid-column: 1 / -1;
-  display: flex;
+  justify-self: start;
+  display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
-  margin: 0.7rem 0 0.4rem;
-  padding: 0;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  padding: 0.32em 0.85em;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-.module-group-head::before,
-.module-group-head::after {
-  content: '';
-  flex: 1 1 auto;
-  height: 1px;
-  min-width: 1.2rem;
-  background: var(--line);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
 }
 .module-group-head .mg-title {
   color: var(--ink);
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
 }
 .module-group-head .mg-count {
   font-family: var(--font-mono);
@@ -666,10 +663,6 @@ button.module-open {
   letter-spacing: 0.04em;
   text-transform: none;
   color: var(--ink-soft);
-  border: 1px solid var(--line);
-  background: var(--paper);
-  border-radius: 999px;
-  padding: 0.1em 0.55em;
 }
 .module-group-head .mg-caret {
   color: var(--ink-soft);
@@ -679,6 +672,7 @@ button.module-open {
 }
 .module-group-head.mg-toggle { cursor: pointer; user-select: none; }
 .module-group-head.mg-toggle:hover .mg-title { color: var(--teal); }
+.module-group-head.mg-toggle:hover { border-color: var(--teal); }
 
 /* Compact quiz row */
 .module-quiz {
