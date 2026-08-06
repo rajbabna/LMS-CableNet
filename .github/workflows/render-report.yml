@@ -1,4 +1,4 @@
-name: render-report
+﻿name: render-report
 
 on:
   push:
@@ -27,8 +27,8 @@ jobs:
 
       - name: Stage artifacts
         run: |
-          mkdir -p "$RUNNER_TEMP/report-artifacts"
-          cp token-cost-report.html token-cost-chart.svg "$RUNNER_TEMP/report-artifacts/"
+          mkdir -p "/report-artifacts"
+          cp token-cost-report.html token-cost-chart.svg "/report-artifacts/"
 
       - name: Commit regenerated artifacts
         run: |
@@ -42,18 +42,7 @@ jobs:
             echo "No changes to commit"
           fi
 
-      - name: Update gh-pages
+      - name: Mirror main to gh-pages (site + report)
         run: |
           git fetch origin main gh-pages
-          git checkout --detach origin/main
-          cp "$RUNNER_TEMP/report-artifacts/token-cost-report.html" .
-          cp "$RUNNER_TEMP/report-artifacts/token-cost-chart.svg" .
-          git add -A
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" \
-                -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-                commit -m "Deploy site + report from main (token-usage.json)"
-            git push origin HEAD:gh-pages --force
-          else
-            echo "gh-pages already current"
-          fi
+          git push origin origin/main:gh-pages --force
