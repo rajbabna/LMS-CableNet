@@ -915,7 +915,12 @@ button.module-open {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 1.4rem 1.5rem 1.2rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 2rem;
 }
+.course-head-main { min-width: 0; }
 .course-head h1 {
   font-family: var(--font-display);
   font-size: 1.7rem;
@@ -951,6 +956,50 @@ button.module-open {
   background: var(--teal);
 }
 
+/* Overall-progress donut in the course header (matches the phase donut
+   pattern but larger). Tracks the same courseProgress as the bar above. */
+.course-head-donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-left: 2rem;
+  border-left: 1px solid var(--line);
+}
+.donut-ring {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: conic-gradient(var(--teal) var(--p, 0%), #e6e1d6 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-hole {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-num {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.donut-caption {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
 .course-dash-body {
   display: grid;
   grid-template-columns: 1fr;
@@ -982,6 +1031,7 @@ button.module-open {
 
 /* Header primary CTA (Start / Continue) */
 .course-head-footer {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   margin-top: 1.2rem;
@@ -1086,6 +1136,23 @@ footer {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--ink-soft);
+}
+
+@media (max-width: 720px) {
+  .course-head {
+    grid-template-columns: 1fr;
+    row-gap: 1.2rem;
+  }
+  .course-head-donut {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding-left: 0;
+    border-left: none;
+  }
+  .donut-ring { width: 64px; height: 64px; }
+  .donut-hole { width: 48px; height: 48px; }
+  .donut-num { font-size: 0.9rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

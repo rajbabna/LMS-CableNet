@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=347D6AEF">
+  <link rel="stylesheet" href="css/style.css?v=F983A843">
   <link rel="stylesheet" href="css/progress-tracking-styles.css?v=17288379">
 </head>
 <body data-course="">
@@ -42,12 +42,22 @@
 
   <!-- Course dashboard: header + phase tabs + content. Populated by load-modules.js -->
   <section class="course-head" id="courseHead" hidden>
-    <span class="port-num" id="coursePort"></span>
-    <h1 id="courseTitle"></h1>
-    <p class="course-desc" id="courseDesc"></p>
-    <div class="course-progress">
-      <div class="progress-label"><span>Course progress</span><span id="coursePct">Loading…</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="courseFill" style="width:0%"></div></div>
+    <div class="course-head-main">
+      <span class="port-num" id="coursePort"></span>
+      <h1 id="courseTitle"></h1>
+      <p class="course-desc" id="courseDesc"></p>
+      <div class="course-progress">
+        <div class="progress-label"><span>Course progress</span><span id="coursePct">Loading…</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="courseFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="course-head-donut" id="courseDonut" hidden>
+      <div class="donut-ring">
+        <div class="donut-hole">
+          <span class="donut-num" id="courseDonutPct">0%</span>
+        </div>
+      </div>
+      <span class="donut-caption" id="courseDonutCaption">Loading…</span>
     </div>
     <div class="course-head-footer" id="courseHeadFooter"></div>
   </section>
@@ -76,7 +86,7 @@
 <script src="js/supabase-client.js?v=17E25610"></script>
 <script src="js/auth-guard.js?v=2EB80F4C"></script>
 <script src="js/content-renderer.js?v=5E980387"></script>
-<script src="js/load-modules.js?v=9B913136"></script>
+<script src="js/load-modules.js?v=2C6B3776"></script>
 <script src="js/progress/progress-tracker.js?v=5ABF9CDA"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script src="js/ai-mentor.js?v=7DE7964F"></script>

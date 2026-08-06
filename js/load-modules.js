@@ -401,6 +401,18 @@ async function loadModulesForCourse(courseId) {
       if (fillEl) fillEl.style.width = pct + '%';
       document.title = (course.title || 'Course') + ' — Cable&Net Courses';
 
+      // Overall-progress donut in the header — mirrors the progress bar above.
+      const donut = document.getElementById('courseDonut');
+      const donutPct = document.getElementById('courseDonutPct');
+      const donutCaption = document.getElementById('courseDonutCaption');
+      if (donut) {
+        donut.hidden = false;
+        const ring = donut.querySelector('.donut-ring');
+        if (ring) ring.style.setProperty('--p', pct + '%');
+      }
+      if (donutPct) donutPct.textContent = pct + '%';
+      if (donutCaption) donutCaption.textContent = `${completedCount} of ${totalModules} modules`;
+
       // Primary CTA: Start Course at 0%, otherwise Continue at the first
       // incomplete module (C7). Scrolls to the module list.
       const footer = document.getElementById('courseHeadFooter');
