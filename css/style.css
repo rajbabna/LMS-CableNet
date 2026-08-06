@@ -664,9 +664,9 @@ button.module-open {
 }
 .module-group-head .mg-donut {
   margin-left: auto;
-  flex: 0 0 26px;
-  width: 26px;
-  height: 26px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: conic-gradient(rgb(var(--ph)) var(--p, 0%), rgba(var(--ph), 0.16) 0);
   display: flex;
@@ -674,8 +674,8 @@ button.module-open {
   justify-content: center;
 }
 .module-group-head .mg-donut-hole {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--paper);
   display: flex;
@@ -684,8 +684,9 @@ button.module-open {
 }
 .module-group-head .mg-donut-num {
   font-family: var(--font-mono);
-  font-size: 0.5rem;
+  font-size: 0.62rem;
   font-weight: 700;
+  line-height: 1;
   color: rgb(var(--ph));
 }
 .module-group-head .mg-count {
