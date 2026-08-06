@@ -631,7 +631,15 @@ async function loadModulesForCourse(courseId) {
       if (infoBtn) {
         e.preventDefault();
         const mod = moduleById.get(Number(infoBtn.dataset.info));
-        if (mod && window.ContentRenderer) ContentRenderer.openInfo(mod);
+        if (mod && window.ContentRenderer) {
+          let statusLabel;
+          if (isPreview) statusLabel = 'Locked — enrollment required';
+          else if (!mod.content_url) statusLabel = 'Coming soon';
+          else if (isCompleted(mod)) statusLabel = 'Completed';
+          else if (startedIds.has(String(mod.id)) || startedIds.has(mod.id)) statusLabel = 'In progress';
+          else statusLabel = 'Not started';
+          ContentRenderer.openInfo(mod, statusLabel);
+        }
         return;
       }
       const btn = e.target.closest('.module-open[data-module-id]');
