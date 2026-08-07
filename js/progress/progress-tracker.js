@@ -131,7 +131,17 @@ class ProgressTracker {
 
       if (error) throw error;
 
-      this.applyChange({ moduleId, completed: false });
+      // Also clear the module's quiz state (attempts + score aggregate) so a
+      // reset doesn't leave a stale "Passed" badge or dashboard pass count.
+      // Best-effort: the reset_quiz_for_module RPC may not exist on older DBs,
+      // so a failure is logged, not fatal.
+      try {
+        await this.supabase.rpc('reset_quiz_for_module', { p_module_id: moduleId });
+      } catch (quizErr) {
+        console.warn('ProgressTracker: quiz reset unavailable:', quizErr && quizErr.message);
+      }
+
+      this.applyChange({ moduleId, completed: false, quizReset: true });
       this.showToast('Module reset — mark it complete when you’re ready', 'info');
     } catch (err) {
       console.error('Error resetting module:', err);

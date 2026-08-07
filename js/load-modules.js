@@ -797,6 +797,12 @@ async function loadModulesForCourse(courseId) {
         renderPhaseTabs();
         renderGrid();
         renderCompletionBanner();
+        // A module reset also clears the quiz, so re-fetch the quiz progress
+        // panel state (best score / badge) for the course once the DB delete
+        // has landed, then re-render to drop the card back to "Not started".
+        if (delta.quizReset) {
+          loadQuizProgress(courseId).then(renderGrid);
+        }
       }
     };
 
