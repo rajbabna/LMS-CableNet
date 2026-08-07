@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "batches": [
+    {
+      "id": "test-users",
+      "label": "Test Users (QA)",
+      "startDate": null,
+      "isTest": true,
+      "students": [
+        "rajbabna@gmail.com",
+        "rajbabna.backup@gmail.com",
+        "rajbabna.ml@gmail.com",
+        "rahnluv@gmail.com"
+      ]
+    }
+  ]
+}
