@@ -951,6 +951,7 @@
           <thead>
             <tr>
               <th>Student</th>
+              <th>Group</th>
               <th>Course</th>
               <th>Progress</th>
               <th>Access</th>
@@ -961,7 +962,7 @@
           </thead>
           <tbody id="studentTableBody">
             <tr>
-              <td colspan="7" class="empty-state">
+              <td colspan="8" class="empty-state">
                 <span class="spinner"></span> Loading students...
               </td>
             </tr>
@@ -1597,6 +1598,7 @@
         chip.classList.toggle('is-active', chip.dataset.group === group);
       });
       loadDashboard();
+      if (window.switchInstructorTab) { try { window.switchInstructorTab('students'); } catch (e) {} }
     }
 
     // ============================================
@@ -1736,7 +1738,7 @@
         if (!data || data.length === 0) {
           document.getElementById('studentTableBody').innerHTML = `
             <tr>
-              <td colspan="7" class="empty-state">
+              <td colspan="8" class="empty-state">
                 No students enrolled yet. Use "Enroll New Student" to get started.
               </td>
             </tr>
@@ -1766,7 +1768,7 @@
         if (filtered.length === 0) {
           document.getElementById('studentTableBody').innerHTML = `
             <tr>
-              <td colspan="7" class="empty-state">
+              <td colspan="8" class="empty-state">
                 No ${groupFilter} students in this course group.
               </td>
             </tr>
@@ -1808,12 +1810,8 @@
 
           return `
           <tr>
-            <td>
-              <div class="student-cell">
-                <span class="student-name">${row.student_name}</span>
-                ${groupBadge}
-              </div>
-            </td>
+            <td>${row.student_name}</td>
+            <td>${groupBadge}</td>
             <td>${row.course_title}</td>
             <td>
               <div class="progress-container">
