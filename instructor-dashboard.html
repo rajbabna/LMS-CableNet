@@ -627,6 +627,10 @@
       box-shadow: 0 2px 8px rgba(217, 119, 87, 0.28);
     }
     .side-link.is-active .side-ico { filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
+    .side-link:focus-visible {
+      outline: 2px solid var(--copper);
+      outline-offset: -2px;
+    }
 
     /* Mobile-only logout action, pinned at the end of the tab bar */
     .side-logout { display: none; }
@@ -778,6 +782,47 @@
       .perf-cols { grid-template-columns: 1fr; }
       .side-link { min-height: 3rem; }
       .btn-sm, .btn-table { min-height: 2.4rem; }
+    }
+
+    /* The Students table becomes a card-stack on phones */
+    @media (max-width: 560px) {
+      /* Targets the table with a data stack on rows */
+      #studentTableBody,
+      #studentTableBody thead,
+      #studentTableBody tbody {
+        display: block;
+      }
+      #studentsSection .data-table thead { display: none; }
+      #studentTableBody tr {
+        display: block;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.4rem 1rem;
+        margin-bottom: 0.9rem;
+      }
+      #studentTableBody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+      #studentTableBody td:last-child { border-bottom: none; }
+      #studentTableBody td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-soft);
+      }
+      #studentTableBody td[data-label="Progress"] .progress-container { flex: 1 1 auto; min-width: 120px; }
+      #studentTableBody td .action-buttons { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
+      #studentTableBody td.empty-state { display: block; }
     }
   </style>
 </head>
@@ -1555,21 +1600,63 @@
     }
 
     function activate(tab) {
-      document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('is-active', v.id === 'view-' + tab); });
-      document.querySelectorAll('.side-link').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === tab); });
+      var panels = document.querySelectorAll('.view');
+      for (var i = 0; i < panels.length; i++) {
+        panels[i].classList.toggle('is-active', panels[i].id === 'view-' + tab);
+      }
+      var tabs = document.querySelectorAll('.side-link[role="tab"]');
+      for (var j = 0; j < tabs.length; j++) {
+        var selected = tabs[j].getAttribute('data-tab') === tab;
+        tabs[j].classList.toggle('is-active', selected);
+        tabs[j].setAttribute('aria-selected', selected ? 'true' : 'false');
+        tabs[j].tabIndex = selected ? 0 : -1;
+      }
       updateHeading(tab);
       // Defer data loads to first activation of each tab (see lazy-loading block below).
       if (window.ensureInstructorTabLoaded) { try { window.ensureInstructorTabLoaded(tab); } catch (e) {} }
     }
 
-    document.querySelectorAll('.side-link').forEach(function (btn) {
-      btn.addEventListener('click', function () { activate(btn.getAttribute('data-tab')); });
-    });
+    // ---- ARIA tab semantics ----
+    var tabsStrip = document.querySelector('.side-nav-tabs');
+    if (tabsStrip) tabsStrip.setAttribute('role', 'tablist');
+
+    var sideLinks = document.querySelectorAll('.side-link');
+    for (var k = 0; k < sideLinks.length; k++) {
+      var tb = sideLinks[k].getAttribute('data-tab');
+      sideLinks[k].setAttribute('role', 'tab');
+      sideLinks[k].setAttribute('id', 'tab-' + tb);
+      sideLinks[k].setAttribute('aria-controls', 'view-' + tb);
+      sideLinks[k].setAttribute('aria-selected', sideLinks[k].classList.contains('is-active') ? 'true' : 'false');
+      sideLinks[k].tabIndex = sideLinks[k].classList.contains('is-active') ? 0 : -1;
+      (function (btn) {
+        btn.addEventListener('click', function () { activate(btn.getAttribute('data-tab')); });
+      })(sideLinks[k]);
+    }
+
+    // Keyboard navigation over the tab strip (roving tabindex)
+    if (tabsStrip) {
+      tabsStrip.addEventListener('keydown', function (e) {
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('.side-link[role="tab"]'));
+        var idx = tabs.indexOf(document.activeElement);
+        if (idx === -1) return;
+        var next = idx;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (idx + 1) % tabs.length;
+        else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (idx - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = tabs.length - 1;
+        else return;
+        e.preventDefault();
+        tabs[next].focus();
+        activate(tabs[next].getAttribute('data-tab'));
+      });
+    }
 
     // Move each section into its tabbed view container.
     Object.keys(views).forEach(function (tab) {
       var panel = document.getElementById('view-' + tab);
       if (!panel) return;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', 'tab-' + tab);
       views[tab].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) panel.appendChild(el);
@@ -1810,10 +1897,10 @@
 
           return `
           <tr>
-            <td>${row.student_name}</td>
-            <td>${groupBadge}</td>
-            <td>${row.course_title}</td>
-            <td>
+            <td data-label="Student">${row.student_name}</td>
+            <td data-label="Group">${groupBadge}</td>
+            <td data-label="Course">${row.course_title}</td>
+            <td data-label="Progress">
               <div class="progress-container">
                 <div class="progress-bar">
                   <div class="progress-fill" style="width: ${row.progress_percentage || 0}%"></div>
@@ -1821,18 +1908,18 @@
                 <div class="progress-text">${row.progress_percentage || 0}%</div>
               </div>
             </td>
-            <td>${accessCell}${isTest || windowLine ? windowLine : ''}</td>
-            <td>
+            <td data-label="Access">${accessCell}${isTest || windowLine ? windowLine : ''}</td>
+            <td data-label="Status">
               <span class="status-badge status-${row.enrollment_status}">
                 ${row.enrollment_status}
               </span>
             </td>
-            <td>
+            <td data-label="Stalled">
               ${row.is_stalled
                 ? '<span class="stalled-flag">🚩 Yes</span>'
                 : '<span style="color: var(--green);">No</span>'}
             </td>
-            <td>
+            <td data-label="Actions">
               <div class="action-buttons">
                 <button class="btn btn-table btn-status"
                   onclick="openStatusModal('${row.student_id}', '${row.student_name}', '${row.course_id}', '${row.enrollment_status}')">
