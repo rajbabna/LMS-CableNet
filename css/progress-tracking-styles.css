@@ -228,3 +228,129 @@
     width: 100%;
   }
 }
+
+/* ===========================================================
+   Quiz Progress Panel (docs/ui/Quiz_Progress_Option2_Design.md)
+   Badge flow (practice -> final) + best score + attempt bar,
+   rendered inside each module card.
+   =========================================================== */
+.quiz-progress-section {
+  margin: 1rem 0 0.2rem;
+  padding: 0.75rem 0.85rem 0.7rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  transition: opacity 0.2s ease;
+}
+
+.quiz-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz-progress-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+.quiz-best-score {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.quiz-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quiz-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.22em 0.7em;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.quiz-badge.pending {
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  background: #eef0ea;
+}
+
+.quiz-badge.active {
+  color: #ffffff;
+  border: 1px solid var(--copper);
+  background: var(--copper);
+}
+
+.quiz-badge.completed {
+  color: #ffffff;
+  border: 1px solid #2f9e6e;
+  background: #2f9e6e;
+}
+
+.quiz-badge-separator {
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+}
+
+.quiz-attempt-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.quiz-attempt-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+
+.quiz-attempt-score {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.quiz-progress-bar {
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.quiz-progress-bar-fill {
+  height: 100%;
+  background: var(--teal);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Attempts exhausted: dimmed and non-interactive */
+.quiz-progress-section.exhausted {
+  opacity: 0.55;
+}
+
+@media (max-width: 480px) {
+  .quiz-progress-title { font-size: 0.78rem; }
+  .quiz-badge { font-size: 0.58rem; }
+  .quiz-attempt-label,
+  .quiz-attempt-score { font-size: 0.66rem; }
+}

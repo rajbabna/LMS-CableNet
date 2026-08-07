@@ -44,6 +44,15 @@
     margin: 0;
     letter-spacing: 0.01em;
   }
+  .back-dash {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--copper-dark);
+    text-decoration: none;
+    margin-bottom: 0.7rem;
+  }
+  .back-dash:hover { text-decoration: underline; }
   .eyebrow {
     font-family: var(--font-mono);
     font-size: 0.72rem;
@@ -216,6 +225,7 @@
 <body>
 <div class="quiz-wrap">
   <div class="quiz-head">
+    <a class="back-dash" href="../student-dashboard.html" title="Back to your dashboard" aria-label="Back to your dashboard">&larr; Back to dashboard</a>
     <span class="eyebrow">Practice · before you enroll</span>
     <h1>Basic Network Quiz</h1>
   </div>
@@ -248,6 +258,7 @@
 
     <div class="controls">
       <button class="btn-primary" id="nextBtn" style="display:none;">Next Question →</button>
+      <button class="btn-ghost" id="pauseBtn">Save &amp; Exit</button>
     </div>
   </div>
 
@@ -430,6 +441,7 @@
     retryBtn: document.getElementById('retryBtn'),
     closeBtn: document.getElementById('closeBtn'),
     nextBtn: document.getElementById('nextBtn'),
+    pauseBtn: document.getElementById('pauseBtn'),
     questionNum: document.getElementById('questionNum'),
     questionText: document.getElementById('questionText'),
     options: document.getElementById('options'),
@@ -445,6 +457,34 @@
     bestBadge: document.getElementById('bestBadge'),
     syncNote: document.getElementById('syncNote')
   };
+
+  // ---- Pause / resume (in-progress quiz state) ----
+  // Lets a learner stop mid-attempt and pick up later. The deck (a snapshot
+  // of the current questions in order), cursor and correct-count are saved to
+  // localStorage keyed by module. The course page reads the same key to offer
+  // a "Resume" entry point (see js/load-modules.js quizResumeFor).
+  function resumeKey() { return 'lms_quiz_resume_' + qModuleId; }
+  function readResume() {
+    try {
+      var raw = localStorage.getItem(resumeKey());
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+  function saveResume(deck, index, correct) {
+    try {
+      localStorage.setItem(resumeKey(), JSON.stringify({
+        module: qModuleId,
+        mode: qMode,
+        deck: deck,
+        index: index,
+        correct: correct,
+        savedAt: Date.now()
+      }));
+    } catch (e) {}
+  }
+  function clearResume() {
+    try { localStorage.removeItem(resumeKey()); } catch (e) {}
+  }
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -500,7 +540,8 @@
       if (!user || !window.supabaseClient) return false;
       return supabaseClient.rpc('submit_quiz_score', {
         p_module_id: QUIZ_MODULE_ID,
-        p_score: score
+        p_score: score,
+        p_mode: qMode
       }).then(function (res) {
         if (res.error) {
           console.error('Quiz score sync failed:', res.error.message);
@@ -539,10 +580,10 @@
     el.bestPill.textContent = 'Best: ' + localBest() + '%';
   }
 
-  function startQuiz(deck) {
+  function startQuiz(deck, startIndex, startCorrect) {
     currentDeck = deck;
-    currentIndex = 0;
-    correctCount = 0;
+    currentIndex = startIndex || 0;
+    correctCount = startCorrect || 0;
     el.startScreen.style.display = 'none';
     el.resultsScreen.style.display = 'none';
     el.quizScreen.style.display = 'block';
@@ -605,6 +646,7 @@
   }
 
   function showResults() {
+    clearResume();
     el.quizScreen.style.display = 'none';
     el.resultsScreen.style.display = 'block';
 
@@ -617,8 +659,10 @@
     saveBest(best);
     updateBestPill();
 
-    if (score === 100) {
-      el.bestBadge.innerHTML = '<span class="best-badge">★ Perfect — ready to enroll!</span>';
+    if (score === 100 && qMode !== 'final') {
+      el.bestBadge.innerHTML = '<span class="best-badge">★ Perfect quiz — your final quiz is now unlocked!</span>';
+    } else if (score === 100) {
+      el.bestBadge.innerHTML = '<span class="best-badge">★ Perfect score — well done!</span>';
     } else if (best === score && score > 0) {
       el.bestBadge.innerHTML = '<span class="best-badge">New best score</span>';
     } else {
@@ -657,11 +701,33 @@
   }
 
   // ---- Wire up ----
-  el.startBtn.addEventListener('click', function () { startQuiz(shuffle(POOL).slice(0, ROUND_SIZE)); });
-  el.retryBtn.addEventListener('click', function () { startQuiz(shuffle(POOL).slice(0, ROUND_SIZE)); });
+  el.startBtn.addEventListener('click', function () {
+    var resume = readResume();
+    if (resume && resume.deck && resume.deck.length && resume.index < resume.deck.length) {
+      startQuiz(resume.deck, resume.index, resume.correct);
+    } else {
+      clearResume();
+      startQuiz(shuffle(POOL).slice(0, ROUND_SIZE));
+    }
+  });
+  el.retryBtn.addEventListener('click', function () {
+    clearResume();
+    startQuiz(shuffle(POOL).slice(0, ROUND_SIZE));
+  });
   el.nextBtn.addEventListener('click', function () {
     currentIndex++;
     renderQuestion();
+    // Persist after advancing so a later tab-close/pause resumes cleanly at
+    // the next unanswered question without double-counting answers.
+    if (currentIndex < currentDeck.length) saveResume(currentDeck, currentIndex, correctCount);
+    else clearResume();
+  });
+  el.pauseBtn.addEventListener('click', function () {
+    saveResume(currentDeck, currentIndex, correctCount);
+    var qCourse = queryParam('course');
+    if (qCourse) { window.location.href = '../course-' + qCourse + '.html'; return; }
+    if (document.referrer) { window.location.href = document.referrer; return; }
+    window.location.href = '../student-dashboard.html';
   });
   el.closeBtn.addEventListener('click', function () {
     var qCourse = queryParam('course');
@@ -683,13 +749,18 @@
   }
 
   loadDbPool().then(function () {
-    if (POOL.length === 0) {
+    var resume = readResume();
+    var hasResume = !!(resume && resume.deck && resume.deck.length && resume.index < resume.deck.length);
+    if (POOL.length === 0 && !hasResume) {
       var start = el.startScreen;
       start.querySelector('p').textContent =
         'No questions have been added for this module yet. Check back soon.';
       el.startBtn.disabled = true;
     } else {
       el.cardCount.textContent = ROUND_SIZE + ' of ' + POOL_SIZE + ' per round';
+    }
+    if (hasResume) {
+      el.startBtn.textContent = 'Resume Quiz · Question ' + (resume.index + 1) + ' of ' + resume.deck.length;
     }
   });
 
