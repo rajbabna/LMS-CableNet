@@ -617,6 +617,9 @@
     }
     .side-link.is-active .side-ico { filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
 
+    /* Mobile-only logout action, pinned at the end of the tab bar */
+    .side-logout { display: none; }
+
     /* Header + content share a column to the right of the fixed sidebar */
     .dash-shell {
       margin-left: 250px;
@@ -660,7 +663,28 @@
       main.dash-main { margin-left: 0; }
 
       /* Hide the hero header's stickiness so it doesn't collide with the pinned tab bar */
-      .site-header { position: static; }
+      .site-header { display: none; }
+
+      /* Account action moves into the pinned tab bar on handhelds */
+      .side-logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-left: auto;
+        position: sticky;
+        right: 0;
+        white-space: nowrap;
+        flex: 0 0 auto;
+        padding: 0.5rem 0.7rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--copper-dark);
+        text-decoration: none;
+        background: #F7F5EF;
+        border-left: 1px solid var(--line);
+        box-shadow: -6px 0 8px -6px rgba(0, 0, 0, 0.16);
+      }
 
       /* The shell's desktop 250px offset is gone when the sidebar goes sticky */
       .dash-shell { margin-left: 0; }
@@ -695,6 +719,7 @@
     <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
     <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
     <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
+    <a href="#" id="navLogout" class="side-logout" onclick="handleLogout(); return false;">↪ Logout</a>
   </aside>
 
   <!-- Header -->
