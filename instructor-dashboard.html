@@ -446,6 +446,11 @@
       border-radius: 10px;
       padding: 1rem 1.2rem;
       text-align: center;
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+    .stat-card:hover {
+      background: #f4efe6;
+      transform: translateY(-2px);
     }
     .stat-card strong {
       display: block;
@@ -712,6 +717,61 @@
     /* Global safety: never allow a horizontal page scrollbar */
     body { overflow-x: hidden; }
 
+    /* Group filter chips (Test vs Real) */
+    .group-chips { display: flex; gap: 0.4rem; }
+    .group-chip {
+      border: 1px solid var(--line, #d8d2c7);
+      background: transparent;
+      color: var(--ink-soft, #6b6b6b);
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .group-chip:hover { border-color: var(--copper, #b87333); color: var(--copper, #b87333); }
+    .group-chip.is-active {
+      background: var(--copper, #b87333);
+      border-color: var(--copper, #b87333);
+      color: #fff;
+    }
+    .group-count { font-size: 0.78rem; color: var(--ink-soft, #6b6b6b); }
+    .student-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+    .student-name { font-weight: 600; }
+    .group-badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 0.1rem 0.55rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      line-height: 1.4;
+    }
+    /* Groups summary card */
+    .group-summary-cards { display: grid; gap: 0.8rem; margin-top: 0.6rem; }
+    .group-summary-card {
+      border: 1px solid var(--line, #d8d2c7);
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--paper, #fff);
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      font-size: 0.9rem;
+    }
+    .group-summary-card:hover { transform: translateY(-2px); }
+    .group-summary-card strong {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+    }
+    .group-summary-card.gs-real { border-left: 4px solid #236b23; }
+    .group-summary-card.gs-test { border-left: 4px solid #7a4d00; }
+    .group-badge.group-test { background: #fce4b8; color: #7a4d00; border: 1px solid #e6b565; }
+    .group-badge.group-real { background: #e3f2e3; color: #236b23; border: 1px solid #9fce9f; }
+    .window-line { display: block; font-size: 0.76rem; color: var(--ink-soft, #6b6b6b); margin-top: 0.2rem; }
+
     @media (max-width: 480px) {
       main.dash-main { padding-left: 1rem; padding-right: 1rem; }
       .dashboard-section { padding: 1.2rem 1rem; }
@@ -874,10 +934,16 @@
         <h2>📚 Your Students</h2>
 
         <!-- Filter -->
-        <div class="filter-bar">
+        <div class="filter-bar" style="align-items:center; gap:0.6rem; flex-wrap:wrap;">
+          <div class="group-chips" id="groupChips" role="group" aria-label="Filter students by group">
+            <button type="button" class="group-chip is-active" data-group="all" onclick="setGroupFilter('all')">All</button>
+            <button type="button" class="group-chip" data-group="real" onclick="setGroupFilter('real')">👤 Real</button>
+            <button type="button" class="group-chip" data-group="test" onclick="setGroupFilter('test')">🛠️ Test</button>
+          </div>
           <select id="courseFilter" onchange="loadDashboard(); loadQuizScores();">
             <option value="">All Courses</option>
           </select>
+          <span id="groupCount" class="group-count"></span>
         </div>
 
         <!-- Students Table -->
@@ -955,7 +1021,23 @@
       </div>
     </div>
 
-    <!-- Student Feedback -->
+    <!-- Student Groups summary -->
+    <div id="groupSummarySection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>👥 Student Groups</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Who belongs in each group. Click a group to filter the students table above.
+      </p>
+      <div class="group-summary-cards">
+        <div class="group-summary-card gs-real" role="button" tabindex="0"
+             onclick="setGroupFilter('real')" onkeydown="if(event.key==='Enter'||event.key===' ')setGroupFilter('real')">
+          <span>👤 Real students</span><strong id="gsRealCount">0</strong>
+        </div>
+        <div class="group-summary-card gs-test" role="button" tabindex="0"
+             onclick="setGroupFilter('test')" onkeydown="if(event.key==='Enter'||event.key===' ')setGroupFilter('test')">
+          <span>🛠️ Test students</span><strong id="gsTestCount">0</strong>
+        </div>
+      </div>
+    </div>
     <div id="feedbackSection" class="dashboard-section" style="margin-top:1.5rem;">
       <h2>💬 Student Feedback</h2>
       <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
@@ -1207,6 +1289,44 @@
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeStatusModal()">Cancel</button>
         <button class="btn btn-primary" onclick="submitStatusUpdate()">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Group Assignment (Test vs Real + training window) -->
+  <div id="groupModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="groupModalTitle">
+    <div class="modal">
+      <h3 id="groupModalTitle">👥 Student Group & Training Window</h3>
+      <p id="groupModalMeta" style="margin-top:0.2rem; font-size:0.85rem; color:var(--ink-soft, #6b6b6b);"></p>
+
+      <input type="hidden" id="groupStudentId">
+      <input type="hidden" id="groupCourseId">
+
+      <div class="field">
+        <label>Group</label>
+        <div class="group-chips" id="groupModalChips" role="radiogroup" aria-label="Student group">
+          <button type="button" class="group-chip" data-group="real" onclick="setModalGroup('real')">👤 Real</button>
+          <button type="button" class="group-chip" data-group="test" onclick="setModalGroup('test')">🛠️ Test</button>
+        </div>
+        <small style="display:block; margin-top:0.3rem; color:var(--ink-soft);">
+          Test accounts stay in all analytics, but show a 🛠️ Test badge and are excluded from the training window.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="groupStartDate">Training starts</label>
+        <input type="date" id="groupStartDate">
+      </div>
+
+      <div class="field">
+        <label for="groupEndDate">Training ends</label>
+        <input type="date" id="groupEndDate">
+      </div>
+      <small style="display:block; margin-top:0.2rem; color:var(--ink-soft)">Only applies to Real students; leave blank to keep current values (or clear for no window).</small>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeGroupModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitGroupModal()">Save</button>
       </div>
     </div>
   </div>
@@ -1469,6 +1589,15 @@
     let currentUserRole    = null;
     let ceCurrentCourseId  = null;
     let ceUnits = [];
+    let groupFilter        = 'all'; // 'all' | 'real' | 'test'
+
+    function setGroupFilter(group) {
+      groupFilter = group;
+      document.querySelectorAll('#groupChips .group-chip').forEach(chip => {
+        chip.classList.toggle('is-active', chip.dataset.group === group);
+      });
+      loadDashboard();
+    }
 
     // ============================================
     // INITIALISATION
@@ -1612,11 +1741,41 @@
               </td>
             </tr>
           `;
+          document.getElementById('groupCount').textContent = '';
+          return;
+        }
+
+        // Groups summary counts (all data, before client-side filter)
+        const gsRealEl = document.getElementById('gsRealCount');
+        const gsTestEl = document.getElementById('gsTestCount');
+        if (gsRealEl) gsRealEl.textContent = data.filter(r => !r.is_test).length;
+        if (gsTestEl) gsTestEl.textContent = data.filter(r => !!r.is_test).length;
+
+        const filtered = data.filter(row =>
+          groupFilter === 'all' || (groupFilter === 'test') === !!row.is_test
+        );
+        const countEl = document.getElementById('groupCount');
+        if (countEl) {
+          if (groupFilter === 'all') {
+            countEl.textContent = `${data.length} student${data.length !== 1 ? 's' : ''}`;
+          } else {
+            countEl.textContent = `${filtered.length} of ${data.length}`;
+          }
+        }
+
+        if (filtered.length === 0) {
+          document.getElementById('studentTableBody').innerHTML = `
+            <tr>
+              <td colspan="7" class="empty-state">
+                No ${groupFilter} students in this course group.
+              </td>
+            </tr>
+          `;
           return;
         }
 
         const tbody = document.getElementById('studentTableBody');
-        tbody.innerHTML = data.map(row => {
+        tbody.innerHTML = filtered.map(row => {
           // Access column: lifetime vs limited-time (incl. expired state)
           let accessCell;
           if (row.expires_at) {
@@ -1629,9 +1788,32 @@
             accessCell = 'Lifetime';
           }
 
+          // Training window (real students) 
+          const isTest = !!row.is_test;
+          const groupBadge = `<span class="group-badge ${isTest ? 'group-test' : 'group-real'}">${isTest ? 'TEST' : 'REAL'}</span>`;
+          let windowLine = '';
+          if (!isTest && row.start_date && row.end_date) {
+            windowLine = `<span class="window-line">📅 ${new Date(row.start_date).toLocaleDateString()} → ${new Date(row.end_date).toLocaleDateString()}</span>`;
+          } else if (isTest) {
+            windowLine = `<span class="window-line">Testing account</span>`;
+          }
+
+          const canManageGroup = currentUserRole === 'admin';
+          const groupBtn = canManageGroup
+            ? `<button class="btn btn-table btn-group"
+                onclick="openGroupModal('${row.student_id}', '${row.student_name}', '${row.course_id}', '${row.course_title}', ${isTest}, '${row.start_date || ''}', '${row.end_date || ''}')">
+                Group
+              </button>`
+            : '';
+
           return `
           <tr>
-            <td>${row.student_name}</td>
+            <td>
+              <div class="student-cell">
+                <span class="student-name">${row.student_name}</span>
+                ${groupBadge}
+              </div>
+            </td>
             <td>${row.course_title}</td>
             <td>
               <div class="progress-container">
@@ -1641,7 +1823,7 @@
                 <div class="progress-text">${row.progress_percentage || 0}%</div>
               </div>
             </td>
-            <td>${accessCell}</td>
+            <td>${accessCell}${isTest || windowLine ? windowLine : ''}</td>
             <td>
               <span class="status-badge status-${row.enrollment_status}">
                 ${row.enrollment_status}
@@ -1679,6 +1861,7 @@
                       onclick="openStalledModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                       Stalled
                     </button>`}
+                ${groupBtn}
                 <a class="btn btn-table btn-mentor"
                   href="student-profile.html?student_id=${row.student_id}&name=${encodeURIComponent(row.student_name)}">
                   AI Chats
@@ -2014,6 +2197,78 @@
 
     function closeStatusModal() { document.getElementById('statusModal').classList.remove('active'); }
 
+    // ============================================
+    // GROUP ASSIGNMENT (Test vs Real + window)
+    // ============================================
+    let groupStudentId = null;
+    let groupCourseId  = null;
+    let groupIsTest    = false;
+
+    function openGroupModal(studentId, studentName, courseId, courseTitle, isTest, startDate, endDate) {
+      groupStudentId = studentId;
+      groupCourseId  = courseId;
+      groupIsTest    = !!isTest;
+      document.getElementById('groupModalMeta').textContent =
+        `${studentName} — ${courseTitle}`;
+      document.getElementById('groupStudentId').value = studentId;
+      document.getElementById('groupCourseId').value  = courseId;
+      document.getElementById('groupStartDate').value = startDate ? startDate.slice(0, 10) : '';
+      document.getElementById('groupEndDate').value   = endDate ? endDate.slice(0, 10) : '';
+      setModalGroup(isTest ? 'test' : 'real');
+      document.getElementById('groupModal').classList.add('active');
+    }
+
+    function setModalGroup(group) {
+      groupIsTest = group === 'test';
+      document.querySelectorAll('#groupModalChips .group-chip').forEach(chip => {
+        chip.classList.toggle('is-active', chip.dataset.group === group);
+      });
+    }
+
+    function closeGroupModal() {
+      document.getElementById('groupModal').classList.remove('active');
+    }
+
+    async function submitGroupModal() {
+      if (!groupStudentId || !groupCourseId) return;
+
+      const startVal = document.getElementById('groupStartDate').value;
+      const endVal   = document.getElementById('groupEndDate').value;
+
+      if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+        showAlert('Training starts must be on or before training ends.', 'error');
+        return;
+      }
+
+      try {
+        // 1) Set is_test on the student profile
+        const { error: e1 } = await supabaseClient.rpc('set_student_is_test', {
+          p_student_id: groupStudentId,
+          p_is_test: groupIsTest
+        });
+        if (e1) throw e1;
+
+        // 2) Set training window (only meaningful for real students)
+        if (!groupIsTest) {
+          const { error: e2 } = await supabaseClient.rpc('set_enrollment_window', {
+            p_student_id: groupStudentId,
+            p_course_id:  groupCourseId,
+            p_start_date: startVal ? `${startVal}T00:00:00Z` : null,
+            p_end_date:   endVal ? `${endVal}T23:59:59Z` : null
+          });
+          if (e2) throw e2;
+        }
+
+        showAlert('Group & window updated.', 'success');
+        closeGroupModal();
+        loadDashboard();
+        loadQuizScores();
+      } catch (err) {
+        showAlert(`Error updating group: ${err.message}`, 'error');
+        console.error(err);
+      }
+    }
+
     async function submitStatusUpdate() {
       const newStatus = document.getElementById('statusSelect').value;
       if (!newStatus) { showAlert('Please select a status', 'error'); return; }
@@ -2285,7 +2540,7 @@
         const studentsBody = document.getElementById('adminStudentsBody');
         const studentRows = (data.students || []).map(p => `
           <tr>
-            <td>${p.name}</td>
+            <td>${p.is_test ? `${p.name}<span class="group-badge group-test">TEST</span>` : `${p.name}<span class="group-badge group-real">REAL</span>`}</td>
             <td>${p.email}</td>
             <td>${p.courses_count}</td>
             <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
