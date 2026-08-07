@@ -21,21 +21,21 @@ converted to Mauritian Rupees (1 USD = 47.04 MUR).
 | Provider | Type | Model | Cost (USD) | Cost (MUR) |
 |---|---|---|---|---:|
 | DeepSeek | Free | v4-flash-free (opencode) | $0.00 | Rs 0.00 |
-| DeepSeek | Paid | v4-flash | $5.09 | Rs 239.44 |
-| DeepSeek | Paid | v4-pro | $14.27 | Rs 671.11 |
+| DeepSeek | Paid | v4-flash | $6.65 | Rs 313.03 |
+| DeepSeek | Paid | v4-pro | $18.63 | Rs 876.58 |
 | Gemini | Free | Flash free tier (rate-limited, AI Studio) | $0.00 | Rs 0.00 |
-| Gemini | Paid | 2.5 Flash-Lite | $6.47 | Rs 304.27 |
-| Gemini | Paid | 3.5 Flash | $171.55 | Rs 8,069.91 |
-| Gemini | Paid | 3.1 Pro | $137.18 | Rs 6,453.17 |
+| Gemini | Paid | 2.5 Flash-Lite | $8.49 | Rs 399.39 |
+| Gemini | Paid | 3.5 Flash | $225.66 | Rs 10,615.11 |
+| Gemini | Paid | 3.1 Pro | $180.18 | Rs 8,475.71 |
 | ChatGPT (OpenAI) | Free | No prod free tier (web ai.com only) | $0.00 | Rs 0.00 |
-| ChatGPT (OpenAI) | Paid | GPT-4o-mini | $28.01 | Rs 1,317.74 |
-| ChatGPT (OpenAI) | Paid | GPT-5.6 Luna | $13.72 | Rs 645.32 |
-| ChatGPT (OpenAI) | Paid | GPT-5.6 Terra | $137.18 | Rs 6,453.17 |
-| ChatGPT (OpenAI) | Paid | GPT-5.6 Sol | $342.96 | Rs 16,132.92 |
+| ChatGPT (OpenAI) | Paid | GPT-4o-mini | $36.88 | Rs 1,734.64 |
+| ChatGPT (OpenAI) | Paid | GPT-5.6 Luna | $18.02 | Rs 847.57 |
+| ChatGPT (OpenAI) | Paid | GPT-5.6 Terra | $180.18 | Rs 8,475.71 |
+| ChatGPT (OpenAI) | Paid | GPT-5.6 Sol | $450.45 | Rs 21,189.27 |
 | Claude | Free | No free tier (trial credit only) | $0.00 | Rs 0.00 |
-| Claude | Paid | Haiku 4.5 | $66.64 | Rs 3,134.62 |
-| Claude | Paid | Sonnet 5 (intro) | $133.27 | Rs 6,269.24 |
-| Claude | Paid | Opus 5 | $333.19 | Rs 15,673.10 |
+| Claude | Paid | Haiku 4.5 | $87.50 | Rs 4,115.89 |
+| Claude | Paid | Sonnet 5 (intro) | $175.00 | Rs 8,231.78 |
+| Claude | Paid | Opus 5 | $437.49 | Rs 20,579.45 |
 <!-- COST-TABLE-END -->
 
 > Full interactive report with per-session breakdown, timestamps and live-updating
