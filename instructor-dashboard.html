@@ -1164,8 +1164,8 @@
     function activate(tab) {
       document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('is-active', v.id === 'view-' + tab); });
       document.querySelectorAll('.side-link').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === tab); });
-      // Tickle the per-tab data so lazy sections load when first shown.
-      if (tab === 'courses' && typeof loadAssignments === 'function') { try { loadAssignments(); } catch (e) {} }
+      // Defer data loads to first activation of each tab (see lazy-loading block below).
+      if (window.ensureInstructorTabLoaded) { try { window.ensureInstructorTabLoaded(tab); } catch (e) {} }
     }
 
     document.querySelectorAll('.side-link').forEach(function (btn) {
@@ -1199,6 +1199,32 @@
     // ============================================
     // INITIALISATION
     // ============================================
+    // ============================================
+    // LAZY PER-TAB DATA (dashboard-redesign)
+    // Each tab's report RPC is deferred until the
+    // tab is first opened. The active (dashboard) tab
+    // is primed in the init below.
+    // ============================================
+    const __tabLoadedTab = {};
+    const __tabLoaders = {
+      dashboard: () => Promise.all([
+        loadAuditLog(),
+        currentUserRole === 'admin' ? loadAdminOverview() : Promise.resolve()
+      ]),
+      students:  () => Promise.all([loadDashboard(), loadFeedback()]),
+      courses:   () => Promise.all([currentUserRole === 'admin' ? loadAssignments() : Promise.resolve()]),
+      mentoring: () => Promise.all([loadAiMentorOverview(), loadMentorDigest()]),
+      analytics: () => Promise.all([loadQuizScores()]),
+      settings:  () => Promise.all([currentUserRole === 'admin' ? loadContentEditor() : Promise.resolve()])
+    };
+    window.ensureInstructorTabLoaded = (tab) => {
+      if (__tabLoadedTab[tab]) return;
+      __tabLoadedTab[tab] = true;
+      if (__tabLoaders[tab]) {
+        try { __tabLoaders[tab](); } catch (e) { console.error(`Lazy load ${tab} error:`, e); }
+      }
+    };
+
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('Dashboard initialising...');
 
@@ -1270,18 +1296,8 @@
         // Populate course dropdowns from get_my_courses()
         await loadMyCourses();
 
-        // Load dashboard data
-        await loadDashboard();
-        await loadAuditLog();
-        await loadAiMentorOverview();
-        await loadFeedback();
-        await loadMentorDigest();
-        await loadQuizScores();
-        if (profile.role === 'admin') {
-          await loadAdminOverview();
-          await loadAssignments();
-          await loadContentEditor();
-        }
+        // Load the default (dashboard) view's data; remaining tabs lazy-load on first open.
+        window.ensureInstructorTabLoaded('dashboard');
 
       } catch (err) {
         console.error('Auth check error:', err);
