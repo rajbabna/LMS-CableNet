@@ -226,11 +226,11 @@
 <div class="quiz-wrap">
   <div class="quiz-head">
     <a class="back-dash" href="../student-dashboard.html" title="Back to your dashboard" aria-label="Back to your dashboard">&larr; Back to dashboard</a>
-    <span class="eyebrow">Practice · before you enroll</span>
+    <span class="eyebrow">Module quiz</span>
     <h1>Basic Network Quiz</h1>
   </div>
   <div class="quiz-meta">
-    <span class="pill" id="cardCount">5 of 15 per round</span>
+    <span class="pill" id="cardCount">Loading questions…</span>
     <span class="pill" id="bestPill">Best: —</span>
     <span class="pill" id="puterPill">Puter: off</span>
     <span class="pill" id="accountPill">Course account: off</span>
@@ -238,7 +238,7 @@
 
   <!-- Start screen -->
   <div class="start-screen" id="startScreen">
-    <p>Each attempt deals you 5 random questions from a pool of 15, so you get a fresh mix every time. No account needed — your best score is saved on your device. If you're signed in to your course account, your best score also syncs to the course.</p>
+    <p>Each attempt deals you a fresh round of up to 12 random questions from this module's pool, so you get a different mix every time. No account needed — your best score is saved on your device. If you're signed in to your course account, your best score also syncs to the course.</p>
     <button class="btn-ghost" id="signInBtn">Sign in with Puter</button>
     <button class="btn-primary" id="startBtn">Start Quiz</button>
   </div>
@@ -385,13 +385,14 @@
   var PUTER_KV_KEY = 'cn_basic_quiz_best_score';
 
   // ---- Runtime config from query params ----
-  //   ?module=<id>&mode=practice|final&title=<module title>
+  //   ?module=<id>&title=<module title>
+  // The quiz is a single assessment (no practice/final split): each attempt
+  // deals a fresh random round from the module's question pool.
   function queryParam(name) {
     var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
     return m ? decodeURIComponent(m[1]) : null;
   }
   var qModuleId = parseInt(queryParam('module') || '27', 10) || 27;
-  var qMode = (queryParam('mode') || 'practice') === 'final' ? 'final' : 'practice';
   var qTitle = queryParam('title') || '';
   var QUIZ_MODULE_ID = qModuleId;
 
@@ -399,7 +400,9 @@
   // only a fallback (kept so the tool works even before migration 40 runs).
   var POOL = FALLBACK_QUESTIONS.slice();
   var POOL_SIZE = POOL.length;
-  var ROUND_SIZE = 5;
+  // A single round shows up to this many questions when the pool is large
+  // enough; if the module bank is smaller, the whole bank is used.
+  var ROUND_CAP = 12;
 
   function mapRow(r) {
     return {
@@ -421,11 +424,19 @@
           POOL_SIZE = POOL.length;
           return true;
         }
-        // Module has no authored questions. Final quizzes must not run empty.
-        if (qMode === 'final') { POOL = []; POOL_SIZE = 0; }
+        // Module has no authored questions. The quiz must not run empty.
+        POOL = [];
+        POOL_SIZE = 0;
         return false;
       })
       .catch(function () { return false; });
+  }
+
+  // Size of the round dealt to the learner on each attempt: the whole pool
+  // when it's small, otherwise a random subset capped at ROUND_CAP so the
+  // quiz stays a focused 10-12 questions while keeping variety across retries.
+  function roundSize() {
+    return Math.min(POOL_SIZE, ROUND_CAP);
   }
 
   var currentDeck = [];
@@ -474,7 +485,6 @@
     try {
       localStorage.setItem(resumeKey(), JSON.stringify({
         module: qModuleId,
-        mode: qMode,
         deck: deck,
         index: index,
         correct: correct,
@@ -533,15 +543,16 @@
   }
 
   // Best effort: persists the best score to the course via the
-  // submit_quiz_score RPC. Never blocks the quiz or throws.
+  // submit_quiz_score RPC. Never blocks the quiz or throws. The quiz is a
+  // single assessment, so the score is recorded with the default practice
+  // mode (the SQL default), keeping the aggregate in quiz_scores in sync.
   function submitBestToSupabase(score) {
     return getSupabaseUser().then(function (user) {
       updateAccountPill(user);
       if (!user || !window.supabaseClient) return false;
       return supabaseClient.rpc('submit_quiz_score', {
         p_module_id: QUIZ_MODULE_ID,
-        p_score: score,
-        p_mode: qMode
+        p_score: score
       }).then(function (res) {
         if (res.error) {
           console.error('Quiz score sync failed:', res.error.message);
@@ -659,14 +670,12 @@
     saveBest(best);
     updateBestPill();
 
-    if (score === 100 && qMode !== 'final') {
-      el.bestBadge.innerHTML = '<span class="best-badge">★ Perfect quiz — your final quiz is now unlocked!</span>';
-    } else if (score === 100) {
-      el.bestBadge.innerHTML = '<span class="best-badge">★ Perfect score — well done!</span>';
-    } else if (best === score && score > 0) {
+    if (best === score && score > 0) {
       el.bestBadge.innerHTML = '<span class="best-badge">New best score</span>';
     } else {
-      el.bestBadge.innerHTML = '';
+      el.bestBadge.innerHTML = best > 0
+        ? '<span class="best-badge">Best score: ' + best + '%</span>'
+        : '';
     }
 
     el.syncNote.textContent = puterSignedIn()
@@ -707,12 +716,12 @@
       startQuiz(resume.deck, resume.index, resume.correct);
     } else {
       clearResume();
-      startQuiz(shuffle(POOL).slice(0, ROUND_SIZE));
+      startQuiz(shuffle(POOL).slice(0, roundSize()));
     }
   });
   el.retryBtn.addEventListener('click', function () {
     clearResume();
-    startQuiz(shuffle(POOL).slice(0, ROUND_SIZE));
+    startQuiz(shuffle(POOL).slice(0, roundSize()));
   });
   el.nextBtn.addEventListener('click', function () {
     currentIndex++;
@@ -744,7 +753,7 @@
   // Init
   var eyebrow = document.querySelector('.eyebrow');
   if (eyebrow) {
-    eyebrow.textContent = (qMode === 'final' ? 'Final quiz' : 'Practice')
+    eyebrow.textContent = 'Module Quiz'
       + ' · Module ' + qModuleId + (qTitle ? ' · ' + qTitle : '');
   }
 
@@ -757,7 +766,7 @@
         'No questions have been added for this module yet. Check back soon.';
       el.startBtn.disabled = true;
     } else {
-      el.cardCount.textContent = ROUND_SIZE + ' of ' + POOL_SIZE + ' per round';
+      el.cardCount.textContent = roundSize() + ' of ' + POOL_SIZE + ' per round';
     }
     if (hasResume) {
       el.startBtn.textContent = 'Resume Quiz · Question ' + (resume.index + 1) + ' of ' + resume.deck.length;
