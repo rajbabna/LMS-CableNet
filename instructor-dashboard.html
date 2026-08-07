@@ -219,6 +219,21 @@
     }
     .btn-unstall:hover { background: #2f8a57; }
 
+    .btn-reset {
+      background: transparent;
+      color: var(--copper-dark);
+      border: 1px dashed var(--copper-dark);
+    }
+    .btn-reset:hover { background: #F7E4DC; }
+
+    .btn-reset-solid {
+      background: var(--copper-dark);
+      color: #fff;
+      border: 1px solid var(--copper-dark);
+    }
+    .btn-reset-solid:hover { background: #7A2E16; }
+    .btn-reset-solid:disabled { opacity: 0.5; cursor: not-allowed; }
+
     /* Primary action button */
     .btn-action { width: 100%; margin-bottom: 1.2rem; }
 
@@ -856,6 +871,28 @@
     </div>
   </div>
 
+  <!-- Modal: Reset Student Progress -->
+  <div id="resetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+    <div class="modal">
+      <h3 id="resetModalTitle">⚠️ Reset Student Progress</h3>
+
+      <p id="resetStudentCopy" style="margin:0.4rem 0 1rem; color:var(--ink-soft); font-size:0.9rem; line-height:1.5;">
+        This will clear all completed modules, quiz attempts and quiz scores for this student in this course.
+        Enrollment and access are kept. This cannot be undone.
+      </p>
+
+      <label class="toggle-line" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.2rem; cursor:pointer;">
+        <input type="checkbox" id="resetConfirmCheck">
+        <span style="font-size:0.9rem;">I understand — reset this student's progress.</span>
+      </label>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeResetModal()">Cancel</button>
+        <button class="btn btn-reset-solid" id="resetSubmitBtn" onclick="submitResetProgress()" disabled>Reset Progress</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Add / Edit Course -->
   <div id="courseModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="courseModalTitle">
     <div class="modal">
@@ -1135,6 +1172,10 @@
                 <button class="btn btn-table btn-history"
                   onclick="openHistoryModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                   History
+                </button>
+                <button class="btn btn-table btn-reset"
+                  onclick="openResetModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                  Reset
                 </button>
                 ${row.is_stalled
                   ? `<button class="btn btn-table btn-unstall"
@@ -1567,10 +1608,75 @@
     }
 
     // ============================================
+    // RESET STUDENT PROGRESS
+    // ============================================
+    function openResetModal(studentId, studentName, courseId) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('resetModalTitle').textContent = `⚠️ Reset Progress for ${studentName}`;
+      document.getElementById('resetStudentCopy').textContent =
+        `This will clear ${studentName}'s completed modules, quiz attempts and quiz scores in this course. ` +
+        'Enrollment and access are kept. This cannot be undone.';
+      const check = document.getElementById('resetConfirmCheck');
+      check.checked = false;
+      document.getElementById('resetSubmitBtn').disabled = true;
+      document.getElementById('resetModal').classList.add('active');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetModal').classList.remove('active');
+      document.getElementById('resetConfirmCheck').checked = false;
+      document.getElementById('resetSubmitBtn').disabled = true;
+    }
+
+    async function submitResetProgress() {
+      const check = document.getElementById('resetConfirmCheck');
+      if (!check.checked) { showAlert('Please confirm before resetting', 'error'); return; }
+
+      const btn = document.getElementById('resetSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Resetting…';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('reset_student_progress', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          btn.textContent = 'Reset Progress';
+          return;
+        }
+
+        if (data === 'no_permission') {
+          showAlert('You do not have permission to reset this course.', 'error');
+          btn.textContent = 'Reset Progress';
+          return;
+        }
+
+        showAlert('✓ Student progress reset', 'success');
+        closeResetModal();
+        await loadDashboard();
+        await loadQuizScores();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+        btn.textContent = 'Reset Progress';
+      }
+    }
+
+    // Enable the Reset button only once the instructor ticks the confirm box.
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'resetConfirmCheck') {
+        document.getElementById('resetSubmitBtn').disabled = !e.target.checked;
+      }
+    });
+
+    // ============================================
     // VIEW HISTORY
     // ============================================
-    async function openHistoryModal(studentId, studentName, courseId) {
-      currentStudentId = studentId;
+    async function openHistoryModal(studentId, studentName, courseId) {      currentStudentId = studentId;
       currentCourseId  = courseId;
       document.getElementById('historyModalTitle').textContent = `📜 History for ${studentName}`;
       document.getElementById('historyModal').classList.add('active');

@@ -321,10 +321,14 @@ class StudentDashboard {
       card.classList.add("course-preview");
     }
 
-    // Calculate progress
-    const progressPercent = course.progress_percentage || 0;
+    // Calculate progress. Percent is derived from the live completed/total
+    // counts rather than trusting the view's stored percentage, which can go
+    // stale (e.g. after modules are reset and it still reads 100%).
     const completedModules = course.completed_modules || 0;
     const totalModules = course.total_modules || 0;
+    const progressPercent = totalModules
+      ? Math.round((completedModules / totalModules) * 100)
+      : 0;
 
     // Determine status and badge styling
     let statusLabel = "○ Not Started";

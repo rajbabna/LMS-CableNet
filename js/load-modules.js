@@ -839,12 +839,27 @@ async function loadModulesForCourse(courseId) {
     // (`tools/basic-network-quiz.html` via an <a href>), so when the student
     // returns to this tab after submitting, refresh the panels so the new
     // score appears immediately instead of showing stale data.
-    function refreshQuizProgress() {
-      loadQuizProgress(courseId).then(renderGrid);
+    async function refreshProgress() {
+      // Re-fetch both quiz state and module completions so a reset performed
+      // in another tab (instructor dashboard) is reflected here — the header
+      // progress bar/donut must drop instead of staying "complete".
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        try {
+          const res = await supabaseClient.from('module_completions')
+            .select('module_id').eq('user_id', user.id).eq('status', 'completed');
+          completedIds = new Set((res.data || []).map(c => c.module_id));
+          recalcProgress();
+        } catch (err) {
+          console.error('Could not refresh completions:', err);
+        }
+      }
+      await loadQuizProgress(courseId).then(renderGrid);
+      renderCourseHead();
     }
-    refreshQuizProgress();
-    window.addEventListener('focus', refreshQuizProgress);
-    window.addEventListener('pageshow', refreshQuizProgress);
+    refreshProgress();
+    window.addEventListener('focus', refreshProgress);
+    window.addEventListener('pageshow', refreshProgress);
 
   } catch (err) {
     console.error('Exception loading modules:', err);
