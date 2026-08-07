@@ -469,9 +469,101 @@
       .data-table { font-size: 0.85rem; }
       .data-table th, .data-table td { padding: 0.6em 0.7em; }
     }
+
+    /* ============================================================
+       VERTICAL SIDEBAR NAVIGATION (dashboard-redesign proposal)
+       ============================================================ */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 230px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 1rem 0.8rem;
+      background: rgba(247, 245, 239, 0.96);
+      border-right: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 1px 0 0 rgba(0, 0, 0, 0.02);
+      overflow-y: auto;
+    }
+    .side-nav .side-brand {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-soft);
+      padding: 0.4rem 0.6rem 0.7rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      margin-bottom: 0.6rem;
+    }
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.62rem 0.7rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink, #222);
+      font-family: var(--font-body, inherit);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .side-link .side-ico { font-size: 1.05rem; width: 1.3rem; text-align: center; }
+    .side-link:hover { background: rgba(217, 119, 87, 0.08); color: var(--copper-dark, #933E17); }
+    .side-link.is-active {
+      background: #D97757;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(217, 119, 87, 0.28);
+    }
+    .side-link.is-active .side-ico { filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
+
+    /* Main content area sits to the right of the fixed sidebar */
+    main.dash-main {
+      margin-left: 250px;
+    }
+
+    /* Tabbed views: only the active one is visible */
+    .view { display: none; }
+    .view.is-active { display: block; }
+
+    @media (max-width: 900px) {
+      .side-nav {
+        position: static;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        background: rgba(247, 245, 239, 0.96);
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 0.5rem 0.6rem;
+        box-shadow: none;
+      }
+      .side-nav .side-brand { display: none; }
+      .side-link { width: auto; white-space: nowrap; }
+      main.dash-main { margin-left: 0; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Vertical Sidebar Navigation -->
+  <aside class="side-nav" aria-label="Dashboard sections">
+    <div class="side-brand">INSTRUCTOR PANEL</div>
+    <button class="side-link is-active" data-tab="dashboard" type="button"><span class="side-ico">📊</span>Dashboard</button>
+    <button class="side-link" data-tab="students" type="button"><span class="side-ico">🎓</span>Students</button>
+    <button class="side-link" data-tab="courses" type="button"><span class="side-ico">📚</span>Courses</button>
+    <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
+    <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
+    <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
+  </aside>
 
   <!-- Header -->
   <header class="site-header">
@@ -491,7 +583,7 @@
     <span></span><span></span><span></span><span></span>
   </div>
 
-  <main>
+  <main class="dash-main">
     <!-- Hero -->
     <div class="hero">
       <span class="eyebrow">📊 Instructor Dashboard</span>
@@ -501,6 +593,14 @@
 
     <!-- Alert -->
     <div id="alert" class="alert-msg" role="alert" aria-live="polite"></div>
+
+    <!-- Sidebar views (sections are re-parented into these panels on load) -->
+    <div class="view is-active" id="view-dashboard"></div>
+    <div class="view" id="view-students"></div>
+    <div class="view" id="view-courses"></div>
+    <div class="view" id="view-mentoring"></div>
+    <div class="view" id="view-analytics"></div>
+    <div class="view" id="view-settings"></div>
 
     <!-- Admin Overview (admin only) -->
     <div id="adminOverviewSection" class="dashboard-section" style="display:none;">
@@ -597,7 +697,7 @@
     <div class="dashboard-container">
 
       <!-- Left: Student Progress Table -->
-      <div class="dashboard-section">
+      <div class="dashboard-section" id="studentsSection">
         <h2>📚 Your Students</h2>
 
         <!-- Filter -->
@@ -631,7 +731,7 @@
       </div>
 
       <!-- Right: Quick Actions & Audit Log -->
-      <div class="dashboard-section">
+      <div class="dashboard-section" id="quickActionsSection">
         <h2>✅ Quick Actions</h2>
 
         <div id="enrollSection">
@@ -1035,10 +1135,50 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <!-- Load config and client BEFORE auth check -->
-  <script src="js/config.js?v=9A0E5BF5"></script>
-  <script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script>
+  // ============================================================
+  // Sidebar navigation shell (dashboard-redesign proposal).
+  // Re-parents the existing sections into tabbed views and wires
+  // the left-hand vertical navigation. Sections keep their IDs so
+  // the existing loadDashboard()/getElementById logic is untouched.
+  // ============================================================
+  (function () {
+    var views = {
+      dashboard: ['adminOverviewSection', 'quickActionsSection'],
+      students:  ['studentsSection', 'feedbackSection'],
+      courses:   ['assignSection'],
+      mentoring: ['aiMentorSection', 'mentorDigestSection'],
+      analytics: ['quizScoresSection'],
+      settings:  ['contentEditorSection']
+    };
 
-  <script>
+    function activate(tab) {
+      document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('is-active', v.id === 'view-' + tab); });
+      document.querySelectorAll('.side-link').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === tab); });
+      // Tickle the per-tab data so lazy sections load when first shown.
+      if (tab === 'courses' && typeof loadAssignments === 'function') { try { loadAssignments(); } catch (e) {} }
+    }
+
+    document.querySelectorAll('.side-link').forEach(function (btn) {
+      btn.addEventListener('click', function () { activate(btn.getAttribute('data-tab')); });
+    });
+
+    // Move each section into its tabbed view container.
+    Object.keys(views).forEach(function (tab) {
+      var panel = document.getElementById('view-' + tab);
+      if (!panel) return;
+      views[tab].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) panel.appendChild(el);
+      });
+    });
+
+    window.switchInstructorTab = activate;
+  })();
+</script>
+<script>
     // ============================================
     // STATE
     // ============================================
