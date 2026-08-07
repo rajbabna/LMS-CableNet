@@ -631,6 +631,14 @@
     .view { display: none; }
     .view.is-active { display: block; }
 
+    /* Analytics top/at-risk panels */
+    .perf-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.9rem;
+    }
+
     @media (max-width: 900px) {
       .side-nav {
         position: static;
@@ -647,6 +655,24 @@
       .side-nav .side-brand { display: none; }
       .side-link { width: auto; white-space: nowrap; }
       main.dash-main { margin-left: 0; }
+
+      /* The shell's desktop 250px offset is gone when the sidebar goes static */
+      .dash-shell { margin-left: 0; }
+
+      /* Keep stray wide tables from widening the page: scroll within each card */
+      .dashboard-section { overflow-x: auto; }
+
+      /* Analytics panels stack below ~900px */
+      .perf-cols { grid-template-columns: 1fr; }
+    }
+
+    /* Global safety: never allow a horizontal page scrollbar */
+    body { overflow-x: hidden; }
+
+    @media (max-width: 480px) {
+      main.dash-main { padding-left: 1rem; padding-right: 1rem; }
+      .dashboard-section { padding: 1.2rem 1rem; }
+      .perf-cols { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -939,7 +965,7 @@
         <div class="stat-card"><strong id="aggAvg">0%</strong><span>Average Best</span></div>
         <div class="stat-card"><strong id="aggAttempts">0</strong><span>Total Attempts</span></div>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.9rem;" class="perf-cols">
+      <div class="perf-cols">
         <div>
           <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">🥇 Top performers</h3>
           <div id="aggTop" class="agg-list"><div class="empty-state">No data</div></div>
