@@ -834,6 +834,51 @@
       </div>
     </div>
 
+<!-- Analytics: highlights -->
+    <div id="analyticsHighlightsSection" class="dashboard-section">
+      <h2>📊 Learning Overview</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Rolled up from practice-quiz results across the selected course above.
+      </p>
+      <div class="stat-cards" style="margin:0.8rem 0 0.2rem; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));">
+        <div class="stat-card"><strong id="aggStudents">0</strong><span>Students</span></div>
+        <div class="stat-card"><strong id="aggModules">0</strong><span>Modules Attempted</span></div>
+        <div class="stat-card"><strong id="aggAvg">0%</strong><span>Average Best</span></div>
+        <div class="stat-card"><strong id="aggAttempts">0</strong><span>Total Attempts</span></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.9rem;" class="perf-cols">
+        <div>
+          <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">🥇 Top performers</h3>
+          <div id="aggTop" class="agg-list"><div class="empty-state">No data</div></div>
+        </div>
+        <div>
+          <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">⚠️ Needs attention (&lt;60%)</h3>
+          <div id="aggAtRisk" class="agg-list"><div class="empty-state">No data</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics by module -->
+    <div id="analyticsModuleSection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>📚 Quiz progress by module</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Per-module attempt and best-score summary for the selected course above.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Students</th>
+            <th>Attempts</th>
+            <th>Avg Best</th>
+          </tr>
+        </thead>
+        <tbody id="analyticsModuleBody">
+          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
 <!-- Quiz Scores -->
     <div id="quizScoresSection" class="dashboard-section" style="margin-top:1.5rem;">
       <h2>📝 Quiz Scores</h2>
@@ -854,6 +899,37 @@
           <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Settings: Profile -->
+    <div id="profileSection" class="dashboard-section">
+      <h2>👤 Profile &amp; Account</h2>
+      <div id="profileCard" class="empty-state" style="display:block; text-align:left; padding:0;">
+        <table class="data-table" style="margin:0; border:none;">
+          <tbody id="profileBody">
+            <tr><td colspan="2" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Settings: Progress management (admin only) -->
+    <div id="progressToolsSection" class="dashboard-section" style="margin-top:1.5rem; display:none;">
+      <h2>🔄 Progress Management</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Reset a student's completed modules, quiz attempts and quiz scores in a given course.
+      </p>
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap; align-items:flex-end;">
+        <div style="flex:1 1 240px;">
+          <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Student</label>
+          <select id="ptStudentSelect" style="width:100%;"><option value="">Loading students…</option></select>
+        </div>
+        <div style="flex:1 1 240px;">
+          <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Course</label>
+          <select id="ptCourseSelect" style="width:100%;"><option value="">Select course…</option></select>
+        </div>
+        <button class="btn btn-danger" id="ptResetBtn" onclick="openProgressReset()">Reset Progress</button>
+      </div>
     </div>
 
     <!-- Content Editor (admin only) -->
@@ -1157,8 +1233,8 @@
       students:  ['studentsSection', 'feedbackSection'],
       courses:   ['assignSection'],
       mentoring: ['aiMentorSection', 'mentorDigestSection'],
-      analytics: ['quizScoresSection'],
-      settings:  ['contentEditorSection']
+      analytics: ['analyticsHighlightsSection', 'analyticsModuleSection', 'quizScoresSection'],
+      settings:  ['profileSection', 'progressToolsSection', 'contentEditorSection']
     };
 
     function activate(tab) {
@@ -1215,7 +1291,11 @@
       courses:   () => Promise.all([currentUserRole === 'admin' ? loadAssignments() : Promise.resolve()]),
       mentoring: () => Promise.all([loadAiMentorOverview(), loadMentorDigest()]),
       analytics: () => Promise.all([loadQuizScores()]),
-      settings:  () => Promise.all([currentUserRole === 'admin' ? loadContentEditor() : Promise.resolve()])
+      settings:  () => Promise.all([
+        loadProfile(),
+        currentUserRole === 'admin' ? loadProgressTools() : Promise.resolve(),
+        currentUserRole === 'admin' ? loadContentEditor() : Promise.resolve()
+      ])
     };
     window.ensureInstructorTabLoaded = (tab) => {
       if (__tabLoadedTab[tab]) return;
@@ -2216,11 +2296,13 @@
         if (error) {
           console.error('Quiz scores error:', error.message);
           tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load quiz scores.</td></tr>`;
+          renderAnalyticsAgg([]);
           return;
         }
 
         if (!data || data.length === 0) {
           tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No quiz scores yet — students sync scores when they take the practice quiz while signed in.</td></tr>`;
+          renderAnalyticsAgg([]);
           return;
         }
 
@@ -2232,10 +2314,91 @@
             <td><span style="font-family: var(--font-mono); color: var(--teal); font-weight:600;">${row.best_score}%</span></td>
             <td style="font-size:0.8rem; color: var(--ink-soft);">${new Date(row.last_attempt_date).toLocaleString()}</td>
           </tr>`).join('');
+
+        renderAnalyticsAgg(data);
       } catch (err) {
         console.error('loadQuizScores error:', err);
         tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load quiz scores.</td></tr>`;
+        renderAnalyticsAgg([]);
       }
+    }
+
+    // ============================================
+    // ANALYTICS AGGREGATES (client-side, shared filter)
+    // ============================================
+    function renderAnalyticsAgg(rows) {
+      const has = document.getElementById('aggStudents') !== null;
+      if (!has) return;
+      const students = document.getElementById('aggStudents'),
+            modules   = document.getElementById('aggModules'),
+            avg       = document.getElementById('aggAvg'),
+            attempts  = document.getElementById('aggAttempts'),
+            topBox    = document.getElementById('aggTop'),
+            riskBox   = document.getElementById('aggAtRisk'),
+            modBody   = document.getElementById('analyticsModuleBody');
+      if (!rows || rows.length === 0) {
+        students.textContent = '0';
+        modules.textContent = '0';
+        avg.textContent = '0%';
+        attempts.textContent = '0';
+        if (topBox)  topBox.innerHTML = '<div class="empty-state">No data</div>';
+        if (riskBox) riskBox.innerHTML = '<div class="empty-state">No data</div>';
+        if (modBody) modBody.innerHTML = '<tr><td colspan="4" class="empty-state">No data</td></tr>';
+        return;
+      }
+
+      // Per-student best & attempt tally
+      const byStudent = {};
+      const byModule = {};
+      let totalAttempts = 0;
+      rows.forEach(r => {
+        totalAttempts += r.attempts || 0;
+        if (!byStudent[r.student_name]) byStudent[r.student_name] = { name: r.student_name, best: 0, attempts: 0 };
+        byStudent[r.student_name].best = Math.max(byStudent[r.student_name].best, r.best_score || 0);
+        byStudent[r.student_name].attempts += (r.attempts || 0);
+        const m = r.module_title || 'Unknown';
+        if (!byModule[m]) byModule[m] = { module: m, students: new Set(), attempts: 0, sum: 0, count: 0 };
+        byModule[m].students.add(r.student_name);
+        byModule[m].attempts += (r.attempts || 0);
+        byModule[m].best = Math.max(byModule[m].best || 0, r.best_score || 0);
+        byModule[m].count += 1;
+      });
+
+      const list = Object.values(byStudent);
+      const avgBest = Math.round(list.reduce((s, st) => s + st.best, 0) / list.length);
+      students.textContent = list.length;
+      modules.textContent = Object.keys(byModule).length;
+      avg.textContent = avg + '%';
+      attempts.textContent = totalAttempts;
+
+      // Top performers
+      const top = list.slice().sort((a, b) => b.best - a.best).slice(0, 5);
+      topBox.innerHTML = top.length
+        ? top.map((st, i) => `<div style="display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid var(--line);">
+            <span>${i + 1}. <strong>${escapeHtml(st.name)}</strong></span>
+            <span style="font-family:var(--font-mono); color:var(--teal); font-weight:600;">${st.best}%</span>
+          </div>`).join('')
+        : '<div class="empty-state">No data</div>';
+
+      // Needs attention: students whose best score is below 60
+      const risk = list.filter(st => st.best < 60).sort((a, b) => a.best - b.best);
+      riskBox.innerHTML = risk.length
+        ? risk.map(st => `<div style="display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid var(--line);">
+            <span>${escapeHtml(st.name)}</span>
+            <span style="font-family:var(--font-mono); color:var(--copper-dark); font-weight:600;">${st.best}%</span>
+          </div>`).join('')
+        : '<div class="empty-state" style="color:var(--green);">👍 All students are at or above 60%.</div>';
+
+      // Per-module summary
+      const modRows = Object.values(byModule)
+        .sort((a, b) => b.attempts - a.attempts)
+        .map(m => `<tr>
+          <td><strong>${escapeHtml(m.module)}</strong></td>
+          <td>${m.students.size}</td>
+          <td>${m.attempts}</td>
+          <td><span style="font-family:var(--font-mono); color:var(--copper-dark); font-weight:600;">${Math.round(m.best)}%</span></td>
+        </tr>`).join('');
+      modBody.innerHTML = modRows || '<tr><td colspan="4" class="empty-state">No modules attempted.</td></tr>';
     }
 
     // ============================================
@@ -2267,6 +2430,91 @@
       } catch (err) {
         console.error('Audit log load error:', err);
       }
+    }
+
+    // ============================================
+    // SETTINGS · PROFILE / ACCOUNT
+    // ============================================
+    async function loadProfile() {
+      const body = document.getElementById('profileBody');
+      if (!body) return;
+      body.innerHTML = '<tr><td colspan="2" class="empty-state"><span class="spinner"></span> Loading...</td></tr>';
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const email = session && session.user ? session.user.email : '—';
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('full_name, role, approved')
+          .eq('id', session.user.id)
+          .single();
+        const fullName = (profile && (profile.full_name || '—')) || '—';
+        const role = (profile && profile.role) || '—';
+        const approved = profile && profile.approved ? 'Approved ✓' : 'Pending';
+        body.innerHTML = `
+          <tr><td style="font-weight:600; color:var(--ink-soft); width:40%;">Name</td><td>${escapeHtml(fullName)}</td></tr>
+          <tr><td style="font-weight:600; color:var(--ink-soft);">Email</td><td>${escapeHtml(email)}</td></tr>
+          <tr><td style="font-weight:600; color:var(--ink-soft);">Role</td><td><span class="role-badge role-badge--${role}">${escapeHtml(role)}</span></td></tr>
+          <tr><td style="font-weight:600; color:var(--ink-soft);">Status</td><td>${approved}</td></tr>
+        `;
+      } catch (err) {
+        console.error('loadProfile error:', err);
+        body.innerHTML = '<tr><td colspan="2" class="empty-state" style="color:var(--copper-dark);">Could not load profile.</td></tr>';
+      }
+    }
+
+    // ============================================
+    // SETTINGS → PROGRESS MANAGEMENT (admin)
+    // ============================================
+    async function loadProgressTools() {
+      const section = document.getElementById('progressToolsSection');
+      if (!section) return;
+      if (currentUserRole !== 'admin') return;
+      section.style.display = '';
+      try {
+        const [{ data: overview }, { data: courses }] = await Promise.all([
+          supabaseClient.rpc('get_admin_overview'),
+          supabaseClient.rpc('get_my_courses')
+        ]);
+        const students = (overview && overview.students) || [];
+        document.getElementById('ptStudentSelect').innerHTML = students.length
+          ? students.map(s => `<option value="${s.id}">${escapeHtml(s.email)}</option>`).join('')
+          : '<option value="">No students</option>';
+        document.getElementById('ptCourseSelect').innerHTML = (courses || []).length
+          ? '<option value="">Select course…</option>' +
+            courses.map(c => `<option value="${c.course_id}">${escapeHtml(c.title)}</option>`).join('')
+          : '<option value="">No courses</option>';
+      } catch (err) {
+        console.error('loadProgressTools error:', err);
+      }
+    }
+
+    async function openProgressReset() {
+      const studentId = document.getElementById('ptStudentSelect').value;
+      const courseId = document.getElementById('ptCourseSelect').value;
+      if (!studentId) { showAlert('Select a student first.', 'error'); return; }
+      if (!courseId) { showAlert('Select a course first.', 'error'); return; }
+      const studentName = document.getElementById('ptStudentSelect').selectedOptions[0].textContent;
+
+      const btn = document.getElementById('ptResetBtn');
+      btn.disabled = true;
+      btn.textContent = 'Resetting…';
+      try {
+        const { data, error } = await supabaseClient.rpc('reset_student_progress', {
+          p_student_id: studentId,
+          p_course_id: courseId
+        });
+        if (error) { showAlert(`Error: ${error.message}`, 'error'); btn.disabled = false; btn.textContent = 'Reset Progress'; return; }
+        if (data === 'no_permission') { showAlert('You do not have permission to reset this course.', 'error'); btn.disabled = false; btn.textContent = 'Reset Progress'; return; }
+        showAlert(`✓ Reset ${escapeHtml(studentName)}'s progress in this course`, 'success');
+        document.getElementById('courseFilter').value = courseId;
+        loadDashboard();
+        loadQuizScores();
+      } catch (err) {
+        console.error('openProgressReset error:', err);
+        showAlert('Reset failed.', 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Reset Progress';
     }
 
     // ============================================
