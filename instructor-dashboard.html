@@ -234,6 +234,31 @@
     .btn-reset-solid:hover { background: #7A2E16; }
     .btn-reset-solid:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .btn-extend {
+      background: transparent;
+      color: var(--teal-dark, #0F766E);
+      border: 1px dashed var(--teal-dark, #0F766E);
+    }
+    .btn-extend:hover { background: #E0F2F1; }
+
+    .extend-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .btn-extend-opt {
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--line, #ddd);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink, #222);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-extend-opt:hover { border-color: var(--teal-dark, #0F766E); background: #E0F2F1; }
+    .btn-extend-lifetime { border-style: dashed; color: var(--teal-dark, #0F766E); }
+
     /* Primary action button */
     .btn-action { width: 100%; margin-bottom: 1.2rem; }
 
@@ -893,6 +918,29 @@
     </div>
   </div>
 
+  <!-- Modal: Extend / Renew Access -->
+  <div id="extendModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="extendModalTitle">
+    <div class="modal">
+      <h3 id="extendModalTitle">🕒 Extend Access</h3>
+
+      <p style="margin:0.4rem 0 1rem; color:var(--ink-soft); font-size:0.9rem; line-height:1.5;">
+        Renew this student's access for this course. Their enrollment is set to
+        <strong>active</strong> and access is extended from today.
+      </p>
+
+      <div class="extend-options">
+        <button class="btn btn-extend-opt" onclick="submitExtendAccess(7, false)">+7 days</button>
+        <button class="btn btn-extend-opt" onclick="submitExtendAccess(30, false)">+30 days</button>
+        <button class="btn btn-extend-opt" onclick="submitExtendAccess(90, false)">+90 days</button>
+        <button class="btn btn-extend-opt btn-extend-lifetime" onclick="submitExtendAccess(0, true)">Lifetime</button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeExtendModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Add / Edit Course -->
   <div id="courseModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="courseModalTitle">
     <div class="modal">
@@ -1172,6 +1220,10 @@
                 <button class="btn btn-table btn-history"
                   onclick="openHistoryModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                   History
+                </button>
+                <button class="btn btn-table btn-extend"
+                  onclick="openExtendModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                  Extend
                 </button>
                 <button class="btn btn-table btn-reset"
                   onclick="openResetModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
@@ -1672,6 +1724,51 @@
         document.getElementById('resetSubmitBtn').disabled = !e.target.checked;
       }
     });
+
+    // ============================================
+    // EXTEND / RENEW ACCESS
+    // ============================================
+    function openExtendModal(studentId, studentName, courseId) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('extendModalTitle').textContent = `🕒 Extend Access for ${studentName}`;
+      document.getElementById('extendModal').classList.add('active');
+    }
+
+    function closeExtendModal() {
+      document.getElementById('extendModal').classList.remove('active');
+    }
+
+    async function submitExtendAccess(days, lifetime) {
+      const btn = event && event.currentTarget;
+      const orig = btn ? btn.textContent : '';
+      if (btn) btn.disabled = true;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('extend_student_access', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId,
+          p_days:       days,
+          p_lifetime:   lifetime
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          if (btn) btn.disabled = false;
+          return;
+        }
+        if (data === 'no_permission') { showAlert('You do not have permission to extend this course.', 'error'); if (btn) btn.disabled = false; return; }
+        if (data === 'not_found') { showAlert('Enrollment not found for this student/course.', 'error'); if (btn) btn.disabled = false; return; }
+
+        showAlert(lifetime ? '✓ Access set to Lifetime' : `✓ Access extended by ${days} days`, 'success');
+        closeExtendModal();
+        await loadDashboard();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+        if (btn) btn.disabled = false;
+      }
+    }
 
     // ============================================
     // VIEW HISTORY
