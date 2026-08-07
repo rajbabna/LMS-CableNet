@@ -640,23 +640,29 @@
     }
 
     @media (max-width: 900px) {
+      /* Keep the tab bar pinned while scrolling on handhelds */
       .side-nav {
-        position: static;
+        position: sticky;
+        top: 0;
         width: 100%;
         flex-direction: row;
         flex-wrap: nowrap;
         overflow-x: auto;
-        background: rgba(247, 245, 239, 0.96);
+        z-index: 90;
+        background: rgba(247, 245, 239, 0.97);
         border-right: none;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         padding: 0.5rem 0.6rem;
-        box-shadow: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       }
       .side-nav .side-brand { display: none; }
       .side-link { width: auto; white-space: nowrap; }
       main.dash-main { margin-left: 0; }
 
-      /* The shell's desktop 250px offset is gone when the sidebar goes static */
+      /* Hide the hero header's stickiness so it doesn't collide with the pinned tab bar */
+      .site-header { position: static; }
+
+      /* The shell's desktop 250px offset is gone when the sidebar goes sticky */
       .dash-shell { margin-left: 0; }
 
       /* Keep stray wide tables from widening the page: scroll within each card */
