@@ -122,6 +122,85 @@ async function loadModulesForCourse(courseId) {
   const pad2 = n => String(n || 0).padStart(2, '0');
   const isCompleted = m => completedIds.has(String(m.id)) || completedIds.has(m.id);
 
+  // Pause/resume: an in-progress quiz writes its state to this localStorage
+  // key (see tools/basic-network-quiz.html). Read it here so the course page
+  // can surface a "Resume" entry point instead of a fresh "Practice" one.
+  const quizResumeKey = id => 'lms_quiz_resume_' + String(id);
+  const quizResumeFor = id => {
+    try {
+      const raw = localStorage.getItem(quizResumeKey(id));
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  // Quiz progress panel: loads each module's single-quiz state from the
+  // get_quiz_progress_for_course RPC (sql/50) in one round-trip, then renders
+  // the status badge + best score bar inside each card.
+  const quizProgressById = new Map();
+  async function loadQuizProgress(courseId) {
+    if (isPreview || !window.supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient.rpc(
+        'get_quiz_progress_for_course',
+        { p_course_id: courseId }
+      );
+      if (error) { console.warn('Quiz progress unavailable:', error.message); return; }
+      (data || []).forEach(r => quizProgressById.set(String(r.module_id), r));
+    } catch (err) {
+      console.warn('Quiz progress unavailable:', err && err.message);
+    }
+  }
+
+  // Read the quiz panel's state from the load-quiz-progress map. The quiz is
+  // a single assessment per module (no practice/final split), and the badge is
+  // score-driven from the student's best score across all attempts:
+  //   - Passed   : best >= 70 (matches the dashboard's quiz-passed definition)
+  //   - Needs re-try : took the quiz but best < 70
+  //   - Not started  : no recorded attempt
+  function quizProgressPanel(m) {
+    const qp = quizProgressById.get(String(m.id));
+    // The new read model reports best score as practice_best_score; older DBs
+    // still expose it as best_score. Accept either so the panel keeps working
+    // whether or not the sql/50 migration has been applied.
+    const rawBest = qp ? (qp.practice_best_score != null ? qp.practice_best_score : qp.best_score) : null;
+    const best = rawBest != null ? Math.round(Number(rawBest)) : null;
+    const practiceStarted = !!(qp && qp.practice_started);
+
+    const cls = best != null && best >= 70 ? 'completed'
+      : practiceStarted ? 'active'
+      : 'pending';
+    const label = best != null && best >= 70 ? 'Passed'
+      : practiceStarted ? 'Needs re-try'
+      : 'Not started';
+
+    const score = best != null ? best : 0;
+    const bestText = best != null ? best + '% best' : '—';
+    const scoreText = best != null ? best + '%' : '0%';
+
+    return `
+      <div class="quiz-progress-section">
+        <div class="quiz-progress-header">
+          <span class="quiz-progress-title">Quiz progress</span>
+          <span class="quiz-best-score">${bestText}</span>
+        </div>
+        <div class="quiz-badge-row">
+          <span class="quiz-badge ${cls}">${label}</span>
+        </div>
+        <div>
+          <div class="quiz-attempt-info">
+            <span class="quiz-attempt-label">Module quiz</span>
+            <span class="quiz-attempt-score">${scoreText}</span>
+          </div>
+          <div class="quiz-progress-bar" role="progressbar" aria-label="Module quiz progress"
+               aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100">
+            <div class="quiz-progress-bar-fill" style="width:${score}%"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
   try {
     // Fetch course metadata + units + modules in parallel.
     const [courseRes, unitsRes, modulesRes, allCoursesRes] = await Promise.all([
@@ -274,22 +353,17 @@ async function loadModulesForCourse(courseId) {
       const progressLabel = completed ? 'Complete' : (status === 'in-progress' ? 'In progress' : 'Not started');
 
       const qEnc = encodeURIComponent(module.title || '');
-      const qParams = `module=${module.id}&course=${courseId}&mode=practice&title=${qEnc}`;
-      const practiceHtml =
-        `<a class="module-quiz-cq cq-practice" href="tools/basic-network-quiz.html?${qParams}" title="Practice quiz for this module" aria-label="Practice quiz">
-          <span class="cq-icon">${iconFor('lesson')}</span><span class="cq-label">Practice</span>
+      const qParams = `module=${module.id}&course=${courseId}&title=${qEnc}`;
+      const resume = quizResumeFor(module.id);
+      const quizIsResume = !!(resume && resume.deck && resume.deck.length);
+      const quizHtml =
+        `<a class="module-quiz-cq cq-practice" href="tools/basic-network-quiz.html?${qParams}" title="${quizIsResume ? 'Resume your in-progress quiz' : 'Quiz for this module'}" aria-label="${quizIsResume ? 'Resume quiz' : 'Quiz'}">
+          <span class="cq-icon">${iconFor('lesson')}</span><span class="cq-label">${quizIsResume ? 'Resume' : 'Take quiz'}</span>
         </a>`;
-      const finalHtml = finalQuizUnlocked
-        ? `<a class="module-quiz-cq cq-final" href="tools/basic-network-quiz.html?module=${module.id}&course=${courseId}&mode=final&title=${qEnc}" title="Final quiz for this module" aria-label="Final quiz">
-            <span class="cq-icon">${iconFor('pdf')}</span><span class="cq-label">Final quiz</span>
-          </a>`
-        : `<span class="module-quiz-cq cq-final cq-locked" title="Complete ${totalModules - completedCount} more module(s) to unlock this final quiz">
-            <span class="cq-icon">🔒</span><span class="cq-label">Final quiz</span>
-          </span>`;
       const quizRow =
         `<div class="module-quiz">
           <div class="module-quiz-label">Quiz</div>
-          <div class="module-quiz-pair">${practiceHtml}${finalHtml}</div>
+          ${quizHtml}
         </div>`;
 
       const liClass = 'status-' + status;
@@ -309,6 +383,7 @@ async function loadModulesForCourse(courseId) {
             </div>
             <div class="progress-text">${progressLabel}</div>
           </div>
+          ${quizProgressPanel(module)}
           <div class="module-actions">
             ${completionHtml}
             <div class="module-open-row">
@@ -722,6 +797,12 @@ async function loadModulesForCourse(courseId) {
         renderPhaseTabs();
         renderGrid();
         renderCompletionBanner();
+        // A module reset also clears the quiz, so re-fetch the quiz progress
+        // panel state (best score / badge) for the course once the DB delete
+        // has landed, then re-render to drop the card back to "Not started".
+        if (delta.quizReset) {
+          loadQuizProgress(courseId).then(renderGrid);
+        }
       }
     };
 
@@ -750,6 +831,35 @@ async function loadModulesForCourse(courseId) {
     ensureFilterBar();
     renderGrid();
     renderCompletionBanner();
+
+    // Load quiz progress in the background, then re-render once available so
+    // the card's quiz panels fill in without blocking first paint.
+    //
+    // Re-fetch on refocus / bfcache-restore: the quiz runs in a separate tab
+    // (`tools/basic-network-quiz.html` via an <a href>), so when the student
+    // returns to this tab after submitting, refresh the panels so the new
+    // score appears immediately instead of showing stale data.
+    async function refreshProgress() {
+      // Re-fetch both quiz state and module completions so a reset performed
+      // in another tab (instructor dashboard) is reflected here — the header
+      // progress bar/donut must drop instead of staying "complete".
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        try {
+          const res = await supabaseClient.from('module_completions')
+            .select('module_id').eq('user_id', user.id).eq('status', 'completed');
+          completedIds = new Set((res.data || []).map(c => c.module_id));
+          recalcProgress();
+        } catch (err) {
+          console.error('Could not refresh completions:', err);
+        }
+      }
+      await loadQuizProgress(courseId).then(renderGrid);
+      renderCourseHead();
+    }
+    refreshProgress();
+    window.addEventListener('focus', refreshProgress);
+    window.addEventListener('pageshow', refreshProgress);
 
   } catch (err) {
     console.error('Exception loading modules:', err);

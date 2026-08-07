@@ -481,10 +481,15 @@ main { max-width: 1100px; margin: 0 auto; padding: 1.4rem 2rem 4rem; }
 }
 .module-head-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+/* Keep the tag on the left and flush the status+type badges together on the
+   right, removing the centered gap created by space-between with 3 children. */
+.module-head-top .mod-status {
+  margin-left: auto;
 }
 .module-list .mod-tag {
   font-family: var(--font-mono);
@@ -729,11 +734,6 @@ button.module-open {
   color: var(--ink-soft);
   margin-bottom: 0.28rem;
 }
-.module-quiz-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-}
 .module-quiz-cq {
   display: flex;
   align-items: center;
@@ -765,25 +765,6 @@ button.module-open {
 .cq-practice:hover {
   background: #dbeef7;
   border-color: var(--teal);
-}
-.cq-final {
-  color: var(--copper-dark);
-  background: #fdf0ea;
-  border-color: #e5bfae;
-}
-.cq-final:hover {
-  background: #f7e2d6;
-  border-color: var(--copper);
-}
-.cq-locked {
-  color: var(--ink-soft);
-  background: var(--paper);
-  border-color: var(--line);
-  cursor: not-allowed;
-  opacity: 0.75;
-}
-.cq-locked .cq-icon {
-  filter: grayscale(1);
 }
 .course-complete {
   display: flex;

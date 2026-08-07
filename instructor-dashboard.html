@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Main theme CSS -->
-  <link rel="stylesheet" href="css/style.css?v=FE2EB4E9">
+  <link rel="stylesheet" href="css/style.css?v=33CC3ACD">
 
   <style>
     /* ===========================================================
@@ -219,6 +219,46 @@
     }
     .btn-unstall:hover { background: #2f8a57; }
 
+    .btn-reset {
+      background: transparent;
+      color: var(--copper-dark);
+      border: 1px dashed var(--copper-dark);
+    }
+    .btn-reset:hover { background: #F7E4DC; }
+
+    .btn-reset-solid {
+      background: var(--copper-dark);
+      color: #fff;
+      border: 1px solid var(--copper-dark);
+    }
+    .btn-reset-solid:hover { background: #7A2E16; }
+    .btn-reset-solid:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-extend {
+      background: transparent;
+      color: var(--teal-dark, #0F766E);
+      border: 1px dashed var(--teal-dark, #0F766E);
+    }
+    .btn-extend:hover { background: #E0F2F1; }
+
+    .extend-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .btn-extend-opt {
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--line, #ddd);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink, #222);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-extend-opt:hover { border-color: var(--teal-dark, #0F766E); background: #E0F2F1; }
+    .btn-extend-lifetime { border-style: dashed; color: var(--teal-dark, #0F766E); }
+
     /* Primary action button */
     .btn-action { width: 100%; margin-bottom: 1.2rem; }
 
@@ -406,6 +446,11 @@
       border-radius: 10px;
       padding: 1rem 1.2rem;
       text-align: center;
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+    .stat-card:hover {
+      background: #f4efe6;
+      transform: translateY(-2px);
     }
     .stat-card strong {
       display: block;
@@ -421,6 +466,99 @@
       color: var(--ink-soft);
     }
 
+    /* Progress management card (Settings) */
+    .pt-card {
+      overflow: hidden;
+    }
+    .pt-head {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+    }
+    .pt-ico {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.3rem;
+      background: linear-gradient(135deg, rgba(194, 98, 45, 0.16), rgba(44, 107, 117, 0.10));
+      border: 1px solid var(--line);
+    }
+    .pt-head h2 {
+      margin: 0 0 0.2rem;
+    }
+    .pt-lede {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+    }
+    .pt-body {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .pt-field {
+      flex: 1 1 230px;
+    }
+    .pt-field label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+      margin-bottom: 0.35rem;
+    }
+    .pt-field select {
+      width: 100%;
+      padding: 0.65em 0.8em;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .pt-field select:focus {
+      outline: 2px solid var(--copper);
+      outline-offset: 1px;
+    }
+    .pt-body .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45em;
+      padding: 0.62em 1.2em;
+    }
+    .pt-btn-ico {
+      font-weight: 700;
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+    .pt-note {
+      margin-top: 1.3rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      background: rgba(194, 98, 45, 0.07);
+      border: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+    .pt-note-ico {
+      flex: 0 0 auto;
+    }
+    @media (max-width: 768px) {
+      .pt-head { align-items: flex-start; }
+      .pt-body .btn { flex: 1 1 100%; justify-content: center; }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .dashboard-container { grid-template-columns: 1fr; }
@@ -429,11 +567,283 @@
       .data-table { font-size: 0.85rem; }
       .data-table th, .data-table td { padding: 0.6em 0.7em; }
     }
+
+    /* ============================================================
+       VERTICAL SIDEBAR NAVIGATION (dashboard-redesign proposal)
+       ============================================================ */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 230px;
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 1rem 0.8rem;
+      background: rgba(247, 245, 239, 0.96);
+      border-right: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 1px 0 0 rgba(0, 0, 0, 0.02);
+      overflow-y: auto;
+    }
+    .side-nav .side-brand {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-soft);
+      padding: 0.4rem 0.6rem 0.7rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      margin-bottom: 0.6rem;
+    }
+    /* Scrollable tabs area (mobile) */
+    .side-nav-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.62rem 0.7rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink, #222);
+      font-family: var(--font-body, inherit);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .side-link .side-ico { font-size: 1.05rem; width: 1.3rem; text-align: center; }
+    .side-link:hover { background: rgba(217, 119, 87, 0.08); color: var(--copper-dark, #933E17); }
+    .side-link.is-active {
+      background: #D97757;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(217, 119, 87, 0.28);
+    }
+    .side-link.is-active .side-ico { filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
+    .side-link:focus-visible {
+      outline: 2px solid var(--copper);
+      outline-offset: -2px;
+    }
+
+    /* Mobile-only logout action, pinned at the end of the tab bar */
+    .side-logout { display: none; }
+
+    /* Header + content share a column to the right of the fixed sidebar */
+    .dash-shell {
+      margin-left: 250px;
+    }
+    main.dash-main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0.5rem 2rem 3rem;
+    }
+
+    /* Tabbed views: only the active one is visible */
+    .view { display: none; }
+    .view.is-active { display: block; }
+
+    /* Analytics top/at-risk panels */
+    .perf-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      /* Keep the tab bar pinned while scrolling on handhelds */
+      .side-nav {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        overflow: hidden;
+        z-index: 90;
+        background: rgba(247, 245, 239, 0.97);
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 0.5rem 0.5rem 0.5rem 0.6rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        gap: 0.5rem;
+      }
+      /* Tabs scroll in their own strip; the logout stays fixed in the right segment */
+      .side-nav-tabs {
+        flex: 1 1 auto;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        gap: 0.4rem;
+      }
+      .side-nav .side-brand { display: none; }
+      .side-link { width: auto; white-space: nowrap; flex: 0 0 auto; }
+      main.dash-main { margin-left: 0; }
+
+      /* Hide the hero header so it doesn't collide with the pinned tab bar */
+      .site-header { display: none; }
+
+      /* Account action: non-scrolling segment pinned to the right end, outside the tabs strip */
+      .side-logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: 0.5rem 0.6rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--copper-dark);
+        text-decoration: none;
+        background: #F7F5EF;
+        border-left: 1px solid var(--line);
+        margin-left: 0.1rem;
+      }
+      .side-logout:hover { color: #B91C1C; }
+
+      /* The shell's desktop 250px offset is gone when the sidebar goes sticky */
+      .dash-shell { margin-left: 0; }
+
+      /* Keep stray wide tables from widening the page: scroll within each card */
+      .dashboard-section { overflow-x: auto; }
+
+      /* Analytics panels stack below ~900px */
+      .perf-cols { grid-template-columns: 1fr; }
+    }
+
+    /* Global safety: never allow a horizontal page scrollbar */
+    body { overflow-x: hidden; }
+
+    /* Group filter chips (Test vs Real) */
+    .group-chips { display: flex; gap: 0.4rem; }
+    .group-chip {
+      border: 1px solid var(--line, #d8d2c7);
+      background: transparent;
+      color: var(--ink-soft, #6b6b6b);
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .group-chip:hover { border-color: var(--copper, #b87333); color: var(--copper, #b87333); }
+    .group-chip.is-active {
+      background: var(--copper, #b87333);
+      border-color: var(--copper, #b87333);
+      color: #fff;
+    }
+    .group-count { font-size: 0.78rem; color: var(--ink-soft, #6b6b6b); }
+    .student-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+    .student-name { font-weight: 600; }
+    .group-badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 0.1rem 0.55rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      line-height: 1.4;
+    }
+    /* Groups summary card */
+    .group-summary-cards { display: grid; gap: 0.8rem; margin-top: 0.6rem; }
+    .group-summary-card {
+      border: 1px solid var(--line, #d8d2c7);
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--paper, #fff);
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      font-size: 0.9rem;
+    }
+    .group-summary-card:hover { transform: translateY(-2px); }
+    .group-summary-card strong {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+    }
+    .group-summary-card.gs-real { border-left: 4px solid #236b23; }
+    .group-summary-card.gs-test { border-left: 4px solid #7a4d00; }
+    .group-badge.group-test { background: #fce4b8; color: #7a4d00; border: 1px solid #e6b565; }
+    .group-badge.group-real { background: #e3f2e3; color: #236b23; border: 1px solid #9fce9f; }
+    .window-line { display: block; font-size: 0.76rem; color: var(--ink-soft, #6b6b6b); margin-top: 0.2rem; }
+
+    @media (max-width: 480px) {
+      main.dash-main { padding-left: 1rem; padding-right: 1rem; }
+      .dashboard-section { padding: 1.2rem 1rem; }
+      .perf-cols { grid-template-columns: 1fr; }
+      .side-link { min-height: 3rem; }
+      .btn-sm, .btn-table { min-height: 2.4rem; }
+    }
+
+    /* The Students table becomes a card-stack on phones */
+    @media (max-width: 560px) {
+      /* Targets the table with a data stack on rows */
+      #studentTableBody,
+      #studentTableBody thead,
+      #studentTableBody tbody {
+        display: block;
+      }
+      #studentsSection .data-table thead { display: none; }
+      #studentTableBody tr {
+        display: block;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.4rem 1rem;
+        margin-bottom: 0.9rem;
+      }
+      #studentTableBody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+      #studentTableBody td:last-child { border-bottom: none; }
+      #studentTableBody td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-soft);
+      }
+      #studentTableBody td[data-label="Progress"] .progress-container { flex: 1 1 auto; min-width: 120px; }
+      #studentTableBody td .action-buttons { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
+      #studentTableBody td.empty-state { display: block; }
+    }
   </style>
 </head>
 <body>
 
+  <!-- Vertical Sidebar Navigation -->
+  <aside class="side-nav" aria-label="Dashboard sections">
+    <div class="side-nav-tabs">
+      <div class="side-brand">INSTRUCTOR PANEL</div>
+      <button class="side-link is-active" data-tab="dashboard" type="button"><span class="side-ico">📊</span>Dashboard</button>
+      <button class="side-link" data-tab="students" type="button"><span class="side-ico">🎓</span>Students</button>
+      <button class="side-link" data-tab="courses" type="button"><span class="side-ico">📚</span>Courses</button>
+      <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
+      <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
+      <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
+    </div>
+    <a href="#" id="navLogout" class="side-logout" onclick="handleLogout(); return false;">↪ Logout</a>
+  </aside>
+
   <!-- Header -->
+  <div class="dash-shell">
   <header class="site-header">
     <div class="brand">CABLE<strong>&amp;</strong>NET COURSES</div>
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
@@ -451,16 +861,24 @@
     <span></span><span></span><span></span><span></span>
   </div>
 
-  <main>
+  <main class="dash-main">
     <!-- Hero -->
     <div class="hero">
-      <span class="eyebrow">📊 Instructor Dashboard</span>
-      <h1>Student Progress &amp; Enrollment</h1>
-      <p class="lede">Monitor your students' progress across all enrolled courses. Update enrollment status, mark students as stalled, and review the complete audit trail.</p>
+      <span class="eyebrow">📊 Course Management Hub</span>
+      <h1 id="dashboardH1">Manage Your Courses &amp; Students</h1>
+      <p class="lede" id="dashboardLede">Track progress, manage enrollments and course assignments, review mentor activity and quiz performance, and audit every change — all in one place.</p>
     </div>
 
     <!-- Alert -->
     <div id="alert" class="alert-msg" role="alert" aria-live="polite"></div>
+
+    <!-- Sidebar views (sections are re-parented into these panels on load) -->
+    <div class="view is-active" id="view-dashboard"></div>
+    <div class="view" id="view-students"></div>
+    <div class="view" id="view-courses"></div>
+    <div class="view" id="view-mentoring"></div>
+    <div class="view" id="view-analytics"></div>
+    <div class="view" id="view-settings"></div>
 
     <!-- Admin Overview (admin only) -->
     <div id="adminOverviewSection" class="dashboard-section" style="display:none;">
@@ -557,14 +975,20 @@
     <div class="dashboard-container">
 
       <!-- Left: Student Progress Table -->
-      <div class="dashboard-section">
+      <div class="dashboard-section" id="studentsSection">
         <h2>📚 Your Students</h2>
 
         <!-- Filter -->
-        <div class="filter-bar">
+        <div class="filter-bar" style="align-items:center; gap:0.6rem; flex-wrap:wrap;">
+          <div class="group-chips" id="groupChips" role="group" aria-label="Filter students by group">
+            <button type="button" class="group-chip is-active" data-group="all" onclick="setGroupFilter('all')">All</button>
+            <button type="button" class="group-chip" data-group="real" onclick="setGroupFilter('real')">👤 Real</button>
+            <button type="button" class="group-chip" data-group="test" onclick="setGroupFilter('test')">🛠️ Test</button>
+          </div>
           <select id="courseFilter" onchange="loadDashboard(); loadQuizScores();">
             <option value="">All Courses</option>
           </select>
+          <span id="groupCount" class="group-count"></span>
         </div>
 
         <!-- Students Table -->
@@ -572,6 +996,7 @@
           <thead>
             <tr>
               <th>Student</th>
+              <th>Group</th>
               <th>Course</th>
               <th>Progress</th>
               <th>Access</th>
@@ -582,7 +1007,7 @@
           </thead>
           <tbody id="studentTableBody">
             <tr>
-              <td colspan="6" class="empty-state">
+              <td colspan="8" class="empty-state">
                 <span class="spinner"></span> Loading students...
               </td>
             </tr>
@@ -591,7 +1016,7 @@
       </div>
 
       <!-- Right: Quick Actions & Audit Log -->
-      <div class="dashboard-section">
+      <div class="dashboard-section" id="quickActionsSection">
         <h2>✅ Quick Actions</h2>
 
         <div id="enrollSection">
@@ -642,7 +1067,23 @@
       </div>
     </div>
 
-    <!-- Student Feedback -->
+    <!-- Student Groups summary -->
+    <div id="groupSummarySection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>👥 Student Groups</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Who belongs in each group. Click a group to filter the students table above.
+      </p>
+      <div class="group-summary-cards">
+        <div class="group-summary-card gs-real" role="button" tabindex="0"
+             onclick="setGroupFilter('real')" onkeydown="if(event.key==='Enter'||event.key===' ')setGroupFilter('real')">
+          <span>👤 Real students</span><strong id="gsRealCount">0</strong>
+        </div>
+        <div class="group-summary-card gs-test" role="button" tabindex="0"
+             onclick="setGroupFilter('test')" onkeydown="if(event.key==='Enter'||event.key===' ')setGroupFilter('test')">
+          <span>🛠️ Test students</span><strong id="gsTestCount">0</strong>
+        </div>
+      </div>
+    </div>
     <div id="feedbackSection" class="dashboard-section" style="margin-top:1.5rem;">
       <h2>💬 Student Feedback</h2>
       <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
@@ -688,6 +1129,51 @@
       </div>
     </div>
 
+<!-- Analytics: highlights -->
+    <div id="analyticsHighlightsSection" class="dashboard-section">
+      <h2>📊 Learning Overview</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Rolled up from practice-quiz results across the selected course above.
+      </p>
+      <div class="stat-cards" style="margin:0.8rem 0 0.2rem; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));">
+        <div class="stat-card"><strong id="aggStudents">0</strong><span>Students</span></div>
+        <div class="stat-card"><strong id="aggModules">0</strong><span>Modules Attempted</span></div>
+        <div class="stat-card"><strong id="aggAvg">0%</strong><span>Average Best</span></div>
+        <div class="stat-card"><strong id="aggAttempts">0</strong><span>Total Attempts</span></div>
+      </div>
+      <div class="perf-cols">
+        <div>
+          <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">🥇 Top performers</h3>
+          <div id="aggTop" class="agg-list"><div class="empty-state">No data</div></div>
+        </div>
+        <div>
+          <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">⚠️ Needs attention (&lt;60%)</h3>
+          <div id="aggAtRisk" class="agg-list"><div class="empty-state">No data</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics by module -->
+    <div id="analyticsModuleSection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>📚 Quiz progress by module</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Per-module attempt and best-score summary for the selected course above.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Students</th>
+            <th>Attempts</th>
+            <th>Avg Best</th>
+          </tr>
+        </thead>
+        <tbody id="analyticsModuleBody">
+          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
 <!-- Quiz Scores -->
     <div id="quizScoresSection" class="dashboard-section" style="margin-top:1.5rem;">
       <h2>📝 Quiz Scores</h2>
@@ -710,6 +1196,48 @@
       </table>
     </div>
 
+    <!-- Settings: Profile -->
+    <div id="profileSection" class="dashboard-section">
+      <h2>👤 Profile &amp; Account</h2>
+      <div id="profileCard" class="empty-state" style="display:block; text-align:left; padding:0;">
+        <table class="data-table" style="margin:0; border:none;">
+          <tbody id="profileBody">
+            <tr><td colspan="2" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Settings: Progress management (admin only) -->
+    <div id="progressToolsSection" class="dashboard-section pt-card" style="margin-top:1.5rem; display:none;">
+      <div class="pt-head">
+        <span class="pt-ico">🔄</span>
+        <div>
+          <h2>Progress Management</h2>
+          <p class="pt-lede">Reset a student's completed modules, quiz attempts and quiz scores for a specific course.</p>
+        </div>
+      </div>
+
+      <div class="pt-body">
+        <div class="pt-field">
+          <label for="ptStudentSelect">Student</label>
+          <select id="ptStudentSelect"><option value="">Loading students…</option></select>
+        </div>
+        <div class="pt-field">
+          <label for="ptCourseSelect">Course</label>
+          <select id="ptCourseSelect"><option value="">Select course…</option></select>
+        </div>
+        <button class="btn btn-primary" id="ptResetBtn" onclick="openProgressReset()">
+          <span class="pt-btn-ico">↺</span> Reset Progress
+        </button>
+      </div>
+
+      <div class="pt-note">
+        <span class="pt-note-ico">⚠️</span>
+        <span>This cannot be undone. Enrollment and course access are kept — only completion, quiz attempts and scores are cleared.</span>
+      </div>
+    </div>
+
     <!-- Content Editor (admin only) -->
     <div id="contentEditorSection" class="dashboard-section" style="margin-top:1.5rem; display:none;">
       <h2>🛠️ Content Editor</h2>
@@ -730,6 +1258,7 @@
       <div id="ceModulesPanel" style="display:none; margin-top:0.5rem;"></div>
     </div>
   </main>
+  </div><!-- /.dash-shell -->
 
   <!-- Modal: Add Student / Account -->
   <div id="enrollModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="enrollModalTitle">
@@ -810,6 +1339,44 @@
     </div>
   </div>
 
+  <!-- Modal: Group Assignment (Test vs Real + training window) -->
+  <div id="groupModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="groupModalTitle">
+    <div class="modal">
+      <h3 id="groupModalTitle">👥 Student Group & Training Window</h3>
+      <p id="groupModalMeta" style="margin-top:0.2rem; font-size:0.85rem; color:var(--ink-soft, #6b6b6b);"></p>
+
+      <input type="hidden" id="groupStudentId">
+      <input type="hidden" id="groupCourseId">
+
+      <div class="field">
+        <label>Group</label>
+        <div class="group-chips" id="groupModalChips" role="radiogroup" aria-label="Student group">
+          <button type="button" class="group-chip" data-group="real" onclick="setModalGroup('real')">👤 Real</button>
+          <button type="button" class="group-chip" data-group="test" onclick="setModalGroup('test')">🛠️ Test</button>
+        </div>
+        <small style="display:block; margin-top:0.3rem; color:var(--ink-soft);">
+          Test accounts stay in all analytics, but show a 🛠️ Test badge and are excluded from the training window.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="groupStartDate">Training starts</label>
+        <input type="date" id="groupStartDate">
+      </div>
+
+      <div class="field">
+        <label for="groupEndDate">Training ends</label>
+        <input type="date" id="groupEndDate">
+      </div>
+      <small style="display:block; margin-top:0.2rem; color:var(--ink-soft)">Only applies to Real students; leave blank to keep current values (or clear for no window).</small>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeGroupModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitGroupModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Mark Stalled -->
   <div id="stalledModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="stalledModalTitle">
     <div class="modal">
@@ -852,6 +1419,51 @@
 
       <div class="modal-footer">
         <button class="btn btn-primary" onclick="closeHistoryModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Reset Student Progress -->
+  <div id="resetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+    <div class="modal">
+      <h3 id="resetModalTitle">⚠️ Reset Student Progress</h3>
+
+      <p id="resetStudentCopy" style="margin:0.4rem 0 1rem; color:var(--ink-soft); font-size:0.9rem; line-height:1.5;">
+        This will clear all completed modules, quiz attempts and quiz scores for this student in this course.
+        Enrollment and access are kept. This cannot be undone.
+      </p>
+
+      <label class="toggle-line" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.2rem; cursor:pointer;">
+        <input type="checkbox" id="resetConfirmCheck">
+        <span style="font-size:0.9rem;">I understand — reset this student's progress.</span>
+      </label>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeResetModal()">Cancel</button>
+        <button class="btn btn-reset-solid" id="resetSubmitBtn" onclick="submitResetProgress()" disabled>Reset Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Extend / Renew Access -->
+  <div id="extendModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="extendModalTitle">
+    <div class="modal">
+      <h3 id="extendModalTitle">🕒 Extend Access</h3>
+
+      <p style="margin:0.4rem 0 1rem; color:var(--ink-soft); font-size:0.9rem; line-height:1.5;">
+        Renew this student's access for this course. Their enrollment is set to
+        <strong>active</strong> and access is extended from today.
+      </p>
+
+      <div class="extend-options">
+        <button class="btn btn-extend-opt" onclick="submitExtendAccess(7, false)">+7 days</button>
+        <button class="btn btn-extend-opt" onclick="submitExtendAccess(30, false)">+30 days</button>
+        <button class="btn btn-extend-opt" onclick="submitExtendAccess(90, false)">+90 days</button>
+        <button class="btn btn-extend-opt btn-extend-lifetime" onclick="submitExtendAccess(0, true)">Lifetime</button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeExtendModal()">Cancel</button>
       </div>
     </div>
   </div>
@@ -950,10 +1562,112 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <!-- Load config and client BEFORE auth check -->
-  <script src="js/config.js?v=9A0E5BF5"></script>
-  <script src="js/supabase-client.js?v=17E25610"></script>
+<script src="js/config.js?v=9A0E5BF5"></script>
+<script src="js/supabase-client.js?v=17E25610"></script>
+<script>
+  // ============================================================
+  // Sidebar navigation shell (dashboard-redesign proposal).
+  // Re-parents the existing sections into tabbed views and wires
+  // the left-hand vertical navigation. Sections keep their IDs so
+  // the existing loadDashboard()/getElementById logic is untouched.
+  // ============================================================
+  (function () {
+    var views = {
+      dashboard: ['adminOverviewSection', 'quickActionsSection'],
+      students:  ['studentsSection', 'feedbackSection'],
+      courses:   ['assignSection'],
+      mentoring: ['aiMentorSection', 'mentorDigestSection'],
+      analytics: ['analyticsHighlightsSection', 'analyticsModuleSection', 'quizScoresSection'],
+      settings:  ['profileSection', 'progressToolsSection', 'contentEditorSection']
+    };
 
-  <script>
+    var HEADINGS = {
+      dashboard: ['Learning Overview', 'Student progress, enrollments, assignments and audit trail at a glance.'],
+      students:  ['Students', 'Track each student\u2019s progress, access and status across their enrolled courses.'],
+      courses:   ['Course Assignments', 'Assign and manage which instructors oversee which courses.'],
+      mentoring: ['Mentorship & Reports', 'Review AI mentor activity, student feedback and mentor session digests.'],
+      analytics: ['Performance Analytics', 'Aggregated quiz results, per-module progress and who needs extra help.'],
+      settings:  ['Settings', 'Your account profile, content editor and progress-management tools.']
+    };
+
+    function updateHeading(tab) {
+      var p = HEADINGS[tab];
+      if (!p) return;
+      var h1 = document.getElementById('dashboardH1');
+      var lede = document.getElementById('dashboardLede');
+      if (h1) h1.textContent = p[0];
+      if (lede) lede.textContent = p[1];
+    }
+
+    function activate(tab) {
+      var panels = document.querySelectorAll('.view');
+      for (var i = 0; i < panels.length; i++) {
+        panels[i].classList.toggle('is-active', panels[i].id === 'view-' + tab);
+      }
+      var tabs = document.querySelectorAll('.side-link[role="tab"]');
+      for (var j = 0; j < tabs.length; j++) {
+        var selected = tabs[j].getAttribute('data-tab') === tab;
+        tabs[j].classList.toggle('is-active', selected);
+        tabs[j].setAttribute('aria-selected', selected ? 'true' : 'false');
+        tabs[j].tabIndex = selected ? 0 : -1;
+      }
+      updateHeading(tab);
+      // Defer data loads to first activation of each tab (see lazy-loading block below).
+      if (window.ensureInstructorTabLoaded) { try { window.ensureInstructorTabLoaded(tab); } catch (e) {} }
+    }
+
+    // ---- ARIA tab semantics ----
+    var tabsStrip = document.querySelector('.side-nav-tabs');
+    if (tabsStrip) tabsStrip.setAttribute('role', 'tablist');
+
+    var sideLinks = document.querySelectorAll('.side-link');
+    for (var k = 0; k < sideLinks.length; k++) {
+      var tb = sideLinks[k].getAttribute('data-tab');
+      sideLinks[k].setAttribute('role', 'tab');
+      sideLinks[k].setAttribute('id', 'tab-' + tb);
+      sideLinks[k].setAttribute('aria-controls', 'view-' + tb);
+      sideLinks[k].setAttribute('aria-selected', sideLinks[k].classList.contains('is-active') ? 'true' : 'false');
+      sideLinks[k].tabIndex = sideLinks[k].classList.contains('is-active') ? 0 : -1;
+      (function (btn) {
+        btn.addEventListener('click', function () { activate(btn.getAttribute('data-tab')); });
+      })(sideLinks[k]);
+    }
+
+    // Keyboard navigation over the tab strip (roving tabindex)
+    if (tabsStrip) {
+      tabsStrip.addEventListener('keydown', function (e) {
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('.side-link[role="tab"]'));
+        var idx = tabs.indexOf(document.activeElement);
+        if (idx === -1) return;
+        var next = idx;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (idx + 1) % tabs.length;
+        else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (idx - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = tabs.length - 1;
+        else return;
+        e.preventDefault();
+        tabs[next].focus();
+        activate(tabs[next].getAttribute('data-tab'));
+      });
+    }
+
+    // Move each section into its tabbed view container.
+    Object.keys(views).forEach(function (tab) {
+      var panel = document.getElementById('view-' + tab);
+      if (!panel) return;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', 'tab-' + tab);
+      views[tab].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) panel.appendChild(el);
+      });
+    });
+
+    window.switchInstructorTab = activate;
+    updateHeading('dashboard');
+  })();
+</script>
+<script>
     // ============================================
     // STATE
     // ============================================
@@ -963,10 +1677,50 @@
     let currentUserRole    = null;
     let ceCurrentCourseId  = null;
     let ceUnits = [];
+    let groupFilter        = 'all'; // 'all' | 'real' | 'test'
+
+    function setGroupFilter(group) {
+      groupFilter = group;
+      document.querySelectorAll('#groupChips .group-chip').forEach(chip => {
+        chip.classList.toggle('is-active', chip.dataset.group === group);
+      });
+      loadDashboard();
+      if (window.switchInstructorTab) { try { window.switchInstructorTab('students'); } catch (e) {} }
+    }
 
     // ============================================
     // INITIALISATION
     // ============================================
+    // ============================================
+    // LAZY PER-TAB DATA (dashboard-redesign)
+    // Each tab's report RPC is deferred until the
+    // tab is first opened. The active (dashboard) tab
+    // is primed in the init below.
+    // ============================================
+    const __tabLoadedTab = {};
+    const __tabLoaders = {
+      dashboard: () => Promise.all([
+        loadAuditLog(),
+        currentUserRole === 'admin' ? loadAdminOverview() : Promise.resolve()
+      ]),
+      students:  () => Promise.all([loadDashboard(), loadFeedback()]),
+      courses:   () => Promise.all([currentUserRole === 'admin' ? loadAssignments() : Promise.resolve()]),
+      mentoring: () => Promise.all([loadAiMentorOverview(), loadMentorDigest()]),
+      analytics: () => Promise.all([loadQuizScores()]),
+      settings:  () => Promise.all([
+        loadProfile(),
+        currentUserRole === 'admin' ? loadProgressTools() : Promise.resolve(),
+        currentUserRole === 'admin' ? loadContentEditor() : Promise.resolve()
+      ])
+    };
+    window.ensureInstructorTabLoaded = (tab) => {
+      if (__tabLoadedTab[tab]) return;
+      __tabLoadedTab[tab] = true;
+      if (__tabLoaders[tab]) {
+        try { __tabLoaders[tab](); } catch (e) { console.error(`Lazy load ${tab} error:`, e); }
+      }
+    };
+
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('Dashboard initialising...');
 
@@ -1038,18 +1792,8 @@
         // Populate course dropdowns from get_my_courses()
         await loadMyCourses();
 
-        // Load dashboard data
-        await loadDashboard();
-        await loadAuditLog();
-        await loadAiMentorOverview();
-        await loadFeedback();
-        await loadMentorDigest();
-        await loadQuizScores();
-        if (profile.role === 'admin') {
-          await loadAdminOverview();
-          await loadAssignments();
-          await loadContentEditor();
-        }
+        // Load the default (dashboard) view's data; remaining tabs lazy-load on first open.
+        window.ensureInstructorTabLoaded('dashboard');
 
       } catch (err) {
         console.error('Auth check error:', err);
@@ -1081,8 +1825,38 @@
         if (!data || data.length === 0) {
           document.getElementById('studentTableBody').innerHTML = `
             <tr>
-              <td colspan="7" class="empty-state">
+              <td colspan="8" class="empty-state">
                 No students enrolled yet. Use "Enroll New Student" to get started.
+              </td>
+            </tr>
+          `;
+          document.getElementById('groupCount').textContent = '';
+          return;
+        }
+
+        // Groups summary counts (all data, before client-side filter)
+        const gsRealEl = document.getElementById('gsRealCount');
+        const gsTestEl = document.getElementById('gsTestCount');
+        if (gsRealEl) gsRealEl.textContent = data.filter(r => !r.is_test).length;
+        if (gsTestEl) gsTestEl.textContent = data.filter(r => !!r.is_test).length;
+
+        const filtered = data.filter(row =>
+          groupFilter === 'all' || (groupFilter === 'test') === !!row.is_test
+        );
+        const countEl = document.getElementById('groupCount');
+        if (countEl) {
+          if (groupFilter === 'all') {
+            countEl.textContent = `${data.length} student${data.length !== 1 ? 's' : ''}`;
+          } else {
+            countEl.textContent = `${filtered.length} of ${data.length}`;
+          }
+        }
+
+        if (filtered.length === 0) {
+          document.getElementById('studentTableBody').innerHTML = `
+            <tr>
+              <td colspan="8" class="empty-state">
+                No ${groupFilter} students in this course group.
               </td>
             </tr>
           `;
@@ -1090,7 +1864,7 @@
         }
 
         const tbody = document.getElementById('studentTableBody');
-        tbody.innerHTML = data.map(row => {
+        tbody.innerHTML = filtered.map(row => {
           // Access column: lifetime vs limited-time (incl. expired state)
           let accessCell;
           if (row.expires_at) {
@@ -1103,11 +1877,30 @@
             accessCell = 'Lifetime';
           }
 
+          // Training window (real students) 
+          const isTest = !!row.is_test;
+          const groupBadge = `<span class="group-badge ${isTest ? 'group-test' : 'group-real'}">${isTest ? 'TEST' : 'REAL'}</span>`;
+          let windowLine = '';
+          if (!isTest && row.start_date && row.end_date) {
+            windowLine = `<span class="window-line">📅 ${new Date(row.start_date).toLocaleDateString()} → ${new Date(row.end_date).toLocaleDateString()}</span>`;
+          } else if (isTest) {
+            windowLine = `<span class="window-line">Testing account</span>`;
+          }
+
+          const canManageGroup = currentUserRole === 'admin';
+          const groupBtn = canManageGroup
+            ? `<button class="btn btn-table btn-group"
+                onclick="openGroupModal('${row.student_id}', '${row.student_name}', '${row.course_id}', '${row.course_title}', ${isTest}, '${row.start_date || ''}', '${row.end_date || ''}')">
+                Group
+              </button>`
+            : '';
+
           return `
           <tr>
-            <td>${row.student_name}</td>
-            <td>${row.course_title}</td>
-            <td>
+            <td data-label="Student">${row.student_name}</td>
+            <td data-label="Group">${groupBadge}</td>
+            <td data-label="Course">${row.course_title}</td>
+            <td data-label="Progress">
               <div class="progress-container">
                 <div class="progress-bar">
                   <div class="progress-fill" style="width: ${row.progress_percentage || 0}%"></div>
@@ -1115,18 +1908,18 @@
                 <div class="progress-text">${row.progress_percentage || 0}%</div>
               </div>
             </td>
-            <td>${accessCell}</td>
-            <td>
+            <td data-label="Access">${accessCell}${isTest || windowLine ? windowLine : ''}</td>
+            <td data-label="Status">
               <span class="status-badge status-${row.enrollment_status}">
                 ${row.enrollment_status}
               </span>
             </td>
-            <td>
+            <td data-label="Stalled">
               ${row.is_stalled
                 ? '<span class="stalled-flag">🚩 Yes</span>'
                 : '<span style="color: var(--green);">No</span>'}
             </td>
-            <td>
+            <td data-label="Actions">
               <div class="action-buttons">
                 <button class="btn btn-table btn-status"
                   onclick="openStatusModal('${row.student_id}', '${row.student_name}', '${row.course_id}', '${row.enrollment_status}')">
@@ -1135,6 +1928,14 @@
                 <button class="btn btn-table btn-history"
                   onclick="openHistoryModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                   History
+                </button>
+                <button class="btn btn-table btn-extend"
+                  onclick="openExtendModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                  Extend
+                </button>
+                <button class="btn btn-table btn-reset"
+                  onclick="openResetModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
+                  Reset
                 </button>
                 ${row.is_stalled
                   ? `<button class="btn btn-table btn-unstall"
@@ -1145,6 +1946,7 @@
                       onclick="openStalledModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                       Stalled
                     </button>`}
+                ${groupBtn}
                 <a class="btn btn-table btn-mentor"
                   href="student-profile.html?student_id=${row.student_id}&name=${encodeURIComponent(row.student_name)}">
                   AI Chats
@@ -1480,6 +2282,78 @@
 
     function closeStatusModal() { document.getElementById('statusModal').classList.remove('active'); }
 
+    // ============================================
+    // GROUP ASSIGNMENT (Test vs Real + window)
+    // ============================================
+    let groupStudentId = null;
+    let groupCourseId  = null;
+    let groupIsTest    = false;
+
+    function openGroupModal(studentId, studentName, courseId, courseTitle, isTest, startDate, endDate) {
+      groupStudentId = studentId;
+      groupCourseId  = courseId;
+      groupIsTest    = !!isTest;
+      document.getElementById('groupModalMeta').textContent =
+        `${studentName} — ${courseTitle}`;
+      document.getElementById('groupStudentId').value = studentId;
+      document.getElementById('groupCourseId').value  = courseId;
+      document.getElementById('groupStartDate').value = startDate ? startDate.slice(0, 10) : '';
+      document.getElementById('groupEndDate').value   = endDate ? endDate.slice(0, 10) : '';
+      setModalGroup(isTest ? 'test' : 'real');
+      document.getElementById('groupModal').classList.add('active');
+    }
+
+    function setModalGroup(group) {
+      groupIsTest = group === 'test';
+      document.querySelectorAll('#groupModalChips .group-chip').forEach(chip => {
+        chip.classList.toggle('is-active', chip.dataset.group === group);
+      });
+    }
+
+    function closeGroupModal() {
+      document.getElementById('groupModal').classList.remove('active');
+    }
+
+    async function submitGroupModal() {
+      if (!groupStudentId || !groupCourseId) return;
+
+      const startVal = document.getElementById('groupStartDate').value;
+      const endVal   = document.getElementById('groupEndDate').value;
+
+      if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+        showAlert('Training starts must be on or before training ends.', 'error');
+        return;
+      }
+
+      try {
+        // 1) Set is_test on the student profile
+        const { error: e1 } = await supabaseClient.rpc('set_student_is_test', {
+          p_student_id: groupStudentId,
+          p_is_test: groupIsTest
+        });
+        if (e1) throw e1;
+
+        // 2) Set training window (only meaningful for real students)
+        if (!groupIsTest) {
+          const { error: e2 } = await supabaseClient.rpc('set_enrollment_window', {
+            p_student_id: groupStudentId,
+            p_course_id:  groupCourseId,
+            p_start_date: startVal ? `${startVal}T00:00:00Z` : null,
+            p_end_date:   endVal ? `${endVal}T23:59:59Z` : null
+          });
+          if (e2) throw e2;
+        }
+
+        showAlert('Group & window updated.', 'success');
+        closeGroupModal();
+        loadDashboard();
+        loadQuizScores();
+      } catch (err) {
+        showAlert(`Error updating group: ${err.message}`, 'error');
+        console.error(err);
+      }
+    }
+
     async function submitStatusUpdate() {
       const newStatus = document.getElementById('statusSelect').value;
       if (!newStatus) { showAlert('Please select a status', 'error'); return; }
@@ -1567,10 +2441,120 @@
     }
 
     // ============================================
+    // RESET STUDENT PROGRESS
+    // ============================================
+    function openResetModal(studentId, studentName, courseId) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('resetModalTitle').textContent = `⚠️ Reset Progress for ${studentName}`;
+      document.getElementById('resetStudentCopy').textContent =
+        `This will clear ${studentName}'s completed modules, quiz attempts and quiz scores in this course. ` +
+        'Enrollment and access are kept. This cannot be undone.';
+      const check = document.getElementById('resetConfirmCheck');
+      check.checked = false;
+      document.getElementById('resetSubmitBtn').disabled = true;
+      document.getElementById('resetModal').classList.add('active');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetModal').classList.remove('active');
+      document.getElementById('resetConfirmCheck').checked = false;
+      document.getElementById('resetSubmitBtn').disabled = true;
+    }
+
+    async function submitResetProgress() {
+      const check = document.getElementById('resetConfirmCheck');
+      if (!check.checked) { showAlert('Please confirm before resetting', 'error'); return; }
+
+      const btn = document.getElementById('resetSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Resetting…';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('reset_student_progress', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          btn.textContent = 'Reset Progress';
+          return;
+        }
+
+        if (data === 'no_permission') {
+          showAlert('You do not have permission to reset this course.', 'error');
+          btn.textContent = 'Reset Progress';
+          return;
+        }
+
+        showAlert('✓ Student progress reset', 'success');
+        closeResetModal();
+        await loadDashboard();
+        await loadQuizScores();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+        btn.textContent = 'Reset Progress';
+      }
+    }
+
+    // Enable the Reset button only once the instructor ticks the confirm box.
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'resetConfirmCheck') {
+        document.getElementById('resetSubmitBtn').disabled = !e.target.checked;
+      }
+    });
+
+    // ============================================
+    // EXTEND / RENEW ACCESS
+    // ============================================
+    function openExtendModal(studentId, studentName, courseId) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('extendModalTitle').textContent = `🕒 Extend Access for ${studentName}`;
+      document.getElementById('extendModal').classList.add('active');
+    }
+
+    function closeExtendModal() {
+      document.getElementById('extendModal').classList.remove('active');
+    }
+
+    async function submitExtendAccess(days, lifetime) {
+      const btn = event && event.currentTarget;
+      const orig = btn ? btn.textContent : '';
+      if (btn) btn.disabled = true;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('extend_student_access', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId,
+          p_days:       days,
+          p_lifetime:   lifetime
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          if (btn) btn.disabled = false;
+          return;
+        }
+        if (data === 'no_permission') { showAlert('You do not have permission to extend this course.', 'error'); if (btn) btn.disabled = false; return; }
+        if (data === 'not_found') { showAlert('Enrollment not found for this student/course.', 'error'); if (btn) btn.disabled = false; return; }
+
+        showAlert(lifetime ? '✓ Access set to Lifetime' : `✓ Access extended by ${days} days`, 'success');
+        closeExtendModal();
+        await loadDashboard();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // ============================================
     // VIEW HISTORY
     // ============================================
-    async function openHistoryModal(studentId, studentName, courseId) {
-      currentStudentId = studentId;
+    async function openHistoryModal(studentId, studentName, courseId) {      currentStudentId = studentId;
       currentCourseId  = courseId;
       document.getElementById('historyModalTitle').textContent = `📜 History for ${studentName}`;
       document.getElementById('historyModal').classList.add('active');
@@ -1641,7 +2625,7 @@
         const studentsBody = document.getElementById('adminStudentsBody');
         const studentRows = (data.students || []).map(p => `
           <tr>
-            <td>${p.name}</td>
+            <td>${p.is_test ? `${p.name}<span class="group-badge group-test">TEST</span>` : `${p.name}<span class="group-badge group-real">REAL</span>`}</td>
             <td>${p.email}</td>
             <td>${p.courses_count}</td>
             <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
@@ -1850,11 +2834,13 @@
         if (error) {
           console.error('Quiz scores error:', error.message);
           tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load quiz scores.</td></tr>`;
+          renderAnalyticsAgg([]);
           return;
         }
 
         if (!data || data.length === 0) {
           tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No quiz scores yet — students sync scores when they take the practice quiz while signed in.</td></tr>`;
+          renderAnalyticsAgg([]);
           return;
         }
 
@@ -1866,10 +2852,91 @@
             <td><span style="font-family: var(--font-mono); color: var(--teal); font-weight:600;">${row.best_score}%</span></td>
             <td style="font-size:0.8rem; color: var(--ink-soft);">${new Date(row.last_attempt_date).toLocaleString()}</td>
           </tr>`).join('');
+
+        renderAnalyticsAgg(data);
       } catch (err) {
         console.error('loadQuizScores error:', err);
         tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Could not load quiz scores.</td></tr>`;
+        renderAnalyticsAgg([]);
       }
+    }
+
+    // ============================================
+    // ANALYTICS AGGREGATES (client-side, shared filter)
+    // ============================================
+    function renderAnalyticsAgg(rows) {
+      const has = document.getElementById('aggStudents') !== null;
+      if (!has) return;
+      const students = document.getElementById('aggStudents'),
+            modules   = document.getElementById('aggModules'),
+            avg       = document.getElementById('aggAvg'),
+            attempts  = document.getElementById('aggAttempts'),
+            topBox    = document.getElementById('aggTop'),
+            riskBox   = document.getElementById('aggAtRisk'),
+            modBody   = document.getElementById('analyticsModuleBody');
+      if (!rows || rows.length === 0) {
+        students.textContent = '0';
+        modules.textContent = '0';
+        avg.textContent = '0%';
+        attempts.textContent = '0';
+        if (topBox)  topBox.innerHTML = '<div class="empty-state">No data</div>';
+        if (riskBox) riskBox.innerHTML = '<div class="empty-state">No data</div>';
+        if (modBody) modBody.innerHTML = '<tr><td colspan="4" class="empty-state">No data</td></tr>';
+        return;
+      }
+
+      // Per-student best & attempt tally
+      const byStudent = {};
+      const byModule = {};
+      let totalAttempts = 0;
+      rows.forEach(r => {
+        totalAttempts += r.attempts || 0;
+        if (!byStudent[r.student_name]) byStudent[r.student_name] = { name: r.student_name, best: 0, attempts: 0 };
+        byStudent[r.student_name].best = Math.max(byStudent[r.student_name].best, r.best_score || 0);
+        byStudent[r.student_name].attempts += (r.attempts || 0);
+        const m = r.module_title || 'Unknown';
+        if (!byModule[m]) byModule[m] = { module: m, students: new Set(), attempts: 0, sum: 0, count: 0 };
+        byModule[m].students.add(r.student_name);
+        byModule[m].attempts += (r.attempts || 0);
+        byModule[m].best = Math.max(byModule[m].best || 0, r.best_score || 0);
+        byModule[m].count += 1;
+      });
+
+      const list = Object.values(byStudent);
+      const avgBest = Math.round(list.reduce((s, st) => s + st.best, 0) / list.length);
+      students.textContent = list.length;
+      modules.textContent = Object.keys(byModule).length;
+      avg.textContent = avg + '%';
+      attempts.textContent = totalAttempts;
+
+      // Top performers
+      const top = list.slice().sort((a, b) => b.best - a.best).slice(0, 5);
+      topBox.innerHTML = top.length
+        ? top.map((st, i) => `<div style="display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid var(--line);">
+            <span>${i + 1}. <strong>${escapeHtml(st.name)}</strong></span>
+            <span style="font-family:var(--font-mono); color:var(--teal); font-weight:600;">${st.best}%</span>
+          </div>`).join('')
+        : '<div class="empty-state">No data</div>';
+
+      // Needs attention: students whose best score is below 60
+      const risk = list.filter(st => st.best < 60).sort((a, b) => a.best - b.best);
+      riskBox.innerHTML = risk.length
+        ? risk.map(st => `<div style="display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid var(--line);">
+            <span>${escapeHtml(st.name)}</span>
+            <span style="font-family:var(--font-mono); color:var(--copper-dark); font-weight:600;">${st.best}%</span>
+          </div>`).join('')
+        : '<div class="empty-state" style="color:var(--green);">👍 All students are at or above 60%.</div>';
+
+      // Per-module summary
+      const modRows = Object.values(byModule)
+        .sort((a, b) => b.attempts - a.attempts)
+        .map(m => `<tr>
+          <td><strong>${escapeHtml(m.module)}</strong></td>
+          <td>${m.students.size}</td>
+          <td>${m.attempts}</td>
+          <td><span style="font-family:var(--font-mono); color:var(--copper-dark); font-weight:600;">${Math.round(m.best)}%</span></td>
+        </tr>`).join('');
+      modBody.innerHTML = modRows || '<tr><td colspan="4" class="empty-state">No modules attempted.</td></tr>';
     }
 
     // ============================================
@@ -1901,6 +2968,91 @@
       } catch (err) {
         console.error('Audit log load error:', err);
       }
+    }
+
+    // ============================================
+    // SETTINGS · PROFILE / ACCOUNT
+    // ============================================
+    async function loadProfile() {
+      const body = document.getElementById('profileBody');
+      if (!body) return;
+      body.innerHTML = '<tr><td colspan="2" class="empty-state"><span class="spinner"></span> Loading...</td></tr>';
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const email = session && session.user ? session.user.email : '—';
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('full_name, role, approved')
+          .eq('id', session.user.id)
+          .single();
+        const fullName = (profile && (profile.full_name || '—')) || '—';
+        const role = (profile && profile.role) || '—';
+        const approved = profile && profile.approved ? 'Approved ✓' : 'Pending';
+        body.innerHTML = `
+          <tr><td style="font-weight:600; color:var(--ink-soft); width:40%;">Name</td><td>${escapeHtml(fullName)}</td></tr>
+          <tr><td style="font-weight:600; color:var(--ink-soft);">Email</td><td>${escapeHtml(email)}</td></tr>
+          <tr><td style="font-weight:600; color:var(--ink-soft);">Role</td><td><span class="role-badge role-badge--${role}">${escapeHtml(role)}</span></td></tr>
+          <tr><td style="font-weight:600; color:var(--ink-soft);">Status</td><td>${approved}</td></tr>
+        `;
+      } catch (err) {
+        console.error('loadProfile error:', err);
+        body.innerHTML = '<tr><td colspan="2" class="empty-state" style="color:var(--copper-dark);">Could not load profile.</td></tr>';
+      }
+    }
+
+    // ============================================
+    // SETTINGS → PROGRESS MANAGEMENT (admin)
+    // ============================================
+    async function loadProgressTools() {
+      const section = document.getElementById('progressToolsSection');
+      if (!section) return;
+      if (currentUserRole !== 'admin') return;
+      section.style.display = '';
+      try {
+        const [{ data: overview }, { data: courses }] = await Promise.all([
+          supabaseClient.rpc('get_admin_overview'),
+          supabaseClient.rpc('get_my_courses')
+        ]);
+        const students = (overview && overview.students) || [];
+        document.getElementById('ptStudentSelect').innerHTML = students.length
+          ? students.map(s => `<option value="${s.id}">${escapeHtml(s.email)}</option>`).join('')
+          : '<option value="">No students</option>';
+        document.getElementById('ptCourseSelect').innerHTML = (courses || []).length
+          ? '<option value="">Select course…</option>' +
+            courses.map(c => `<option value="${c.course_id}">${escapeHtml(c.title)}</option>`).join('')
+          : '<option value="">No courses</option>';
+      } catch (err) {
+        console.error('loadProgressTools error:', err);
+      }
+    }
+
+    async function openProgressReset() {
+      const studentId = document.getElementById('ptStudentSelect').value;
+      const courseId = document.getElementById('ptCourseSelect').value;
+      if (!studentId) { showAlert('Select a student first.', 'error'); return; }
+      if (!courseId) { showAlert('Select a course first.', 'error'); return; }
+      const studentName = document.getElementById('ptStudentSelect').selectedOptions[0].textContent;
+
+      const btn = document.getElementById('ptResetBtn');
+      btn.disabled = true;
+      btn.textContent = 'Resetting…';
+      try {
+        const { data, error } = await supabaseClient.rpc('reset_student_progress', {
+          p_student_id: studentId,
+          p_course_id: courseId
+        });
+        if (error) { showAlert(`Error: ${error.message}`, 'error'); btn.disabled = false; btn.textContent = 'Reset Progress'; return; }
+        if (data === 'no_permission') { showAlert('You do not have permission to reset this course.', 'error'); btn.disabled = false; btn.textContent = 'Reset Progress'; return; }
+        showAlert(`✓ Reset ${escapeHtml(studentName)}'s progress in this course`, 'success');
+        document.getElementById('courseFilter').value = courseId;
+        loadDashboard();
+        loadQuizScores();
+      } catch (err) {
+        console.error('openProgressReset error:', err);
+        showAlert('Reset failed.', 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Reset Progress';
     }
 
     // ============================================
