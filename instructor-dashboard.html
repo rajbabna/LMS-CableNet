@@ -591,6 +591,12 @@
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
       margin-bottom: 0.6rem;
     }
+    /* Scrollable tabs area (mobile) */
+    .side-nav-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
     .side-link {
       display: flex;
       align-items: center;
@@ -649,33 +655,39 @@
         top: 0;
         width: 100%;
         flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
+        align-items: center;
+        overflow: hidden;
         z-index: 90;
         background: rgba(247, 245, 239, 0.97);
         border-right: none;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        padding: 0.5rem 0.6rem;
+        padding: 0.5rem 0.5rem 0.5rem 0.6rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        gap: 0.5rem;
+      }
+      /* Tabs scroll in their own strip; the logout stays fixed in the right segment */
+      .side-nav-tabs {
+        flex: 1 1 auto;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        gap: 0.4rem;
       }
       .side-nav .side-brand { display: none; }
-      .side-link { width: auto; white-space: nowrap; }
+      .side-link { width: auto; white-space: nowrap; flex: 0 0 auto; }
       main.dash-main { margin-left: 0; }
 
-      /* Hide the hero header's stickiness so it doesn't collide with the pinned tab bar */
+      /* Hide the hero header so it doesn't collide with the pinned tab bar */
       .site-header { display: none; }
 
-      /* Account action moves into the pinned tab bar on handhelds */
+      /* Account action: non-scrolling segment pinned to the right end, outside the tabs strip */
       .side-logout {
         display: inline-flex;
         align-items: center;
         gap: 0.3rem;
-        margin-left: auto;
-        position: sticky;
-        right: 0;
-        white-space: nowrap;
         flex: 0 0 auto;
-        padding: 0.5rem 0.7rem;
+        white-space: nowrap;
+        padding: 0.5rem 0.6rem;
         font-family: var(--font-mono);
         font-size: 0.8rem;
         font-weight: 600;
@@ -683,8 +695,9 @@
         text-decoration: none;
         background: #F7F5EF;
         border-left: 1px solid var(--line);
-        box-shadow: -6px 0 8px -6px rgba(0, 0, 0, 0.16);
+        margin-left: 0.1rem;
       }
+      .side-logout:hover { color: #B91C1C; }
 
       /* The shell's desktop 250px offset is gone when the sidebar goes sticky */
       .dash-shell { margin-left: 0; }
@@ -712,13 +725,15 @@
 
   <!-- Vertical Sidebar Navigation -->
   <aside class="side-nav" aria-label="Dashboard sections">
-    <div class="side-brand">INSTRUCTOR PANEL</div>
-    <button class="side-link is-active" data-tab="dashboard" type="button"><span class="side-ico">📊</span>Dashboard</button>
-    <button class="side-link" data-tab="students" type="button"><span class="side-ico">🎓</span>Students</button>
-    <button class="side-link" data-tab="courses" type="button"><span class="side-ico">📚</span>Courses</button>
-    <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
-    <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
-    <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
+    <div class="side-nav-tabs">
+      <div class="side-brand">INSTRUCTOR PANEL</div>
+      <button class="side-link is-active" data-tab="dashboard" type="button"><span class="side-ico">📊</span>Dashboard</button>
+      <button class="side-link" data-tab="students" type="button"><span class="side-ico">🎓</span>Students</button>
+      <button class="side-link" data-tab="courses" type="button"><span class="side-ico">📚</span>Courses</button>
+      <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
+      <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
+      <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
+    </div>
     <a href="#" id="navLogout" class="side-logout" onclick="handleLogout(); return false;">↪ Logout</a>
   </aside>
 
