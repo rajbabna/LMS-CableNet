@@ -944,7 +944,47 @@
       </div>
     </div>
 
-    <!-- Course Assignments (admin only) -->
+    <!-- Instructor Overview (non-admin; mirrors the admin System Overview in teacher-scoped form) -->
+    <div id="instructorOverviewSection" class="dashboard-section" style="display:none;">
+      <h2>🏗️ My Teaching Overview</h2>
+
+      <!-- Stat cards -->
+      <div class="stat-cards">
+        <div class="stat-card"><strong id="instStatCourses">0</strong><span>Courses</span></div>
+        <div class="stat-card"><strong id="instStatStudents">0</strong><span>Students</span></div>
+        <div class="stat-card"><strong id="instStatEnrollments">0</strong><span>Enrollments</span></div>
+        <div class="stat-card"><strong id="instStatActive">0</strong><span>Active</span></div>
+      </div>
+
+      <h3 style="margin-top:1.5rem;">📚 Courses</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Students</th>
+          </tr>
+        </thead>
+        <tbody id="instCoursesBody">
+          <tr><td colspan="2" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:1.5rem;">🎓 Students</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Group</th>
+            <th>Course</th>
+            <th>Progress</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="instStudentsBody">
+          <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
     <div id="assignSection" class="dashboard-section" style="display:none;">
       <h2>🔗 Course Assignments</h2>
       <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
@@ -1287,10 +1327,20 @@
 
       <div class="field">
         <label for="enrollRole">Role</label>
-        <select id="enrollRole">
+        <select id="enrollRole" onchange="toggleEnrollTestField()">
           <option value="student">Student</option>
           <option value="instructor">Instructor</option>
         </select>
+      </div>
+
+      <div id="enrollTestField" class="field">
+        <label class="toggle-line">
+          <input type="checkbox" id="enrollIsTest">
+          <span>
+            <span class="toggle-title">Test student</span>
+            <span class="toggle-hint">Counts in stats · flagged with a TEST badge</span>
+          </span>
+        </label>
       </div>
 
       <div class="field">
@@ -1453,9 +1503,12 @@
         Enrollment and access are kept. This cannot be undone.
       </p>
 
-      <label class="toggle-line" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.2rem; cursor:pointer;">
+      <label class="toggle-line" style="margin-bottom:1.2rem;">
         <input type="checkbox" id="resetConfirmCheck">
-        <span style="font-size:0.9rem;">I understand — reset this student's progress.</span>
+        <span>
+          <span class="toggle-title">I understand</span>
+          <span class="toggle-hint">Reset this student's progress — this cannot be undone.</span>
+        </span>
       </label>
 
       <div class="modal-footer">
@@ -1593,7 +1646,7 @@
   // ============================================================
   (function () {
     var views = {
-      dashboard: ['adminOverviewSection', 'quickActionsSection', 'groupSummarySection'],
+      dashboard: ['adminOverviewSection', 'instructorOverviewSection', 'quickActionsSection', 'groupSummarySection'],
       students:  ['studentsSection', 'feedbackSection'],
       courses:   ['assignSection', 'myCoursesSection'],
       mentoring: ['aiMentorSection', 'mentorDigestSection'],
@@ -1721,6 +1774,7 @@
     const __tabLoaders = {
       dashboard: () => Promise.all([
         loadAuditLog(),
+        loadInstructorOverview(),
         currentUserRole === 'admin' ? loadAdminOverview() : Promise.resolve()
       ]),
       students:  () => Promise.all([loadDashboard(), loadFeedback()]),
@@ -2172,12 +2226,22 @@
       roleSelect.innerHTML = isAdmin
         ? '<option value="student">Student</option><option value="instructor">Instructor</option>'
         : '<option value="student">Student</option>';
+      roleSelect.value = 'student';
+      document.getElementById('enrollIsTest').checked = false;
+      toggleEnrollTestField();
       document.getElementById('enrollModal').classList.add('active');
+    }
+
+    function toggleEnrollTestField() {
+      const isStudent = document.getElementById('enrollRole').value === 'student';
+      document.getElementById('enrollTestField').style.display = isStudent ? '' : 'none';
     }
 
     function closeEnrollModal() {
       document.getElementById('enrollModal').classList.remove('active');
       document.getElementById('enrollRole').value       = 'student';
+      document.getElementById('enrollIsTest').checked    = false;
+      toggleEnrollTestField();
       document.getElementById('enrollStudentId').value  = '';
       document.getElementById('enrollFullName').value   = '';
       document.getElementById('enrollPassword').value   = '';
@@ -2251,7 +2315,8 @@
           p_full_name: fullName || null,
           p_course_id: courseId || null,
           p_user_id:   userId || null,
-          p_expires_at: expiresAt
+          p_expires_at: expiresAt,
+          p_is_test:    role === 'student' && document.getElementById('enrollIsTest').checked
         });
 
         if (error) {
@@ -2615,6 +2680,78 @@
     // ============================================
     // ADMIN OVERVIEW (admin only)
     // ============================================
+    // ============================================
+    // INSTRUCTOR OVERVIEW (non-admin dashboard)
+    // Mirrors the admin "System Overview" but scoped
+    // to the signed-in teacher: their stat cards,
+    // their assigned courses, and their students.
+    // ============================================
+    async function loadInstructorOverview() {
+      const section = document.getElementById('instructorOverviewSection');
+      if (!section) return;
+      if (currentUserRole === 'admin') { section.style.display = 'none'; return; }
+
+      const courseBody = document.getElementById('instCoursesBody');
+      const studBody   = document.getElementById('instStudentsBody');
+
+      try {
+        const [rowsRes, myRes] = await Promise.all([
+          supabaseClient.rpc('get_instructor_dashboard', { p_course_id: null }),
+          supabaseClient.rpc('get_my_courses')
+        ]);
+
+        if (rowsRes.error) throw rowsRes.error;
+        if (myRes.error)   throw myRes.error;
+
+        const rows    = rowsRes.data || [];
+        const courses = myRes.data   || [];
+
+        section.style.display = '';
+
+        // Stat cards
+        const distinctStudents = new Set(rows.map(r => r.student_id));
+        document.getElementById('instStatCourses').textContent    = courses.length;
+        document.getElementById('instStatStudents').textContent   = distinctStudents.size;
+        document.getElementById('instStatEnrollments').textContent = rows.length;
+        document.getElementById('instStatActive').textContent =
+          rows.filter(r => r.enrollment_status === 'active').length;
+
+        // Courses table: per-course enrolled-student count
+        const byCourse = {};
+        rows.forEach(r => {
+          if (!byCourse[r.course_id]) byCourse[r.course_id] = { title: r.course_title, students: new Set() };
+          byCourse[r.course_id].students.add(r.student_id);
+        });
+        courseBody.innerHTML = courses.length
+          ? courses.map(c => {
+              const enrol = byCourse[c.course_id];
+              return `
+              <tr>
+                <td><strong>${escapeHtml(c.title)}</strong></td>
+                <td>${enrol ? enrol.students.size : 0}</td>
+              </tr>`;
+            }).join('')
+          : '<tr><td colspan="2" class="empty-state">No courses assigned to you yet.</td></tr>';
+
+        // Students table (mirrors admin group-badge layout)
+        studBody.innerHTML = rows.length
+          ? rows.map(row => `
+              <tr>
+                <td><strong>${row.student_name}</strong></td>
+                <td><span class="group-badge ${row.is_test ? 'group-test' : 'group-real'}">${row.is_test ? 'TEST' : 'REAL'}</span></td>
+                <td>${row.course_title}</td>
+                <td>${row.progress_percentage || 0}%</td>
+                <td><span class="status-badge status-${row.enrollment_status}">${row.enrollment_status}</span></td>
+              </tr>`).join('')
+          : '<tr><td colspan="5" class="empty-state">No students yet.</td></tr>';
+      } catch (err) {
+        console.error('Instructor overview load error:', err);
+        section.style.display = '';
+        courseBody.innerHTML = '<tr><td colspan="2" class="empty-state">Could not load overview.</td></tr>';
+        studBody.innerHTML   = '<tr><td colspan="5" class="empty-state">Could not load overview.</td></tr>';
+      }
+    }
+
     async function loadAdminOverview() {
       const section = document.getElementById('adminOverviewSection');
       if (!section) return;
