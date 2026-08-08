@@ -912,13 +912,14 @@
         <thead>
           <tr>
             <th>Student</th>
+            <th>Group</th>
             <th>Email</th>
             <th>Courses</th>
             <th>Approved</th>
           </tr>
         </thead>
         <tbody id="adminStudentsBody">
-          <tr><td colspan="4" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+          <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
         </tbody>
       </table>
 
@@ -2648,13 +2649,14 @@
         const studentsBody = document.getElementById('adminStudentsBody');
         const studentRows = (data.students || []).map(p => `
           <tr>
-            <td>${p.is_test ? `${p.name}<span class="group-badge group-test">TEST</span>` : `${p.name}<span class="group-badge group-real">REAL</span>`}</td>
+            <td><strong>${p.name}</strong></td>
+            <td><span class="group-badge ${p.is_test ? 'group-test' : 'group-real'}">${p.is_test ? 'TEST' : 'REAL'}</span></td>
             <td>${p.email}</td>
             <td>${p.courses_count}</td>
             <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
           </tr>
         `).join('');
-        studentsBody.innerHTML = studentRows || '<tr><td colspan="4" class="empty-state">No students yet.</td></tr>';
+        studentsBody.innerHTML = studentRows || '<tr><td colspan="5" class="empty-state">No students yet.</td></tr>';
 
         const instructorsBody = document.getElementById('adminInstructorsBody');
         const instructorRows = (data.instructors || []).map(p => `
