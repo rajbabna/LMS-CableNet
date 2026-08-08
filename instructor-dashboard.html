@@ -971,6 +971,25 @@
       </table>
     </div>
 
+    <!-- Your Courses (instructor view, replaces the admin assignment manager) -->
+    <div id="myCoursesSection" class="dashboard-section" style="display:none;">
+      <h2>📚 Your Courses</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        The courses you're assigned to teach. Student progress for these courses appears on your Students tab.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Assigned</th>
+          </tr>
+        </thead>
+        <tbody id="myCoursesBody">
+          <tr><td colspan="2" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <!-- Dashboard Grid -->
     <div class="dashboard-container">
 
@@ -1575,7 +1594,7 @@
     var views = {
       dashboard: ['adminOverviewSection', 'quickActionsSection', 'groupSummarySection'],
       students:  ['studentsSection', 'feedbackSection'],
-      courses:   ['assignSection'],
+      courses:   ['assignSection', 'myCoursesSection'],
       mentoring: ['aiMentorSection', 'mentorDigestSection'],
       analytics: ['analyticsHighlightsSection', 'analyticsModuleSection', 'quizScoresSection'],
       settings:  ['profileSection', 'progressToolsSection', 'contentEditorSection']
@@ -1704,7 +1723,11 @@
         currentUserRole === 'admin' ? loadAdminOverview() : Promise.resolve()
       ]),
       students:  () => Promise.all([loadDashboard(), loadFeedback()]),
-      courses:   () => Promise.all([currentUserRole === 'admin' ? loadAssignments() : Promise.resolve()]),
+      courses:   () => Promise.all([
+        loadMyCourses(),
+        loadInstructorCourses(),
+        currentUserRole === 'admin' ? loadAssignments() : Promise.resolve()
+      ]),
       mentoring: () => Promise.all([loadAiMentorOverview(), loadMentorDigest()]),
       analytics: () => Promise.all([loadQuizScores()]),
       settings:  () => Promise.all([
@@ -2669,6 +2692,41 @@
       } catch (err) {
         console.error('approveInstructor error:', err);
         showAlert('Could not approve instructor.', 'error');
+      }
+    }
+
+    // ============================================
+    // INSTRUCTOR: MY COURSES panel (Courses tab)
+    // Shows the courses assigned to the signed-in
+    // instructor; hidden for admins (they use the
+    // assignment manager instead).
+    // ============================================
+    async function loadInstructorCourses() {
+      const section = document.getElementById('myCoursesSection');
+      if (!section) return;
+      if (currentUserRole === 'admin') { section.style.display = 'none'; return; }
+
+      const tbody = document.getElementById('myCoursesBody');
+      try {
+        const { data, error } = await supabaseClient.rpc('get_my_courses');
+        section.style.display = '';
+
+        if (error) {
+          tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Could not load your courses.</td></tr>';
+          return;
+        }
+
+        const courses = data || [];
+        tbody.innerHTML = courses.length
+          ? courses.map(c => `
+              <tr>
+                <td><strong>${escapeHtml(c.title)}</strong></td>
+                <td><span style="color: var(--green); font-weight:600;">✓ Assigned</span></td>
+              </tr>`).join('')
+          : '<tr><td colspan="2" class="empty-state">No courses assigned to you yet.</td></tr>';
+      } catch (err) {
+        console.error('loadInstructorCourses error:', err);
+        tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Could not load your courses.</td></tr>';
       }
     }
 
