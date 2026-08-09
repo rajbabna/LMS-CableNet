@@ -2362,7 +2362,7 @@
             <td>${r.courses_completed}</td>
             <td>${r.progress_percentage != null ? r.progress_percentage + '%' : '—'}</td>
             <td>${r.avg_quiz_score != null ? r.avg_quiz_score + '%' : '—'}</td>
-            <td>${r.is_stalled ? '<span class="stalled-flag">🚩 stalled</span>' : '<span style="color:var(--green);">active</span>'}</td>
+            <td>${r.is_stalled ? '<span class="stalled-flag">⚠️ 14d quiet</span>' : '<span style="color:var(--green);">active</span>'}</td>
             <td>
               <button class="btn btn-table btn-reset" onclick="removeFromBatch('${r.student_id}')">Remove</button>
             </td>
