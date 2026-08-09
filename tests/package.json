@@ -1,0 +1,15 @@
+{
+  "name": "lms-playwright-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright E2E suite for Cable&Net LMS",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "dotenv": "^17.4.2"
+  }
+}

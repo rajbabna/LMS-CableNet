@@ -183,6 +183,16 @@
       font-size: 0.7rem;
       white-space: nowrap;
     }
+    #stalledReportBody td[data-label="Actions"] {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    @media (max-width: 768px) {
+      #stalledReportBody td[data-label="Actions"] { flex-wrap: wrap; }
+      #stalledReportBody td[data-label="Actions"] .btn-table { width: auto; }
+    }
 
     .btn-status {
       background: var(--copper);

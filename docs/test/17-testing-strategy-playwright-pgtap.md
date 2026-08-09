@@ -134,8 +134,38 @@ This is the core reason for running both — each one is blind to the layer the 
 
 ## Checklist
 
-- [ ] Start with a Playwright test covering the three role-based sign-in redirects — highest value, lowest effort first test
+- [x] Start with a Playwright test covering the three role-based sign-in redirects — highest value, lowest effort first test
+- [x] Add Playwright coverage for student → instructor/admin URL isolation (cross-role redirect)
+- [x] Add a regression guard for the Stalled-students report tab (sql/58)
 - [ ] Set up a dedicated test Supabase project (or isolated schema) before writing any pgTAP tests
 - [ ] Add pgTAP tests for `mentor_ai_sessions` and `enrollments` RLS policies first, since those protect the most sensitive data
 - [ ] Add Playwright coverage for the AI Mentor widget's offline notice — a state that's easy to forget to test manually
 - [ ] Treat a test failure as the first place to check before assuming a GitHub Pages cache issue
+
+## Playwright suite — how to run
+
+The suite lives in `tests/` (uses `@playwright/test`; requires Node + Python on PATH;
+Chromium is installed via `npx playwright install chromium` on first run).
+
+```sh
+# 1. Set credentials once — never commit these
+cp tests/.env.example tests/.env
+#    fill LMS_ADMIN_* (required). Add LMS_STUDENT_* / LMS_INSTRUCTOR_* to
+#    enable the role-redirect and cross-role tests (they bag quietly otherwise).
+
+# 2. Run against the repo root (a local http.server on :4173 is auto-started)
+cd tests
+npx playwright test          # headless
+npx playwright test --headed # watch it run
+```
+
+Test roles that skip (no credentials in `tests/.env`) show as ⏭ skipped, not
+failed — so the suite stays green for a fresh clone that only has an admin email.
+
+What the suite covers today:
+
+| Spec | Assertions |
+|---|---|
+| `auth-role-redirect.spec.js` | admin → `instructor-dashboard.html`; instructor → same; student → `student-dashboard.html`; bad credentials stay on `login.html` with an error |
+| `cross-role-isolation.spec.js` | a logged-in student who hand-navigates to `instructor-dashboard.html` is bounced to the student dashboard, not just hidden via CSS |
+| `stalled-report.spec.js` | admin opens the Stalled tab; stat cards populate; auto + manual counts equal total; each row has an Un-stall action |
