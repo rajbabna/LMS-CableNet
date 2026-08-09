@@ -57,7 +57,7 @@ supabase test db --pgpgtap ...   # docker-based, migrations applied (per-strateg
 | `02-ai-sessions-rls.sql` | `mentor_ai_sessions`: owner reads own; instructor course-scoped; admin all; no cross-user UPDATE. |
 | `03-enrollments-rls.sql` | `enrollments`: own-row reads; no UPDATE/DELETE path via REST; expiry not self-widened. |
 | `04-module-completions-rls.sql` | own INSERT/UPDATE only; cross-user insert/update denied; no REST delete. |
-| `05-profile-role-guard.sql` | `set_profile_role` never demotes admin/instructor; students can''t self-elevate via REST. |
+| `05-profile-role-guard.sql` | `set_profile_role` never demotes admin/instructor; students can''t self-elevate via REST or the RPC (sql/60 blocks it). |
 | `06-rpc-authorization.sql` | SECURITY DEFINER RPCs respect role + course assignment (instructor scoping). |
 | `07-batches-staff-read.sql` | batches staff SELECT only; admin-only mutation RPCs. |
 

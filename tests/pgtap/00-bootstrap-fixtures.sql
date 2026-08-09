@@ -88,14 +88,21 @@ VALUES
   ('a0000000-0000-0000-0000-000000000012', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'pgtap.student2@test.local', 'x', now(), now(), now())
 ON CONFLICT (id) DO NOTHING;
 
--- profiles (the roles that gate every RPC + staff policy)
+-- profiles (the roles that gate every RPC + staff policy).
+-- Upsert (not DO NOTHING): the hardened handle_new_user trigger creates a
+-- 'student' profile on the auth.users insert above; this fixture must
+-- override it with the persona's real role + approval.
 INSERT INTO public.profiles (id, email, full_name, role, approved)
 VALUES
   ('a0000000-0000-0000-0000-000000000001', 'pgtap.admin@test.local',      'PgTAP Admin',      'admin',      true),
   ('a0000000-0000-0000-0000-000000000002', 'pgtap.instructor@test.local', 'PgTAP Instructor', 'instructor', true),
   ('a0000000-0000-0000-0000-000000000011', 'pgtap.student1@test.local',   'PgTAP Student One', 'student',   true),
   ('a0000000-0000-0000-0000-000000000012', 'pgtap.student2@test.local',   'PgTAP Student Two', 'student',   true)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  email     = EXCLUDED.email,
+  full_name = EXCLUDED.full_name,
+  role      = EXCLUDED.role,
+  approved  = EXCLUDED.approved;
 
 -- Instructor teaches ONLY the cabling course (so course-scoping is testable).
 INSERT INTO public.course_instructors (course_id, instructor_id)

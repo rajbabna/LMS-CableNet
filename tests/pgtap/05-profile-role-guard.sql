@@ -48,19 +48,17 @@ SELECT is((SELECT role FROM public.profiles WHERE id = 'a0000000-0000-0000-0000-
   'student1 role is still student after the attempted self-update');
 
 -- 4. Self-elevation through the set_profile_role RPC must also be blocked.
---    KNOWN GAP (marked as a pgTAP todo): sql/24 as written will happily
---    SET an existing student to 'instructor' (WHERE only guards demotion).
---    So the private_call+role checks below document the REQUIREMENT and are
---    expected to be flagged as failing todos until the function is tightened.
+--    sql/60 hardened the function so it can never create an elevated role
+--    for the caller (insert path creates 'student' only; conflict path only
+--    ever rewrites a student profile to 'student'). The assertion below is
+--    now a REAL check — if this ever starts failing, elevations are back.
 SELECT set_role_postgres();
 SELECT set_uid('a0000000-0000-0000-0000-000000000011');
 SELECT set_role_authenticated();
-SELECT todo_start('set_profile_role currently allows a student to self-elevate — needs tightening');
 SELECT lives_ok('SELECT public.set_profile_role(''instructor'')',
-  'student''s set_profile_role(''instructor'') call completes (gap: currently this elevates)');
+  'student''s set_profile_role(''instructor'') call completes without error');
 SELECT is((SELECT role FROM public.profiles WHERE id = 'a0000000-0000-0000-0000-000000000011'), 'student',
-  'student1 role still student AFTER set_profile_role(''instructor'') — self-elevation blocked');
-SELECT todo_end();
+  'student1 role STILL student after set_profile_role(''instructor'') — self-elevation blocked');
 
 -- 5. profiles: staff can read only their OWN row via RLS (no blanket staff read).
 SELECT set_role_postgres();
