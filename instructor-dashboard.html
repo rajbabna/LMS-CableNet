@@ -3458,7 +3458,7 @@
       const avgBest = Math.round(list.reduce((s, st) => s + st.best, 0) / list.length);
       students.textContent = list.length;
       modules.textContent = Object.keys(byModule).length;
-      avg.textContent = avg + '%';
+      avg.textContent = avgBest + '%';
       attempts.textContent = totalAttempts;
 
       // Top performers
