@@ -40,7 +40,7 @@ Features we're building now. Everything else in the original checklist was revie
 
 ## 10. Automated testing
 - ✅ **Playwright E2E suite** in `tests/`: role redirects, cross-role isolation, stalled-report, batches — 4 pass / 4 skip (student/instructor creds unknown → env-driven skips).
-- ⏳ **pgTAP RLS/security suite** not started. See `docs/test/17-testing-strategy-playwright-pgtap.md`.
+- ✅ **pgTAP RLS/security suite authored** in `tests/pgtap/` (files `00`–`07` + README): schema integrity, mentor AI sessions / enrollments / module completions RLS, profile role guard (self-elevation gap flagged as a pgTAP todo), RPC authorization, batch staff-read. ⏳ Not yet executed — requires a dedicated TEST Supabase project (never production). Run instructions: `tests/pgtap/README.md` + `docs/test/17-testing-strategy-playwright-pgtap.md`.
 
 ---
 
