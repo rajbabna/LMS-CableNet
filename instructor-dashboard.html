@@ -837,6 +837,7 @@
       <button class="side-link" data-tab="courses" type="button"><span class="side-ico">📚</span>Courses</button>
       <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
       <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
+      <button class="side-link" data-tab="stalled" type="button"><span class="side-ico">🚩</span>Stalled</button>
       <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
     </div>
     <a href="#" id="navLogout" class="side-logout" onclick="handleLogout(); return false;">↪ Logout</a>
@@ -878,6 +879,7 @@
     <div class="view" id="view-courses"></div>
     <div class="view" id="view-mentoring"></div>
     <div class="view" id="view-analytics"></div>
+    <div class="view" id="view-stalled"></div>
     <div class="view" id="view-settings"></div>
 
     <!-- Admin Overview (admin only) -->
@@ -1252,6 +1254,37 @@
         </thead>
         <tbody id="quizScoresBody">
           <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Stalled students report -->
+    <div id="stalledReportSection" class="dashboard-section">
+      <h2>🚩 Stalled Students</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Students whose active enrollment has had no completed module for 14+ days (Auto), plus anyone a staff
+        member flagged manually. Un-stall a student to dismiss them from this list until they go quiet again.
+      </p>
+      <div class="stat-cards" style="margin:0.8rem 0 0.2rem; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));">
+        <div class="stat-card"><strong id="stallTotal">0</strong><span>Stalled</span></div>
+        <div class="stat-card"><strong id="stallAutoCount">0</strong><span>Auto-detected</span></div>
+        <div class="stat-card"><strong id="stallManualCount">0</strong><span>Manual flags</span></div>
+      </div>
+      <table class="data-table" style="margin-top:0.6rem;">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Type</th>
+            <th>Progress</th>
+            <th>Last completed</th>
+            <th>Inactive (days)</th>
+            <th>Reason</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="stalledReportBody">
+          <tr><td colspan="8" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1651,6 +1684,7 @@
       courses:   ['assignSection', 'myCoursesSection'],
       mentoring: ['aiMentorSection', 'mentorDigestSection'],
       analytics: ['analyticsHighlightsSection', 'analyticsModuleSection', 'quizScoresSection'],
+      stalled:   ['stalledReportSection'],
       settings:  ['profileSection', 'progressToolsSection', 'contentEditorSection']
     };
 
@@ -1660,6 +1694,7 @@
       courses:   ['Course Assignments', 'Assign and manage which instructors oversee which courses.'],
       mentoring: ['Mentorship & Reports', 'Review AI mentor activity, student feedback and mentor session digests.'],
       analytics: ['Performance Analytics', 'Aggregated quiz results, per-module progress and who needs extra help.'],
+      stalled:  ['Stalled Students', 'Students flagged for review - auto-detected (no completion in 14 days) or manually.'],
       settings:  ['Settings', 'Your account profile, content editor and progress-management tools.']
     };
 
@@ -1785,6 +1820,7 @@
       ]),
       mentoring: () => Promise.all([loadAiMentorOverview(), loadMentorDigest()]),
       analytics: () => Promise.all([loadQuizScores()]),
+      stalled:  () => Promise.all([loadStalledReport()]),
       settings:  () => Promise.all([
         loadProfile(),
         currentUserRole === 'admin' ? loadProgressTools() : Promise.resolve(),
@@ -1994,7 +2030,7 @@
             </td>
             <td data-label="Stalled">
               ${row.is_stalled
-                ? '<span class="stalled-flag">🚩 Yes</span>'
+                ? `<span class="stalled-flag">🚩 ${row.stall_status === 'manual' ? 'Manual' : 'Auto'}</span>`
                 : '<span style="color: var(--green);">No</span>'}
             </td>
             <td data-label="Actions">
@@ -2073,6 +2109,64 @@
     function escapeHtml(text) {
       const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
       return String(text || '').replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // ============================================
+    // STALLED STUDENTS REPORT
+    // ============================================
+    async function loadStalledReport() {
+      const tbody = document.getElementById('stalledReportBody');
+      if (!tbody) return;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_stalled_report');
+        if (error) throw error;
+
+        const rows = data || [];
+        document.getElementById('stallTotal').textContent    = rows.length;
+        document.getElementById('stallAutoCount').textContent  = rows.filter(r => r.stall_type !== 'manual').length;
+        document.getElementById('stallManualCount').textContent = rows.filter(r => r.stall_type === 'manual').length;
+
+        if (rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No stalled students right now. 🎉</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(row => {
+          const last = row.last_completed_at
+            ? new Date(row.last_completed_at).toLocaleDateString()
+            : '<em style="color:var(--ink-soft)">never</em>';
+          return `
+            <tr>
+              <td data-label="Student">
+                ${escapeHtml(row.student_name)}${row.is_test ? '<span class="group-badge group-test">TEST</span>' : ''}
+              </td>
+              <td data-label="Course">${escapeHtml(row.course_title)}</td>
+              <td data-label="Type">
+                <span class="group-badge ${row.stall_type === 'manual' ? 'group-test' : 'group-real'}">
+                  ${row.stall_type === 'manual' ? 'Manual' : 'Auto'}
+                </span>
+              </td>
+              <td data-label="Progress">${row.progress_percentage}%</td>
+              <td data-label="Last completed">${last}</td>
+              <td data-label="Inactive (days)">${row.days_inactive ?? '—'}</td>
+              <td data-label="Reason">${escapeHtml(row.reason) || '<span style="color:var(--ink-soft)">—</span>'}</td>
+              <td data-label="Actions">
+                <button class="btn btn-table btn-unstall"
+                  onclick="unStallStudent('${row.student_id}', '${row.course_id}')">
+                  Un-stall
+                </button>
+                <a class="btn btn-table btn-status"
+                  href="student-profile.html?student_id=${row.student_id}&name=${encodeURIComponent(row.student_name)}">
+                  Profile
+                </a>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch (err) {
+        console.error('loadStalledReport error:', err);
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Could not load stalled report.</td></tr>';
+      }
     }
 
     // ============================================
@@ -2505,6 +2599,7 @@
         closeStalledModal();
         await loadDashboard();
         await loadAuditLog();
+        try { await loadStalledReport(); } catch (e) {}
       } catch (err) {
         showAlert(`Unexpected error: ${err.message}`, 'error');
       }
@@ -2524,6 +2619,7 @@
         showAlert('✓ Student un-stalled', 'success');
         await loadDashboard();
         await loadAuditLog();
+        try { await loadStalledReport(); } catch (e) {}
       } catch (err) {
         showAlert(`Unexpected error: ${err.message}`, 'error');
       }
