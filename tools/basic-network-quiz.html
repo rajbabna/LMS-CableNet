@@ -238,7 +238,7 @@
 
   <!-- Start screen -->
   <div class="start-screen" id="startScreen">
-    <p>Each attempt deals you a fresh round of up to 12 random questions from this module's pool, so you get a different mix every time. No account needed — your best score is saved on your device. If you're signed in to your course account, your best score also syncs to the course.</p>
+    <p>Each attempt deals you a fresh round of up to 5 random questions from this module's pool, so you get a different mix every time. No account needed — your best score is saved on your device. If you're signed in to your course account, your best score also syncs to the course.</p>
     <button class="btn-ghost" id="signInBtn">Sign in with Puter</button>
     <button class="btn-primary" id="startBtn">Start Quiz</button>
   </div>
@@ -402,7 +402,7 @@
   var POOL_SIZE = POOL.length;
   // A single round shows up to this many questions when the pool is large
   // enough; if the module bank is smaller, the whole bank is used.
-  var ROUND_CAP = 12;
+  var ROUND_CAP = 5;
 
   function mapRow(r) {
     return {
@@ -434,7 +434,7 @@
 
   // Size of the round dealt to the learner on each attempt: the whole pool
   // when it's small, otherwise a random subset capped at ROUND_CAP so the
-  // quiz stays a focused 10-12 questions while keeping variety across retries.
+  // quiz stays a focused 5 questions while keeping variety across retries.
   function roundSize() {
     return Math.min(POOL_SIZE, ROUND_CAP);
   }
