@@ -97,9 +97,11 @@ than one batch**, is a data error (both violate the "exactly one batch" rule).
 
 ## Deferred (later)
 
-- Admin Dashboard UI to **create/edit batches** and **drag students** between them.
-- A `batch` column on the student profile / an `insert` trigger on enrollments.
-- Import script that turns `batches.json` into DB rows (same shape as `sql/*`).
+- ~~Admin Dashboard UI to **create/edit batches** and **drag students** between them.~~ ✅ Done — **Batches** tab (`sql/59`): create/archive/delete batches, add/remove students, per-batch progress monitor.
+- ~~A `batch` column on the student profile / an `insert` trigger on enrollments.~~ ✅ Done via a **membership table** (`student_batch_members`) + `add_student_to_batch` enforcing "one batch per student" in SQL — no trigger needed.
+- ~~Import script that turns `batches.json` into DB rows~~ ✅ `sql/59` section 6 seeds the roster; re-run to re-sync membership.
+
+All three "Deferred (later)" items are now **built and live**. Grouping and per-batch progress monitoring both work in the admin dashboard **Batches** tab.
 
 > Cross-references: `docs/resources/batches/batches.json` (roster),
 > `docs/resources/batches/batch-test-users.md` (QA roster details),

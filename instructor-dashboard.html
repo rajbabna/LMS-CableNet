@@ -848,6 +848,7 @@
       <button class="side-link" data-tab="mentoring" type="button"><span class="side-ico">🤝</span>Mentoring</button>
       <button class="side-link" data-tab="analytics" type="button"><span class="side-ico">📈</span>Analytics</button>
       <button class="side-link" data-tab="stalled" type="button"><span class="side-ico">🚩</span>Stalled</button>
+      <button class="side-link" data-tab="batches" type="button"><span class="side-ico">🗂️</span>Batches</button>
       <button class="side-link" data-tab="settings" type="button"><span class="side-ico">⚙️</span>Settings</button>
     </div>
     <a href="#" id="navLogout" class="side-logout" onclick="handleLogout(); return false;">↪ Logout</a>
@@ -890,6 +891,7 @@
     <div class="view" id="view-mentoring"></div>
     <div class="view" id="view-analytics"></div>
     <div class="view" id="view-stalled"></div>
+    <div class="view" id="view-batches"></div>
     <div class="view" id="view-settings"></div>
 
     <!-- Admin Overview (admin only) -->
@@ -1299,6 +1301,59 @@
       </table>
     </div>
 
+    <!-- Student Batches -->
+    <div id="batchesSection" class="dashboard-section" style="margin-top:1.5rem;">
+      <h2>🗂️ Student Batches</h2>
+      <p class="lede" style="margin-top:0.3rem; font-size:0.9rem; color: var(--ink-soft);">
+        Group students into cohorts (one intake per batch). Once assigned, choose a batch below to track progress
+        across that whole group. Each student belongs to exactly one batch.
+      </p>
+
+      <!-- Create batch -->
+      <div class="filter-bar" style="margin:0.6rem 0 1rem; gap:0.5rem;">
+        <input id="batchIdInput" type="text" placeholder="batch-2026-003" aria-label="Batch ID"
+               style="padding:0.5em 0.7em; border:1px solid var(--line); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <input id="batchLabelInput" type="text" placeholder="Batch label, e.g. 2026 Intake 3" aria-label="Batch label"
+               style="padding:0.5em 0.7em; border:1px solid var(--line); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <input id="batchStartInput" type="date" aria-label="Batch start date"
+               style="padding:0.5em 0.7em; border:1px solid var(--line); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <button class="btn btn-primary" onclick="createBatch()">Create Batch</button>
+      </div>
+
+      <!-- Batch list -->
+      <div id="batchListContainer" class="empty-state"><span class="spinner"></span> Loading...</div>
+
+      <!-- Per-batch progress monitor -->
+      <div id="batchProgressSection" class="dashboard-section" style="margin-top:1.2rem; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
+          <h2 id="batchProgressTitle" style="margin:0;">Progress — Batch</h2>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <select id="batchAddStudentSelect" aria-label="Add student to batch"
+                    style="padding:0.45em 0.6em; border:1px solid var(--line); border-radius:6px; font-family:var(--font-mono); font-size:0.8rem;">
+              <option value="">Add student…</option>
+            </select>
+            <button class="btn btn-sm" onclick="addToBatch()">Add</button>
+          </div>
+        </div>
+        <table class="data-table" style="margin-top:0.8rem;">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Enrolled</th>
+              <th>Completed</th>
+              <th>Progress</th>
+              <th>Avg Quiz</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="batchProgressBody">
+            <tr><td colspan="7" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Settings: Profile -->
     <div id="profileSection" class="dashboard-section">
       <h2>👤 Profile &amp; Account</h2>
@@ -1695,6 +1750,7 @@
       mentoring: ['aiMentorSection', 'mentorDigestSection'],
       analytics: ['analyticsHighlightsSection', 'analyticsModuleSection', 'quizScoresSection'],
       stalled:   ['stalledReportSection'],
+      batches:   ['batchesSection'],
       settings:  ['profileSection', 'progressToolsSection', 'contentEditorSection']
     };
 
@@ -1705,6 +1761,7 @@
       mentoring: ['Mentorship & Reports', 'Review AI mentor activity, student feedback and mentor session digests.'],
       analytics: ['Performance Analytics', 'Aggregated quiz results, per-module progress and who needs extra help.'],
       stalled:  ['Stalled Students', 'Students flagged for review - auto-detected (no completion in 14 days) or manually.'],
+      batches:  ['Student Batches', 'Group students into cohorts and compare their progress side by side.'],
       settings:  ['Settings', 'Your account profile, content editor and progress-management tools.']
     };
 
@@ -1831,6 +1888,7 @@
       mentoring: () => Promise.all([loadAiMentorOverview(), loadMentorDigest()]),
       analytics: () => Promise.all([loadQuizScores()]),
       stalled:  () => Promise.all([loadStalledReport()]),
+      batches:  () => Promise.all([loadBatches()]),
       settings:  () => Promise.all([
         loadProfile(),
         currentUserRole === 'admin' ? loadProgressTools() : Promise.resolve(),
@@ -2176,6 +2234,216 @@
       } catch (err) {
         console.error('loadStalledReport error:', err);
         tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Could not load stalled report.</td></tr>';
+      }
+    }
+
+    // ============================================
+    // STUDENT BATCHES
+    // ============================================
+    let currentBatchId = null;
+    let batchStudentCache = [];
+
+    async function loadBatches() {
+      const container = document.getElementById('batchListContainer');
+      if (!container) return;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('list_batches');
+        if (error) throw error;
+
+        const batches = data || [];
+        if (batches.length === 0) {
+          container.innerHTML = '<div class="empty-state">No batches yet. Create one above to group students.</div>';
+          return;
+        }
+
+        container.innerHTML = batches.map(b => `
+          <div class="batch-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; padding:0.7rem 0.9rem; border:1px solid var(--line); border-radius:8px; margin-bottom:0.5rem;">
+            <div>
+              <strong style="font-family:var(--font-mono);">${escapeHtml(b.label)}</strong>
+              <span style="color:var(--ink-soft); font-size:0.8rem;"> — ${escapeHtml(b.id)}</span>
+              <span class="group-badge ${b.member_count > 0 ? 'group-real' : 'group-test'}" style="margin-left:0.5rem;">${b.member_count} students</span>
+              ${b.start_date ? `<span style="color:var(--ink-soft); font-size:0.8rem;"> · starts ${escapeHtml(b.start_date)}</span>` : ''}
+              ${b.is_active ? '' : '<span class="group-badge group-test" style="margin-left:0.4rem;">archived</span>'}
+            </div>
+            <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+              <button class="btn btn-table btn-status" onclick="selectBatch('${b.id}')">View progress</button>
+              <button class="btn btn-table ${b.is_active ? 'btn-mentor' : 'btn-unstall'}" onclick="toggleArchiveBatch('${b.id}', ${!b.is_active})">
+                ${b.is_active ? 'Archive' : 'Un-archive'}
+              </button>
+              <button class="btn btn-table btn-reset" onclick="deleteBatch('${b.id}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Refill the "add student" picker whenever the roster changes.
+        await populateBatchStudentPicker();
+      } catch (err) {
+        console.error('loadBatches error:', err);
+        container.innerHTML = '<div class="empty-state">Could not load batches.</div>';
+      }
+    }
+
+    async function populateBatchStudentPicker() {
+      const select = document.getElementById('batchAddStudentSelect');
+      if (!select) return;
+      try {
+        const { data, error } = await supabaseClient.rpc('get_admin_overview');
+        if (error) throw error;
+        const students = (data && data.students) || [];
+        batchStudentCache = students;
+        select.innerHTML = '<option value="">Add student…</option>' + students.map(s =>
+          `<option value="${s.id}">${escapeHtml(s.name || s.email)}</option>`).join('');
+      } catch (err) {
+        console.error('populateBatchStudentPicker error:', err);
+      }
+    }
+
+    async function createBatch() {
+      const id = document.getElementById('batchIdInput').value.trim();
+      const label = document.getElementById('batchLabelInput').value.trim();
+      const start = document.getElementById('batchStartInput').value || null;
+
+      if (!id || !label) {
+        showAlert('Please enter both a batch ID and label.', 'error');
+        return;
+      }
+      if (!/^batch-\d{4}-\d{3}$/.test(id)) {
+        showAlert('Batch ID must look like batch-2026-003 (batch-YYYY-NNN).', 'error');
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.rpc('create_batch', {
+          p_id: id, p_label: label, p_start_date: start
+        });
+        if (error) throw error;
+
+        document.getElementById('batchIdInput').value = '';
+        document.getElementById('batchLabelInput').value = '';
+        document.getElementById('batchStartInput').value = '';
+        showAlert('✓ Batch created', 'success');
+        await loadBatches();
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function selectBatch(batchId) {
+      currentBatchId = batchId;
+      const section = document.getElementById('batchProgressSection');
+      const title = document.getElementById('batchProgressTitle');
+      const tbody = document.getElementById('batchProgressBody');
+      if (!section || !tbody) return;
+
+      section.style.display = '';
+      const batches = await loadBatchesListOnly();
+      const b = (batches || []).find(x => x.id === batchId);
+      title.textContent = b ? `Progress — ${b.label}` : `Progress — ${batchId}`;
+
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><span class="spinner"></span> Loading...</td></tr>';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_batch_progress', { p_batch_id: batchId });
+        if (error) throw error;
+
+        const rows = data || [];
+        if (rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No students in this batch yet — add one with the dropdown above.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td><strong>${escapeHtml(r.student_name)}</strong>${r.is_test ? '<span class="group-badge group-test" style="margin-left:0.4rem;">TEST</span>' : ''}
+              <div class="window-line">${escapeHtml(r.student_email)}</div>
+            </td>
+            <td>${r.enrollments}</td>
+            <td>${r.courses_completed}</td>
+            <td>${r.progress_percentage != null ? r.progress_percentage + '%' : '—'}</td>
+            <td>${r.avg_quiz_score != null ? r.avg_quiz_score + '%' : '—'}</td>
+            <td>${r.is_stalled ? '<span class="stalled-flag">🚩 stalled</span>' : '<span style="color:var(--green);">active</span>'}</td>
+            <td>
+              <button class="btn btn-table btn-reset" onclick="removeFromBatch('${r.student_id}')">Remove</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('selectBatch error:', err);
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Could not load batch progress.</td></tr>';
+      }
+    }
+
+    // Bare list of batches (no DOM writing) for the progress title lookup.
+    async function loadBatchesListOnly() {
+      try {
+        const { data, error } = await supabaseClient.rpc('list_batches');
+        if (error) throw error;
+        return data || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async function addToBatch() {
+      const select = document.getElementById('batchAddStudentSelect');
+      const sid = select && select.value;
+      if (!currentBatchId) { showAlert('Pick a batch first.', 'error'); return; }
+      if (!sid) { showAlert('Pick a student to add.', 'error'); return; }
+
+      try {
+        const { error } = await supabaseClient.rpc('add_student_to_batch', {
+          p_batch_id: currentBatchId,
+          p_student_ids: [sid]
+        });
+        if (error) throw error;
+        showAlert('✓ Student added to batch', 'success');
+        await selectBatch(currentBatchId);
+        await loadBatches();
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function removeFromBatch(studentId) {
+      if (!currentBatchId) return;
+      try {
+        const { error } = await supabaseClient.rpc('remove_student_from_batch', {
+          p_batch_id: currentBatchId,
+          p_student_id: studentId
+        });
+        if (error) throw error;
+        showAlert('Student removed from batch', 'success');
+        await selectBatch(currentBatchId);
+        await loadBatches();
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function toggleArchiveBatch(batchId, makeActive) {
+      try {
+        const { error } = await supabaseClient.rpc('archive_batch', { p_id: batchId, p_is_active: makeActive });
+        if (error) throw error;
+        await loadBatches();
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function deleteBatch(batchId) {
+      if (!confirm(`Delete batch ${batchId}? This removes the batch and its memberships.`)) return;
+      try {
+        const { error } = await supabaseClient.rpc('delete_batch', { p_id: batchId });
+        if (error) throw error;
+        if (currentBatchId === batchId) {
+          currentBatchId = null;
+          document.getElementById('batchProgressSection').style.display = 'none';
+        }
+        showAlert('✓ Batch deleted', 'success');
+        await loadBatches();
+      } catch (err) {
+        showAlert(`Error: ${err.message}`, 'error');
       }
     }
 
