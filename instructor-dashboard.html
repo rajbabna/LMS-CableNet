@@ -3175,9 +3175,7 @@
             <td>${p.name}</td>
             <td>${p.email}</td>
             <td>${p.approved ? '<span style="color: var(--green);">✓</span>' : '<span style="color: var(--copper-dark);">Pending</span>'}</td>
-            <td>${p.approved
-              ? '<span style="color: var(--ink-soft);">Approved</span>'
-              : `<button class="btn btn-sm" onclick="approveInstructor('${p.id}')">Approve</button>`}</td>
+            <td><span style="color: var(--ink-soft);">${p.approved ? 'Active' : 'Admin-created'}</span></td>
           </tr>
         `).join('');
         instructorsBody.innerHTML = instructorRows || '<tr><td colspan="4" class="empty-state">No instructors yet.</td></tr>';
@@ -3187,26 +3185,9 @@
       }
     }
 
-    async function approveInstructor(userId) {
-      try {
-        const { data, error } = await supabaseClient.rpc('approve_instructor', {
-          p_user_id: userId
-        });
-        if (error) {
-          showAlert(`Error approving instructor: ${error.message}`, 'error');
-          return;
-        }
-        if (data === 'not_found') {
-          showAlert('Instructor not found or already approved.', 'error');
-          return;
-        }
-        showAlert('Instructor approved. They can now sign in and see the dashboard.', 'success');
-        await loadAdminOverview();
-      } catch (err) {
-        console.error('approveInstructor error:', err);
-        showAlert('Could not approve instructor.', 'error');
-      }
-    }
+    // Note: approve_instructor / get_pending_instructors were dropped in
+    // sql/25 (self-signup removed); staff accounts are created pre-approved,
+    // so there is no approve action anymore.
 
     // ============================================
     // INSTRUCTOR: MY COURSES panel (Courses tab)
