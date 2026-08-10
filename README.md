@@ -75,7 +75,7 @@ converted to Mauritian Rupees (1 USD = 47.04 MUR).
 
 - Static HTML/CSS/JS served on **GitHub Pages**
 - **Supabase** (PostgreSQL + Auth) via the UMD `supabase-js` client (`js/config.js`)
-- RPCs in `sql/` (run `01` → `27` in the Supabase SQL Editor in order)
+- RPCs in `sql/` (run `01` → `60` in the Supabase SQL Editor in order — see `docs/CURRENT-STATUS.md`)
 
 ## Project layout
 
@@ -89,7 +89,7 @@ course-cabling.html         course page (preview-locked)
 course-networking.html      course page (preview-locked)
 js/                         config, client, loaders, auth-guard, progress, mentor-sessions
 css/                        design system + progress styles
-sql/                        01–27: schema, RPCs, triggers, cleanup scripts
+sql/                        schema, RPCs, triggers, cleanup scripts (01–60, gitignored)
 docs/                       documentation + future interactive-content plan
 ```
 
