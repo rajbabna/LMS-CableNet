@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Pack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEEBE3;
+    --paper: #F7F5EF;
+    --ink: #1C2430;
+    --ink-soft: #4A5261;
+    --line: #D8D3C7;
+    --copper: #C2622D;
+    --copper-dark: #A24F22;
+    --teal: #2C6B75;
+    --green: #4A7A52;
+    --red: #B03A3A;
+    --font-display: "Archivo Narrow", "Arial Narrow", sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .pack-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  .pack-head h1 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--copper-dark);
+    display: block;
+    margin-bottom: 0.5em;
+  }
+  .pack-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin: 0.8rem 0 1.4rem;
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .pack-meta .pill {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.2em 0.7em;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    margin: 2rem 0 0.8rem;
+    padding-top: 1.4rem;
+    border-top: 1px dashed var(--line);
+  }
+
+  /* ---- Study notes ---- */
+  .notes-body {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+  }
+  .notes-body h2 { font-size: 1.05rem; font-family: var(--font-display); margin: 1.4rem 0 0.5rem; }
+  .notes-body h2:first-child { margin-top: 0; }
+  .notes-body p { color: var(--ink-soft); margin: 0 0 0.9rem; }
+  .notes-body img { max-width: 100%; height: auto; display: block; margin: 0.8rem 0 1rem; border: 1px solid var(--line); border-radius: 10px; }
+  .notes-body ul, .notes-body ol { padding-left: 1.4rem; margin: 0 0 0.9rem; color: var(--ink-soft); }
+  .notes-body li { margin-bottom: 0.3rem; }
+  .notes-body kbd, .notes-body code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    background: #ece9dd;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+  .notes-body table { border-collapse: collapse; width: 100%; margin: 0 0 1rem; font-size: 0.92rem; }
+  .notes-body th, .notes-body td { border: 1px solid var(--line); padding: 0.45rem 0.7rem; text-align: left; }
+  .notes-body th { background: #efece2; font-family: var(--font-mono); font-size: 0.78rem; }
+
+  /* ---- Quiz (reuses the online quiz look) ---- */
+  .quiz-strip {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.6rem;
+    margin-bottom: 1.2rem;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0 0 1.4rem;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--teal);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .question-num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--copper-dark);
+    margin-bottom: 0.5rem;
+  }
+  .question-text {
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin: 0;
+  }
+  .options {
+    display: grid;
+    gap: 0.7rem;
+    margin-top: 1.2rem;
+  }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.98rem;
+    color: var(--ink);
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--teal); }
+  .option .letter {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .option.correct { border-color: var(--green); background: #eef4ec; }
+  .option.correct .letter { background: var(--green); color: #fff; border-color: var(--green); }
+  .option.wrong { border-color: var(--red); background: #fbeeee; }
+  .option.wrong .letter { background: var(--red); color: #fff; border-color: var(--red); }
+  .option:disabled { cursor: default; opacity: 0.9; }
+  .feedback {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+  }
+  .feedback.good { background: #eef4ec; color: #335a3a; border: 1px solid var(--green); }
+  .feedback.bad  { background: #fbeeee; color: #7a2f2f; border: 1px solid var(--red); }
+  .controls {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7em 1.3em;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  button:active { transform: translateY(1px); }
+  .btn-primary { background: var(--copper); color: #fff; }
+  .btn-primary:hover { background: var(--copper-dark); }
+  .btn-ghost { background: var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: #cfcbbd; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .results {
+    text-align: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 2rem;
+  }
+  .results h2 { font-family: var(--font-display); font-size: 1.6rem; margin: 0 0 0.6rem; }
+  .results p { color: var(--ink-soft); }
+  .big-score {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--teal);
+    margin: 0.6rem 0;
+  }
+  .best-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 999px;
+    padding: 0.25em 0.8em;
+    margin-top: 0.5rem;
+  }
+  .sync-note {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-top: 1.2rem;
+  }
+  .sync-form {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 340px;
+    margin: 0.8rem auto 0;
+    text-align: left;
+  }
+  .sync-form input {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 0.55em 0.8em;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    width: 100%;
+  }
+  .sync-form input:focus { outline: none; border-color: var(--teal); }
+  .mobile-hint {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    background: #efece2;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+  @media (max-width: 520px) {
+    .quiz-strip, .notes-body { padding: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="pack-wrap">
+  <div class="pack-head">
+    <span class="eyebrow">Study pack</span>
+    <h1 id="packTitle">Study Pack</h1>
+  </div>
+  <div class="pack-meta">
+    <span class="pill" id="packMeta">Offline-ready</span>
+    <span class="pill" id="progressPill">Not started</span>
+    <span class="pill" id="bestPill">Best: —</span>
+  </div>
+
+  <div class="mobile-hint" id="offlineHint" style="display:none;">
+    📶 Offline mode — progress is saved on this device and will sync to your course when you're back online.
+  </div>
+
+  <!-- STUDY NOTES -->
+  <div id="notesSection">
+    <h2 class="section-title">Study notes</h2>
+    <div class="notes-body" id="notesBody"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <h2 class="section-title">Test your knowledge</h2>
+  <div id="quizZone">
+    <div class="quiz-strip" id="quizScreen">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="question-num" id="questionNum">Question 1 of 0</div>
+      <p class="question-text" id="questionText"></p>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="controls">
+        <button class="btn-primary" id="nextBtn" style="display:none;">Next Question →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // EMBEDDED PACK DATA — a generator fills these before shipping.
+  // The quiz question shape mirrors get_module_quiz_questions()
+  // (id / question / options / correct_index / explanation) so a
+  // pack embeds exactly what the online quiz deals from.
+  // ============================================================
+  var STUDY_PACK = {
+    "moduleId": 19,
+    "title": "Module 2: Subnetting & CIDR Notation",
+    "version": "1.0",
+    "note": "Network Operations — Configuration & Troubleshooting — module 2. Offline study pack: read the notes, take the quiz, then save your best score to the course while online.",
+    "notes": {
+      "sections": [
+        {
+          "title": "Learning Objectives",
+          "html": "<ul><li>Explain what a subnet mask does and represent it in binary</li>\n<li>Calculate network address, broadcast address, and usable host range</li>\n<li>Read and write CIDR notation (e.g., <code>/24</code>, <code>/25</code>)</li>\n<li>Apply the host formula: usable hosts = 2^(32 - prefix) - 2</li>\n</ul>"
+        },
+        {
+          "title": "Quiz: Decimal ↔ Binary (8:30–9:00)",
+          "html": "Quick recall check from last week's homework before moving on."
+        },
+        {
+          "title": "Lecture Notes (9:00–10:30)",
+          "html": "<h3>Subnet Masks</h3>\n<ul><li>A subnet mask marks which bits of an IP address are &quot;network&quot; vs &quot;host&quot;</li>\n<li>Common masks: <code>255.255.255.0</code> = <code>/24</code>, <code>255.255.255.128</code> = <code>/25</code></li>\n<li>In binary, mask bits are <code>1</code>s for network, <code>0</code>s for host</li>\n</ul>\n<h3>The Host Formula</h3>\n<strong>Usable hosts = 2^(32 - prefix) - 2</strong> (minus 2 = network + broadcast)\n<ul><li>/24 → 2^8 - 2 = 254</li>\n<li>/26 → 2^6 - 2 = 62</li>\n</ul>\n<h3>Key Calculations</h3>\n<ul><li><strong>Network address:</strong> all host bits set to 0</li>\n<li><strong>Broadcast address:</strong> all host bits set to 1</li>\n<li><strong>Usable host range:</strong> everything between network and broadcast</li>\n<li>Never assign the network or broadcast address to a device</li>\n</ul>\n<h3>CIDR Reference</h3>\n<table><thead><tr><th>CIDR</th><th>Mask</th><th>Usable Hosts</th></tr></thead><tbody><tr><td>/24</td><td>255.255.255.0</td><td>254</td></tr><tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr><tr><td>/26</td><td>255.255.255.192</td><td>62</td></tr><tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr><tr><td>/28</td><td>255.255.255.240</td><td>14</td></tr><tr><td>/29</td><td>255.255.255.248</td><td>6</td></tr><tr><td>/30</td><td>255.255.255.252</td><td>2 (point-to-point)</td></tr></tbody></table>"
+        },
+        {
+          "title": "Lab 2A: Guided Subnet Calculation (10:45–11:30)",
+          "html": "Given <code>192.168.1.0/24</code>:\n<ul><li>Network address → <code>192.168.1.0</code></li>\n<li>Broadcast address → <code>192.168.1.255</code></li>\n<li>Usable range → <code>192.168.1.1</code>–<code>192.168.1.254</code></li>\n<li>Total usable hosts → 254 (formula: 2^8 - 2)</li>\n</ul>"
+        },
+        {
+          "title": "Lab 2B: Subdividing a Network (11:30–12:30)",
+          "html": "Split <code>192.168.1.0/24</code> into 4 equal subnets for 4 departments\n(Accounting, Sales, Support, Backend), each needing ~60 hosts:\n<ul><li>We need 4 subnets → borrow 2 host bits (2^2 = 4)</li>\n<li>New prefix: /24 + 2 = <strong>/26</strong></li>\n<li>Usable per subnet: 2^6 - 2 = <strong>62</strong> (fits 60)</li>\n<li>Block size = 64, subnets start at 0:</li>\n</ul> - <code>192.168.1.0</code> /26 usable <code>192.168.1.1</code>–<code>192.168.1.62</code>\n - <code>192.168.1.64</code> /26 usable <code>192.168.1.65</code>–<code>192.168.1.126</code>\n - <code>192.168.1.128</code>/26 usable <code>192.168.1.129</code>–<code>192.168.1.190</code>\n - <code>192.168.1.192</code>/26 usable <code>192.168.1.193</code>–<code>192.168.1.254</code>"
+        },
+        {
+          "title": "Speed Drills (1:15–2:15)",
+          "html": "<ul><li>Timed subnetting challenge (e.g., &quot;Who can solve <code>10.0.0.0/25</code> fastest?&quot;)</li>\n<li>Celebrate fast, correct answers to build confidence under pressure</li>\n<li>Practice: given N hosts, choose the smallest prefix that fits</li>\n<li>Quick-fire: readable /24–/30 host counts from memory</li>\n</ul>"
+        },
+        {
+          "title": "Check for Understanding",
+          "html": "<ul><li>What's the broadcast address for <code>192.168.1.0/24</code>?</li>\n<li>How many usable hosts does a <code>/26</code> network support?</li>\n<li>Write <code>255.255.255.192</code> in CIDR notation.</li>\n<li>Using the formula, how many usable hosts are in a <code>/28</code>?</li>\n</ul>"
+        },
+        {
+          "title": "Home Assignment",
+          "html": "<ul><li>Complete 10 subnetting problems with answers</li>\n<li>Watch a &quot;CIDR notation explained&quot; video (8 min)</li>\n<li>Create a personal subnet cheat sheet</li>\n<li>Prepare for Packet Tracer next week</li>\n<li>Read: docs/resources/networking/ip-addressing-and-subnetting.md</li>\n</ul>"
+        }
+      ]
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": 1,
+          "question": "What is the broadcast address of `192.168.1.0/24`?",
+          "options": [
+            "192.168.1.0",
+            "192.168.1.254",
+            "192.168.1.255",
+            "192.168.0.255"
+          ],
+          "correct_index": 2,
+          "explanation": "192.168.1.255 (all host bits 1) (resource §3)."
+        },
+        {
+          "id": 2,
+          "question": "How many usable hosts does a `/26` network support?",
+          "options": [
+            "254",
+            "126",
+            "62",
+            "30"
+          ],
+          "correct_index": 2,
+          "explanation": "/26 → 2^6 − 2 = 62 (resource §2, module §CIDR Reference)."
+        },
+        {
+          "id": 3,
+          "question": "`255.255.255.192` in CIDR notation is:",
+          "options": [
+            "/24",
+            "/25",
+            "/26",
+            "/27"
+          ],
+          "correct_index": 2,
+          "explanation": "255.255.255.192 = /26 (resource §2)."
+        },
+        {
+          "id": 4,
+          "question": "The \"minus 2\" in the host formula `2^(32-prefix) - 2` accounts for:",
+          "options": [
+            "The gateway and DNS server",
+            "The network address and broadcast address",
+            "Two spare hosts",
+            "The DHCP lease"
+          ],
+          "correct_index": 1,
+          "explanation": "Network + broadcast addresses are not assignable (resource §2)."
+        },
+        {
+          "id": 5,
+          "question": "Which prefix is the standard for a point-to-point link (router to router)?",
+          "options": [
+            "/24",
+            "/26",
+            "/28",
+            "/30"
+          ],
+          "correct_index": 3,
+          "explanation": "/30 gives exactly 2 usable (point-to-point) (resource §5)."
+        },
+        {
+          "id": 6,
+          "question": "How many usable hosts are in a `/28`?",
+          "options": [
+            "30",
+            "14",
+            "62",
+            "6"
+          ],
+          "correct_index": 1,
+          "explanation": "/28 → 2^4 − 2 = 14 (resource §5)."
+        }
+      ]
+    }
+  };
+
+  // ============================================================
+  // SYNC CONFIG
+  // Filled by the generator with the course project's URL + key so
+  // the Supabase CDN client can call submit_quiz_score. Leave
+  // enabled=false for a pure-offline pack build.
+  // ============================================================
+  var SYNC = {
+  enabled: true,
+  supabaseUrl: 'https://mantjzpfhikezztonrga.supabase.co',
+  supabaseAnonKey: 'sb_publishable_t5GiOxBzTlWkRDR0pS0f0g_L1JhYfI0',
+  rpc: 'submit_quiz_score'
+};
+
+  // ---- Element refs ----
+  var el = {
+    title: document.getElementById('packTitle'),
+    meta: document.getElementById('packMeta'),
+    progressPill: document.getElementById('progressPill'),
+    bestPill: document.getElementById('bestPill'),
+    offlineHint: document.getElementById('offlineHint'),
+    notesBody: document.getElementById('notesBody'),
+    quizZone: document.getElementById('quizZone'),
+    progressFill: document.getElementById('progressFill'),
+    questionNum: document.getElementById('questionNum'),
+    questionText: document.getElementById('questionText'),
+    options: document.getElementById('options'),
+    feedback: document.getElementById('feedback'),
+    nextBtn: document.getElementById('nextBtn')
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  // ---- Pack header ----
+  function renderHead() {
+    document.title = STUDY_PACK.title;
+    el.title.textContent = STUDY_PACK.title;
+    el.meta.textContent = 'v' + STUDY_PACK.version + ' · ' + STUDY_PACK.quiz.questions.length + ' questions';
+    renderNotes();
+    renderProgressPills();
+  }
+
+  // ---- Study notes ----
+  function renderNotes() {
+    var sections = (STUDY_PACK.notes && STUDY_PACK.notes.sections) || [];
+    if (!sections.length) {
+      el.notesBody.innerHTML = '<p style="color:var(--ink-soft)">No study notes embedded yet.</p>';
+      return;
+    }
+    var html = '';
+    sections.forEach(function (s) {
+      html += s.title ? '<h2>' + escapeHtml(s.title) + '</h2>' : '';
+      html += s.html || '';
+    });
+    el.notesBody.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ---- Progress (local + local best) ----
+  function storageKey() { return 'study-pack:' + STUDY_PACK.moduleId; }
+  function bestKey() { return 'study-pack-best:' + STUDY_PACK.moduleId; }
+
+  function readProgress() {
+    try { var raw = localStorage.getItem(storageKey()); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+  }
+  function writeProgress(p) {
+    try { localStorage.setItem(storageKey(), JSON.stringify(p)); } catch (e) {}
+  }
+  function localBest() {
+    try { return parseInt(localStorage.getItem(bestKey()) || '0', 10); } catch (e) { return 0; }
+  }
+  function setLocalBest(v) {
+    try { localStorage.setItem(bestKey(), String(v)); } catch (e) {}
+  }
+
+  function renderProgressPills() {
+    var best = localBest();
+    el.bestPill.textContent = 'Best: ' + (best > 0 ? best + '%' : '—');
+    var p = readProgress();
+    if (p && p.completedAt) {
+      el.progressPill.textContent = 'Completed ' + (p.finalScore || 0) + '%' + (p.syncedToCloud ? ' · ✓ synced' : '');
+    } else {
+      el.progressPill.textContent = 'Not started';
+    }
+  }
+
+  // ---- Quiz engine (one question at a time, immediate feedback) ----
+  var questions = (STUDY_PACK.quiz && STUDY_PACK.quiz.questions) || [];
+  var idx = 0;
+  var correct = 0;
+  var responses = [];
+  var answered = false;
+
+  function mostRecentAttempt() {
+    var p = readProgress();
+    return p && p.responses ? p.responses.length : 0;
+  }
+
+  function alreadyAnswered(qid) {
+    var p = readProgress();
+    if (!p || !p.responses) return null;
+    for (var i = 0; i < p.responses.length; i++) {
+      if (p.responses[i].questionId === qid) return p.responses[i];
+    }
+    return null;
+  }
+
+  function renderQuestion(q, saved) {
+    answered = !!saved;
+    if (saved) correct++;
+
+    el.questionNum.textContent = 'Question ' + (idx + 1) + ' of ' + questions.length;
+    el.questionText.textContent = q.question;
+    el.progressFill.style.width = (idx / questions.length * 100) + '%';
+
+    var opts = '';
+    q.options.forEach(function (o, i) {
+      var cls = 'option';
+      var letter = String.fromCharCode(65 + i);
+      var checked = saved ? ' checked="checked"' : '';
+      var disabled = saved ? ' disabled' : '';
+      var mark = '';
+      if (saved) {
+        if (i === q.correct_index) { cls += ' correct'; mark = ' ✓'; }
+        else if (saved.selectedIndex === i) { cls += ' wrong'; mark = ' ✗'; }
+      }
+      opts += '<button type="button" class="' + cls + '" data-i="' + i + '"' + disabled + '>'
+            + '<span class="letter">' + letter + '</span><span>' + escapeHtml(o) + mark + '</span></button>';
+    });
+    el.options.innerHTML = opts;
+    el.options.querySelectorAll('.option').forEach(function (b) {
+      b.addEventListener('click', function () { onChoose(parseInt(b.getAttribute('data-i'), 10)); });
+    });
+
+    if (saved) {
+      showFeedback(saved.selectedIndex === q.correct_index, q);
+      el.nextBtn.style.display = 'inline-block';
+      el.nextBtn.textContent = (idx === questions.length - 1) ? 'Finish Quiz' : 'Next Question →';
+    } else {
+      el.feedback.style.display = 'none';
+      el.nextBtn.style.display = 'none';
+    }
+  }
+
+  function onChoose(i) {
+    if (answered) return;
+    var q = questions[idx];
+    answered = true;
+    var isCorrect = i === q.correct_index;
+    if (isCorrect) correct++;
+
+    el.options.querySelectorAll('.option').forEach(function (b) {
+      var k = parseInt(b.getAttribute('data-i'), 10);
+      b.disabled = true;
+      if (k === q.correct_index) b.classList.add('correct');
+      else if (k === i) b.classList.add('wrong');
+    });
+
+    // Persist per-question response immediately (offline-safe).
+    responses.push({ questionId: q.id || (idx + 1), selectedIndex: i, isCorrect: isCorrect });
+    var subs = readProgress() || { moduleId: STUDY_PACK.moduleId, responses: [] };
+    subs.responses.push(responses[responses.length - 1]);
+    subs.startedAt = subs.startedAt || new Date().toISOString();
+    writeProgress(subs);
+
+    showFeedback(isCorrect, q);
+    el.nextBtn.style.display = 'inline-block';
+    el.nextBtn.textContent = (idx === questions.length - 1) ? 'Finish Quiz' : 'Next Question →';
+  }
+
+  function showFeedback(isCorrect, q) {
+    var f = el.feedback;
+    f.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    f.textContent = isCorrect ? 'Correct ✓' : (q.explanation || 'Incorrect');
+    f.style.display = 'block';
+  }
+
+  function next() {
+    idx++;
+    if (idx >= questions.length) { finishQuiz(); return; }
+    var q = questions[idx];
+    renderQuestion(q, alreadyAnswered(q.id || (idx + 1)));
+  }
+
+  // ---- Finish ----
+  var finished = false;
+  function finishQuiz() {
+    if (finished) return;
+    finished = true;
+    var score = Math.round(correct / questions.length * 100);
+
+    var prog = readProgress() || { moduleId: STUDY_PACK.moduleId, responses: [] };
+    prog.finalScore = score;
+    prog.completedAt = new Date().toISOString();
+    prog.syncedToCloud = false;
+    writeProgress(prog);
+
+    var prevBest = localBest();
+    if (score > prevBest) setLocalBest(score);
+
+    renderProgressPills();
+    renderResult(score, true);
+    syncIfOnline(score);
+  }
+
+  function renderResult(score, allowRetake) {
+    var best = localBest();
+    var p = readProgress();
+    el.quizZone.innerHTML =
+      '<div class="results">' +
+        '<h2>Quiz Complete</h2>' +
+        '<div class="big-score">' + score + '%</div>' +
+        '<p>' + score + ' correct out of ' + questions.length + '.</p>' +
+        (best > 0 ? '<span class="best-badge">Best: ' + best + '%</span>' : '') +
+        '<div class="sync-note" id="syncNote"></div>' +
+        '<div class="controls">' +
+          (allowRetake ? '<button class="btn-primary" id="retryBtn">Try Again</button>' : '') +
+          '<button class="btn-ghost" id="backToNotesBtn">Read Notes</button>' +
+        '</div>' +
+      '</div>';
+    var syncNote = $('syncNote');
+    if (p) {
+      if (p.syncedToCloud) {
+        syncNote.textContent = '✓ Saved to your course.';
+      } else if (navigator.onLine && SYNC.enabled) {
+        syncNote.textContent = 'Saved on this device.';
+        renderSignInForm(score);
+      } else {
+        syncNote.textContent = 'Saved on this device. When online, choose "Save to Cloud".';
+        renderEndBtn();
+      }
+    }
+    $('retryBtn').addEventListener('click', retake);
+    $('backToNotesBtn').addEventListener('click', function () {
+      document.getElementById('notesBody').scrollIntoView({ behavior: 'smooth' });
+    });
+    el.progressFill.style.width = '100%';
+  }
+
+  function retake() {
+    // Fresh attempt: keep local best, clear in-progress responses cache.
+    writeProgress({ moduleId: STUDY_PACK.moduleId, responses: [] });
+    idx = 0; correct = 0; responses = []; finished = false;
+    el.quizZone.innerHTML = earlierMarkup();
+    wireQuiz();
+    renderQuestion(questions[0], null);
+  }
+
+  // Rebuild the quiz DOM after a retake wiped the results markup.
+  function earlierMarkup() {
+    return '<div class="quiz-strip" id="quizScreen">' +
+      '<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>' +
+      '<div class="question-num" id="questionNum"></div>' +
+      '<p class="question-text" id="questionText"></p>' +
+      '<div class="options" id="options"></div>' +
+      '<div class="feedback" id="feedback"></div>' +
+      '<div class="controls"><button class="btn-primary" id="nextBtn" style="display:none;">Next Question →</button></div>' +
+    '</div>';
+  }
+
+  function wireQuiz() {
+    el.progressFill = $('progressFill');
+    el.questionNum = $('questionNum');
+    el.questionText = $('questionText');
+    el.options = $('options');
+    el.feedback = $('feedback');
+    el.nextBtn = $('nextBtn');
+    el.nextBtn.addEventListener('click', next);
+  }
+
+  // ---- Offline indicator ----
+  function updateOnline() {
+    el.offlineHint.style.display = navigator.onLine ? 'none' : 'block';
+  }
+
+  // ---- Cloud sync (best effort) ----
+  // Only fires when SYNC.enabled and online. The results screen offers
+  // "Save to Cloud": if no session exists (e.g. the pack was downloaded and
+  // opened from a local file), a compact sign-in form appears so the student
+  // can log in with their course account (email/password) and then sync.
+  // Never blocks the quiz.
+  var syncClient = null;
+  function ensureClient() {
+    if (!SYNC.enabled || !window.supabase) return null;
+    if (!syncClient) {
+      try {
+        syncClient = window.supabase.createClient(SYNC.supabaseUrl, SYNC.supabaseAnonKey);
+      } catch (e) { return null; }
+    }
+    return syncClient;
+  }
+
+  function currentUser() {
+    var c = ensureClient();
+    return c ? c.auth.getUser() : Promise.resolve({ data: { user: null } });
+  }
+
+  function syncIfOnline(score) {
+    if (!SYNC.enabled || !navigator.onLine) return;
+    currentUser().then(function (r) {
+      if (r.error || !r.data.user) {
+        renderSignInForm(score);
+        return;
+      }
+      return submitScore(score);
+    }).catch(function () { renderSignInForm(score); });
+  }
+
+  function submitScore(score) {
+    var c = ensureClient();
+    if (!c) { showSyncStatus('Sync is not configured for this pack.'); return; }
+    return c.rpc(SYNC.rpc, { p_module_id: STUDY_PACK.moduleId, p_score: score })
+      .then(function (res) {
+        if (res.error) { showSyncStatus('Could not sync now — ' + res.error.message); return false; }
+        markSynced();
+        return true;
+      })
+      .catch(function (err) {
+        showSyncStatus('Sync failed — ' + (err && err.message ? err.message : 'offline'));
+        return false;
+      });
+  }
+
+  // Inline email/password sign-in on the results panel, then syncs on success.
+  function renderSignInForm(score) {
+    var note = $('syncNote');
+    if (!note) return;
+    note.innerHTML =
+      '<span>Saved on this device. Sign in to your course account to sync your best score.</span>' +
+      '<form class="sync-form" id="syncForm" onsubmit="return false;">' +
+        '<input type="email" id="syncEmail" placeholder="Course email" autocomplete="username" required>' +
+        '<input type="password" id="syncPass" placeholder="Password" autocomplete="current-password" required>' +
+        '<button class="btn-ghost" type="submit" id="syncGoBtn">Sign in &amp; sync</button>' +
+      '</form>' +
+      '<button class="btn-ghost" id="syncLaterBtn" style="margin-top:0.6rem;">Sync later</button>';
+    var form = $('syncForm');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var email = $('syncEmail').value.trim();
+      var pass = $('syncPass').value;
+      var go = $('syncGoBtn');
+      go.disabled = true;
+      go.textContent = 'Syncing…';
+      var c = ensureClient();
+      if (!c) { showSyncStatus('Sync is not configured for this pack.'); return; }
+      c.auth.signInWithPassword({ email: email, password: pass })
+        .then(function (res) {
+          if (res.error) {
+            showSyncStatus('Sign-in failed — ' + res.error.message);
+            go.disabled = false;
+            go.textContent = 'Sign in & sync';
+            return;
+          }
+          submitScore(score);
+        })
+        .catch(function (err) {
+          showSyncStatus('Sign-in failed — ' + (err && err.message ? err.message : 'try again'));
+          go.disabled = false;
+          go.textContent = 'Sign in & sync';
+        });
+    });
+    $('syncLaterBtn').addEventListener('click', function () {
+      note.textContent = 'Saved on this device. Choose "Save to Cloud" when you are back online.';
+    });
+    renderEndBtn();
+  }
+
+  function renderEndBtn() {
+    var cur = $('saveCloudBtn');
+    if (cur) return;
+    var note = $('syncNote');
+    if (!note) return;
+    // A "Save to Cloud" entry that reappears for already-finished packs.
+    note.innerHTML = note.innerHTML +
+      '<br><button class="btn-ghost" id="saveCloudBtn" style="margin-top:0.5rem;">Save to Cloud</button>';
+    $('saveCloudBtn').addEventListener('click', function () {
+      var p = readProgress();
+      var s = p && p.finalScore != null ? p.finalScore : 0;
+      syncIfOnline(s);
+    });
+  }
+
+  function markSynced() {
+    var p = readProgress() || {};
+    p.syncedToCloud = true;
+    writeProgress(p);
+    renderProgressPills();
+    showSyncStatus('✓ Saved to your course.');
+  }
+
+  function showSyncStatus(msg) {
+    var note = $('syncNote');
+    if (note) {
+      var btn = $('saveCloudBtn');
+      if (btn && btn.parentNode === note) btn.remove();
+      note.textContent = msg;
+    }
+  }
+
+  // ---- Init ----
+  function boot() {
+    renderHead();
+    updateOnline();
+    window.addEventListener('online', updateOnline);
+    window.addEventListener('offline', updateOnline);
+
+    if (!questions.length) {
+      el.quizZone.innerHTML =
+        '<div class="results"><h2>No questions yet</h2>' +
+        '<p>This study pack has no embedded quiz questions. Check back when the pack is updated.</p></div>';
+      return;
+    }
+
+    // Resume: continue from the first unanswered question in the saved
+    // progress; previously answered responses already count toward the score.
+    // A question that was saved as answered but hasn't been re-rendered yet
+    // is treated as correct-if-was-correct (responses are only persisted on
+    // selection). We tally them now to keep the running score honest.
+    var p = readProgress();
+    if (p && p.responses && p.responses.length) {
+      var seenCorrect = 0;
+      p.responses.forEach(function (r) {
+        if (r.isCorrect) seenCorrect++;
+        var q = questions[idx];
+        if (q && q.id === r.questionId) idx++;
+      });
+      // Fallback: count by position if ids don't line up (e.g. pool reshuffle).
+      if (!idx) {
+        idx = p.responses.length;
+        seenCorrect = 0;
+      }
+      correct = seenCorrect;
+      if (idx >= questions.length) {
+        // Already finished previously — show results rather than replay.
+        var score = p.finalScore || Math.round(
+          p.responses.filter(function (r) { return r.isCorrect; }).length / questions.length * 100);
+        el.quizZone.innerHTML =
+          '<div class="results"><h2>Already complete</h2>' +
+          '<div class="big-score">' + score + '%</div>' +
+          '<p>Your last attempt for this pack.</p>' +
+          (localBest() > 0 ? '<span class="best-badge">Best: ' + localBest() + '%</span>' : '') +
+          '<div class="controls"><button class="btn-primary" id="retryBtn">Try Again</button>' +
+          '<button class="btn-ghost" id="backToNotesBtn">Read Notes</button></div></div>';
+        $('retryBtn').addEventListener('click', retake);
+        $('backToNotesBtn').addEventListener('click', function () {
+          document.getElementById('notesBody').scrollIntoView({ behavior: 'smooth' });
+        });
+        return;
+      }
+    }
+
+    wireQuiz();
+    renderQuestion(questions[idx], p && p.responses && p.responses.length ? null : null);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

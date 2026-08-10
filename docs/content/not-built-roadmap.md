@@ -36,7 +36,8 @@ Features we're building now. Everything else in the original checklist was revie
 - Minor polish later: auto-issuing at the exact moment the last module completes (vs. on claim).
 
 ## 9. Study packs & Puter course-app
-- ⏳ **Not built** — business logic only. See `docs/content/12-study-packs-business-logic.md`, `13-puter-course-app-business-logic.md`.
+- ✅ **Downloadable study packs built** (study-pack half of #9): `tools/study-pack-template.html` (single-file offline pack: notes + embedded quiz + localStorage progress + cloud sync) and `tools/build-study-packs.js`, which generates `tools/study-packs/<course>-module-<NN>.html` per module from the **same** quiz banks + lesson bundles the online course uses. Module cards on `course.html` show a "Study pack → View / download" link for modules 1–9; demo/non-lesson modules are excluded. Packs work fully offline; when online they offer click-to-sign-in (course email/password) then sync the best score via `submit_quiz_score`. See `docs/content/12-study-packs-business-logic.md`.
+- ⏳ **Puter course-app** not built — business logic only. See `docs/content/13-puter-course-app-business-logic.md`.
 
 ## 10. Automated testing
 - ✅ **Playwright E2E suite** in `tests/`: role redirects, cross-role isolation, stalled-report, batches — 4 pass / 4 skip (student/instructor creds unknown → env-driven skips).

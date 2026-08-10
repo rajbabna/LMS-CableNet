@@ -366,6 +366,24 @@ async function loadModulesForCourse(courseId) {
           ${quizHtml}
         </div>`;
 
+      // Study pack entry point (roadmap #9). Packs are generated per module
+      // (tools/build-study-packs.js) and named <course>-module-<NN>.html for
+      // module_number 1–9 of the two live courses. The link opens the pack in a
+      // new tab (View online); the download attribute offers a local copy so the
+      // student can study offline in a lab without internet.
+      const packNum = Number(module.module_number);
+      const hasPack = (courseId === 'cabling' || courseId === 'networking') && packNum >= 1 && packNum <= 9;
+      const packHref = hasPack ? `tools/study-packs/${courseId}-module-${pad2(packNum)}.html` : '';
+      const packRow = hasPack
+        ? `<div class="module-quiz">
+            <div class="module-quiz-label">Study pack</div>
+            <a class="module-quiz-cq cq-practice" href="${packHref}" target="_blank" rel="noopener"
+               title="Open the offline study pack for this module" aria-label="Open study pack">
+              <span class="cq-icon">${iconFor('pdf')}</span><span class="cq-label">View / download</span>
+            </a>
+          </div>`
+        : '';
+
       const liClass = 'status-' + status;
       return `
         <li data-module-id="${module.id}" class="${liClass}">
@@ -392,6 +410,7 @@ async function loadModulesForCourse(courseId) {
             </div>
           </div>
           ${quizRow}
+          ${packRow}
         </li>`;
     }
 
