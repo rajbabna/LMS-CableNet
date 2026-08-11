@@ -42,6 +42,7 @@ docs/content/overall-achievements.md
 docs/ACHIEVEMENTS.md
 docs/RESUME.md
 docs/START-HERE.md
+docs/SESSION-HANDOFF.md
 
 # Lesson content source (markdown bundle) — generated HTML lives in the
 # repo; the source MD that tools/build-lessons.js reads from stays local

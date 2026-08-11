@@ -19,7 +19,7 @@ Features we're building now. Everything else in the original checklist was revie
 
 ## 4. Achievements
 - ✅ **Merged**. Badges/scoring system wired on top of quiz scores + module completions via `sql/38-achievements.sql`; `loadAchievements`/achievements UI live in the student dashboard.
-- See `docs/ACHIEVEMENTS.md`, `docs/content/overall-achievements.md`.
+- See `docs/content/overall-achievements.md` (local-only snapshot).
 
 ## 5. Video/PDF/interactive content types
 - ✅ Render non-`lesson` `content_type` modules (`video | pdf | interactive | text`) on course pages.

@@ -112,6 +112,6 @@ The site auto-deploys on push to `main` (GitHub Pages, ~1–3 min rebuild).
 Three local copies must stay in sync — `LMS - V2.0` is the git source of truth;
 mirrors live in `Sites\WEB` and `Sites\GitHub Web\cable-net-courses`.
 
-See `docs/RESUME.md` and `docs/START-HERE.md` for the current project state and
-parked future work (Puter course-app, applying `sql/31`–`60`, certificates,
-admin module manager).
+See `docs/SESSION-HANDOFF.md` and `docs/CURRENT-STATUS.md` for the current project
+state and parked future work (Puter course-app, certificates, admin module
+manager).

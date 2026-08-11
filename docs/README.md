@@ -1,53 +1,44 @@
 # 📚 Docs Index — Cable&Net Courses LMS
 
-> **New here?** Start with the root [README.md](../README.md), then [RESUME.md](./RESUME.md) for the current state.
+> **New here?** Read the root [README.md](../README.md), then go straight to
+> [SESSION-HANDOFF.md](./SESSION-HANDOFF.md) (current state) and
+> [CURRENT-STATUS.md](./CURRENT-STATUS.md) (single source of truth).
 
 This folder documents the live Cable&Net Courses learning management system.
 
-## Status & orientation
+## Status & current state
 
 | Doc | What it covers |
 |-----|----------------|
-| [RESUME.md](./RESUME.md) | **Current project state** — roles, accounts, what's built, gotchas, parked work |
-| [START-HERE.md](./START-HERE.md) | Full documentation index + current status |
-| [README-DYNAMIC-SETUP.md](./README-DYNAMIC-SETUP.md) | Quick start / deployment overview |
-| [SYSTEM-SUMMARY.md](./SYSTEM-SUMMARY.md) | System overview & file list |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | System design, data flows, security model |
-
-## Content / database guides
-
-| Doc | What it covers |
-|-----|----------------|
-| [IMPLEMENTATION-GUIDE.md](./IMPLEMENTATION-GUIDE.md) | Setting up courses |
-| [MODULES-IMPLEMENTATION-GUIDE.md](./MODULES-IMPLEMENTATION-GUIDE.md) | Setting up modules |
-| [MODULES-QUICK-REFERENCE.md](./MODULES-QUICK-REFERENCE.md) | Day-to-day content tasks |
-| [SUPABASE-CLIENT-ERROR.md](./SUPABASE-CLIENT-ERROR.md) | Known client/setup issues |
+| [SESSION-HANDOFF.md](./SESSION-HANDOFF.md) | **Read first** — where work left off, creds, deploy pattern, what's next |
+| [CURRENT-STATUS.md](./CURRENT-STATUS.md) | Single source of truth for built features, applied SQL, and the live site |
 
 ## Testing
 
 | Doc | What it covers |
 |-----|----------------|
-| [TESTING-METHODOLOGY.md](./TESTING-METHODOLOGY.md) | **Current framework** — pgTAP (RLS/security) + Playwright (UI flows), env rules, how to run/add tests |
-| `test/17-testing-strategy-playwright-pgtap.md` | Original Step-17 strategy outline (superseded by the methodology doc) |
+| [TESTING-METHODOLOGY.md](./TESTING-METHODOLOGY.md) | **Current framework** — pgTAP (RLS/security) on the TEST project + Playwright (UI flows), env rules, how to run/add tests |
+| `test/17-testing-strategy-playwright-pgtap.md` | Original Step-17 strategy outline (superseded by the methodology doc, checklist kept) |
 
-## Future interactive-content plan (parked)
+## Build inputs (content source)
 
-The `docs/content/` folder holds the step-by-step plan for interactive modules
-(quizzes, simulators, branching scenarios) and the schema they need:
+These folders are read by `tools/build-*.js` to generate the shipped HTML/SQL —
+do not delete:
 
-- `07-interactive-content-strategy.md`
-- `08-quiz-game-modules.md`
-- `09-simulator-modules.md`
-- `10-branching-scenarios.md`
-- `11-schema-updates.md`
+- `cablenet-courses-bundle/*.md` — lesson notes source (via `build-lessons.js`, `build-study-packs.js`)
+- `resources/*` — quiz banks, resource bundles, batches (via `build-quizquestions.js`, `build-resources.js`, `build-study-packs.js`, `validate-batches.js`)
 
-Parts are built on top of live data — the quiz + question banks (modules 1–9 both
-courses, the source for both the online quiz and the per-module **study packs**) are
-shipped; simulators / branching scenarios are not. Business-logic docs 12–16 cover
-study packs (built), the Puter course-app (not built), and the AI Mentor flow (built).
+## Business logic & roadmap
+
+The `docs/content/` folder holds the interactive-module plan (07–11, partly built),
+business-logic docs for study packs (12, built), the Puter course-app (13, not
+built), and the AI Mentor flow (14–16, built):
+
+- `content/not-built-roadmap.md` — what's built / pending / discarded
+- `content/cablenet-lms-issues-to-flag.md` — known issues worth flagging
 
 ## SQL
 
 Database schema, RPCs, triggers, and cleanup scripts live in `../sql/`
-(`01-supabase-schema.sql` … `60-block-self-elevation.sql`). Run them in order
-in the Supabase SQL Editor.
+(`01-supabase-schema.sql` … `62-…`). Run them in order in the Supabase SQL Editor
+(production) or via `tests/pgtap/run-pgtap.js` (TEST project only).

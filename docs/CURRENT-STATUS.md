@@ -181,9 +181,9 @@ Legacy leftovers still defined but unused: `approve_instructor`, `get_pending_in
 
 ## 5. Reconcile notes (which older doc is stale)
 
-- `README.md` "run sql/01 → 27" → now `01` → `62`.
-- `START-HERE.md` "SQL through 27" → now through `60`; new dashboard tabs (Batches,
-  Stalled), achievements, certificates, quiz scoring are absent there — see this file.
+- The old status/setup docs (`RESUME`, `START-HERE`, `ACHIEVEMENTS`,
+  `README-DYNAMIC-SETUP`, `IMPLEMENTATION-GUIDE`, `SYSTEM-SUMMARY`,
+  `ARCHITECTURE`, etc.) were deleted — this file + `SESSION-HANDOFF.md` replace them.
 - `overall-achievements.md` is a snapshot to `sql/30` (Aug 2, 2026) — superseded here.
 - Every human-logged `mentor_sessions` row is still intact; just no UI.
 
