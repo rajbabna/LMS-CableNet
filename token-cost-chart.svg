@@ -2,7 +2,7 @@
 <svg width="980" height="900" viewBox="0 0 980 900" xmlns="http://www.w3.org/2000/svg">
 <rect width="100%" height="100%" fill="#fafafa"/>
 <text x="490.0" y="26" text-anchor="middle" font-family="Segoe UI,Arial" font-size="19" font-weight="700" fill="#202124">Projected cost of the dominant working session by provider &amp; model</text>
-<text x="490.0" y="48" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12.5" fill="#5f6368">Input 22.24M · Output 1.74M (incl. 724.6K reasoning) · Cache-read 264.26M · log-scale, USD</text>
+<text x="490.0" y="48" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12.5" fill="#5f6368">Input 32.79M · Output 2.95M (incl. 894.9K reasoning) · Cache-read 458.89M · log-scale, USD</text>
 <line x1="223.9" y1="110" x2="223.9" y2="838" stroke="#e3e6ea" stroke-width="1"/>
 <text x="223.9" y="854" text-anchor="middle" font-family="Segoe UI,Arial" font-size="10.5" fill="#9aa0a6">$1</text>
 <line x1="402.9" y1="110" x2="402.9" y2="838" stroke="#e3e6ea" stroke-width="1"/>
@@ -16,39 +16,39 @@
 <text x="158" y="122.0" text-anchor="end" font-family="Segoe UI,Arial" font-size="14" font-weight="700" fill="#202124">DeepSeek</text>
 <rect x="170.0" y="110.0" width="14.2" height="24" rx="3" fill="#eafb0a"/>
 <text x="190.2" y="126.0" text-anchor="start" font-family="Consolas" font-size="11" font-weight="700" fill="#111">v4-flash-free (opencode) · $0.00</text>
-<rect x="170.0" y="148.0" width="168.1" height="24" rx="3" fill="#2E7D32"/>
-<text x="338.1" y="164.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">v4-flash · $4.34</text>
-<rect x="170.0" y="182.0" width="248.1" height="24" rx="3" fill="#F9A825"/>
-<text x="418.1" y="198.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">v4-pro · $12.15</text>
+<rect x="170.0" y="148.0" width="201.8" height="24" rx="3" fill="#2E7D32"/>
+<text x="371.8" y="164.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">v4-flash · $6.70</text>
+<rect x="170.0" y="182.0" width="280.7" height="24" rx="3" fill="#F9A825"/>
+<text x="450.7" y="198.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">v4-pro · $18.49</text>
 <text x="158" y="232.0" text-anchor="end" font-family="Segoe UI,Arial" font-size="14" font-weight="700" fill="#202124">Gemini</text>
 <rect x="170.0" y="220.0" width="14.2" height="24" rx="3" fill="#eafb0a"/>
 <text x="190.2" y="236.0" text-anchor="start" font-family="Consolas" font-size="11" font-weight="700" fill="#111">Flash free tier (rate-limited, AI Studio) · $0.00</text>
-<rect x="170.0" y="258.0" width="187.3" height="24" rx="3" fill="#2E7D32"/>
-<text x="357.3" y="274.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">2.5 Flash-Lite · $5.56</text>
-<rect x="170.0" y="292.0" width="442.5" height="24" rx="3" fill="#F9A825"/>
-<text x="612.5" y="308.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">3.5 Flash · $148.16</text>
-<rect x="170.0" y="326.0" width="425.0" height="24" rx="3" fill="#C62828"/>
-<text x="595.0" y="342.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">3.1 Pro · $118.26</text>
+<rect x="170.0" y="258.0" width="225.1" height="24" rx="3" fill="#2E7D32"/>
+<text x="395.1" y="274.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">2.5 Flash-Lite · $9.05</text>
+<rect x="170.0" y="292.0" width="482.5" height="24" rx="3" fill="#F9A825"/>
+<text x="652.5" y="308.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">3.5 Flash · $247.83</text>
+<rect x="170.0" y="326.0" width="463.0" height="24" rx="3" fill="#C62828"/>
+<text x="633.0" y="342.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">3.1 Pro · $192.78</text>
 <text x="158" y="376.0" text-anchor="end" font-family="Segoe UI,Arial" font-size="14" font-weight="700" fill="#202124">ChatGPT (OpenAI)</text>
 <rect x="170.0" y="364.0" width="14.2" height="24" rx="3" fill="#eafb0a"/>
 <text x="190.2" y="380.0" text-anchor="start" font-family="Consolas" font-size="11" font-weight="700" fill="#111">No prod free tier (web ai.com only) · $0.00</text>
-<rect x="170.0" y="402.0" width="301.6" height="24" rx="3" fill="#2E7D32"/>
-<text x="471.6" y="418.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-4o-mini · $24.20</text>
-<rect x="170.0" y="436.0" width="246.0" height="24" rx="3" fill="#F9A825"/>
-<text x="416.0" y="452.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-5.6 Luna · $11.83</text>
-<rect x="170.0" y="470.0" width="425.0" height="24" rx="3" fill="#C62828"/>
-<text x="595.0" y="486.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-5.6 Terra · $118.26</text>
-<rect x="170.0" y="504.0" width="496.2" height="24" rx="3" fill="#C62828"/>
-<text x="666.2" y="520.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-5.6 Sol · $295.65</text>
+<rect x="170.0" y="402.0" width="342.8" height="24" rx="3" fill="#2E7D32"/>
+<text x="512.8" y="418.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-4o-mini · $41.11</text>
+<rect x="170.0" y="436.0" width="284.0" height="24" rx="3" fill="#F9A825"/>
+<text x="454.0" y="452.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-5.6 Luna · $19.28</text>
+<rect x="170.0" y="470.0" width="463.0" height="24" rx="3" fill="#C62828"/>
+<text x="633.0" y="486.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-5.6 Terra · $192.78</text>
+<rect x="170.0" y="504.0" width="534.2" height="24" rx="3" fill="#C62828"/>
+<text x="704.2" y="520.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">GPT-5.6 Sol · $481.94</text>
 <text x="158" y="554.0" text-anchor="end" font-family="Segoe UI,Arial" font-size="14" font-weight="700" fill="#202124">Claude</text>
 <rect x="170.0" y="542.0" width="14.2" height="24" rx="3" fill="#eafb0a"/>
 <text x="190.2" y="558.0" text-anchor="start" font-family="Consolas" font-size="11" font-weight="700" fill="#111">No free tier (trial credit only) · $0.00</text>
-<rect x="170.0" y="580.0" width="368.8" height="24" rx="3" fill="#2E7D32"/>
-<text x="538.8" y="596.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">Haiku 4.5 · $57.39</text>
-<rect x="170.0" y="614.0" width="422.7" height="24" rx="3" fill="#F9A825"/>
-<text x="592.7" y="630.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">Sonnet 5 (intro) · $114.77</text>
-<rect x="170.0" y="648.0" width="493.9" height="24" rx="3" fill="#C62828"/>
-<text x="663.9" y="664.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">Opus 5 · $286.93</text>
+<rect x="170.0" y="580.0" width="406.7" height="24" rx="3" fill="#2E7D32"/>
+<text x="576.7" y="596.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">Haiku 4.5 · $93.44</text>
+<rect x="170.0" y="614.0" width="460.6" height="24" rx="3" fill="#F9A825"/>
+<text x="630.6" y="630.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">Sonnet 5 (intro) · $186.87</text>
+<rect x="170.0" y="648.0" width="531.8" height="24" rx="3" fill="#C62828"/>
+<text x="701.8" y="664.0" text-anchor="end" font-family="Consolas" font-size="11" font-weight="700" fill="#fff">Opus 5 · $467.18</text>
 <rect x="170" y="869" width="13" height="13" rx="2" fill="#eafb0a"/>
 <text x="188" y="879" font-family="Segoe UI,Arial" font-size="11.5" fill="#3c4043">Free (no cost)</text>
 <rect x="362.5" y="869" width="13" height="13" rx="2" fill="#2E7D32"/>

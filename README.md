@@ -21,21 +21,21 @@ converted to Mauritian Rupees (1 USD = 47.04 MUR).
 | Provider | Type | Model | Cost (USD) | Cost (MUR) |
 |---|---|---|---|---:|
 | DeepSeek | Free | v4-flash-free (opencode) | $0.00 | Rs 0.00 |
-| DeepSeek | Paid | v4-flash | $5.09 | Rs 239.44 |
-| DeepSeek | Paid | v4-pro | $14.27 | Rs 671.11 |
+| DeepSeek | Paid | v4-flash | $8.40 | Rs 394.93 |
+| DeepSeek | Paid | v4-pro | $23.28 | Rs 1,095.07 |
 | Gemini | Free | Flash free tier (rate-limited, AI Studio) | $0.00 | Rs 0.00 |
-| Gemini | Paid | 2.5 Flash-Lite | $6.47 | Rs 304.27 |
-| Gemini | Paid | 3.5 Flash | $171.55 | Rs 8,069.91 |
-| Gemini | Paid | 3.1 Pro | $137.18 | Rs 6,453.17 |
+| Gemini | Paid | 2.5 Flash-Lite | $11.11 | Rs 522.58 |
+| Gemini | Paid | 3.5 Flash | $301.40 | Rs 14,177.88 |
+| Gemini | Paid | 3.1 Pro | $235.94 | Rs 11,098.78 |
 | ChatGPT (OpenAI) | Free | No prod free tier (web ai.com only) | $0.00 | Rs 0.00 |
-| ChatGPT (OpenAI) | Paid | GPT-4o-mini | $28.01 | Rs 1,317.74 |
-| ChatGPT (OpenAI) | Paid | GPT-5.6 Luna | $13.72 | Rs 645.32 |
-| ChatGPT (OpenAI) | Paid | GPT-5.6 Terra | $137.18 | Rs 6,453.17 |
-| ChatGPT (OpenAI) | Paid | GPT-5.6 Sol | $342.96 | Rs 16,132.92 |
+| ChatGPT (OpenAI) | Paid | GPT-4o-mini | $49.85 | Rs 2,344.89 |
+| ChatGPT (OpenAI) | Paid | GPT-5.6 Luna | $23.59 | Rs 1,109.88 |
+| ChatGPT (OpenAI) | Paid | GPT-5.6 Terra | $235.94 | Rs 11,098.78 |
+| ChatGPT (OpenAI) | Paid | GPT-5.6 Sol | $589.86 | Rs 27,746.96 |
 | Claude | Free | No free tier (trial credit only) | $0.00 | Rs 0.00 |
-| Claude | Paid | Haiku 4.5 | $66.64 | Rs 3,134.62 |
-| Claude | Paid | Sonnet 5 (intro) | $133.27 | Rs 6,269.24 |
-| Claude | Paid | Opus 5 | $333.19 | Rs 15,673.10 |
+| Claude | Paid | Haiku 4.5 | $114.53 | Rs 5,387.61 |
+| Claude | Paid | Sonnet 5 (intro) | $229.07 | Rs 10,775.23 |
+| Claude | Paid | Opus 5 | $572.66 | Rs 26,938.07 |
 <!-- COST-TABLE-END -->
 
 > Full interactive report with per-session breakdown, timestamps and live-updating
@@ -70,12 +70,19 @@ converted to Mauritian Rupees (1 USD = 47.04 MUR).
   Chat **topic summaries are always captured** (`mentor_ai_sessions`, never raw messages;
   disclosed in the widget) so instructors can improve the course; instructors see them on
   the student profile and an aggregate activity panel on the instructor dashboard.
+- **Study packs** — downloadable, single-file offline packs per lesson module
+  (`tools/study-packs/`) containing notes, an embedded quiz, and progress tracking that
+  works with no internet. When back online, students can sign in and sync their best
+  score to the course. Generated from the same quiz banks the online quiz uses.
+- **Remove from course** — staff can remove a student from a course (enrollment +
+  all course progress/quiz/certificate/AI-mentor data for that course), with a
+  confirm-gated modal. Requires `sql/61` applied.
 
 ## Tech
 
 - Static HTML/CSS/JS served on **GitHub Pages**
 - **Supabase** (PostgreSQL + Auth) via the UMD `supabase-js` client (`js/config.js`)
-- RPCs in `sql/` (run `01` → `60` in the Supabase SQL Editor in order — see `docs/CURRENT-STATUS.md`)
+- RPCs in `sql/` (run `01` → `62` in the Supabase SQL Editor in order — see `docs/CURRENT-STATUS.md`)
 
 ## Project layout
 
@@ -87,7 +94,8 @@ instructor-dashboard.html   instructor/admin dashboard
 student-profile.html        instructor mentor log for one student (timeline + form)
 course-cabling.html         course page (preview-locked)
 course-networking.html      course page (preview-locked)
-js/                         config, client, loaders, auth-guard, progress, mentor-sessions
+js/                         config, client, loaders, auth-guard, progress, mentor-sessions, study-pack entry points
+tools/                      standalone tools + generated study packs (tools/study-packs/)
 css/                        design system + progress styles
 sql/                        schema, RPCs, triggers, cleanup scripts (01–60, gitignored)
 docs/                       documentation + future interactive-content plan
@@ -105,4 +113,5 @@ Three local copies must stay in sync — `LMS - V2.0` is the git source of truth
 mirrors live in `Sites\WEB` and `Sites\GitHub Web\cable-net-courses`.
 
 See `docs/RESUME.md` and `docs/START-HERE.md` for the current project state and
-parked future work (course content, certificates, admin module manager).
+parked future work (Puter course-app, applying `sql/31`–`60`, certificates,
+admin module manager).
