@@ -41,7 +41,7 @@ Features we're building now. Everything else in the original checklist was revie
 
 ## 10. Automated testing
 - ✅ **Playwright E2E suite** in `tests/`: role redirects, cross-role isolation, stalled-report, batches — 4 pass / 4 skip (student/instructor creds unknown → env-driven skips).
-- ✅ **pgTAP RLS/security suite authored** in `tests/pgtap/` (files `00`–`07` + README): schema integrity, mentor AI sessions / enrollments / module completions RLS, profile role guard (self-elevation gap **fixed** in sql/60), RPC authorization, batch staff-read. ⏳ Not yet executed — requires a dedicated TEST Supabase project (never production). Run instructions: `tests/pgtap/README.md` + `docs/test/17-testing-strategy-playwright-pgtap.md`.
+- ✅ **pgTAP RLS/security suite authored** in `tests/pgtap/` (files `00`–`08` + README): schema integrity, mentor AI sessions / enrollments / module completions RLS, profile role guard (self-elevation gap **fixed** in sql/60), RPC authorization, batch staff-read, delete-enrollment authorization. ⏳ Not yet executed — requires a dedicated TEST Supabase project (never production). Run instructions: `tests/pgtap/README.md` + `docs/test/17-testing-strategy-playwright-pgtap.md`.
 - ✅ **Self-elevation gap closed** (sql/60): `set_profile_role` can no longer create an elevated role — insert path only ever makes `student`, conflict path only rewrites `student` → `student`; the signup trigger ignores `options.data.role` metadata; one-time cleanup demotes any elevated-but-unapproved profile (staff roles are admin-assigned via `add_student` only).
 
 ---
@@ -49,6 +49,7 @@ Features we're building now. Everything else in the original checklist was revie
 ## Added beyond the original roadmap
 - ✅ **Stalled students report** (sql/58): auto-detects inactive enrollments (14-day rule) + manual flags; admin Stalled tab lists them and offers Un-stall.
 - ✅ **Student batches** (sql/59): admin Groups them into `batch-YYYY-NNN` cohorts and views per-batch progress, avg quiz, and 14-day-quiet status.
+- ✅ **Remove student from course** (sql/61, ⏳ not applied live): `delete_enrollment` staff RPC + confirm-gated Remove button on the Students tab — deletes the enrollment + course-scoped progress/quiz/certificate/stalled/AI data, keeps the account + other enrollments.
 
 ---
 

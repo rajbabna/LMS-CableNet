@@ -48,13 +48,13 @@ SELECT set_role_authenticated();
 SELECT is((SELECT count(*)::bigint
          FROM public.mentor_ai_sessions s
          JOIN public.courses c ON c.id = s.course_id
-         WHERE c.id = ''cabling''), 2::bigint,
+         WHERE c.id = 'cabling'), 2::bigint,
         'cabling instructor sees her cabling sessions');
 
 -- 6. same instructor cannot see networking sessions (not assigned).
 SELECT is((SELECT count(*)::bigint
          FROM public.mentor_ai_sessions
-         WHERE course_id = ''networking''), 0::bigint,
+         WHERE course_id = 'networking'), 0::bigint,
         'cabling instructor cannot see networking sessions');
 
 -- 7. admin sees everything.

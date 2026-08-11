@@ -23,6 +23,13 @@ This folder documents the live Cable&Net Courses learning management system.
 | [MODULES-QUICK-REFERENCE.md](./MODULES-QUICK-REFERENCE.md) | Day-to-day content tasks |
 | [SUPABASE-CLIENT-ERROR.md](./SUPABASE-CLIENT-ERROR.md) | Known client/setup issues |
 
+## Testing
+
+| Doc | What it covers |
+|-----|----------------|
+| [TESTING-METHODOLOGY.md](./TESTING-METHODOLOGY.md) | **Current framework** — pgTAP (RLS/security) + Playwright (UI flows), env rules, how to run/add tests |
+| `test/17-testing-strategy-playwright-pgtap.md` | Original Step-17 strategy outline (superseded by the methodology doc) |
+
 ## Future interactive-content plan (parked)
 
 The `docs/content/` folder holds the step-by-step plan for interactive modules
@@ -34,11 +41,13 @@ The `docs/content/` folder holds the step-by-step plan for interactive modules
 - `10-branching-scenarios.md`
 - `11-schema-updates.md`
 
-This is a **separate project** — build the real course materials here before wiring
-them into the `modules` table.
+Parts are built on top of live data — the quiz + question banks (modules 1–9 both
+courses, the source for both the online quiz and the per-module **study packs**) are
+shipped; simulators / branching scenarios are not. Business-logic docs 12–16 cover
+study packs (built), the Puter course-app (not built), and the AI Mentor flow (built).
 
 ## SQL
 
 Database schema, RPCs, triggers, and cleanup scripts live in `../sql/`
-(`01-supabase-schema.sql` … `24-restamp-admin-and-guard-role.sql`). Run them in order
+(`01-supabase-schema.sql` … `60-block-self-elevation.sql`). Run them in order
 in the Supabase SQL Editor.

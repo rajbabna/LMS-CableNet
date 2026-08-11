@@ -60,6 +60,7 @@ supabase test db --pgpgtap ...   # docker-based, migrations applied (per-strateg
 | `05-profile-role-guard.sql` | `set_profile_role` never demotes admin/instructor; students can''t self-elevate via REST or the RPC (sql/60 blocks it). |
 | `06-rpc-authorization.sql` | SECURITY DEFINER RPCs respect role + course assignment (instructor scoping). |
 | `07-batches-staff-read.sql` | batches staff SELECT only; admin-only mutation RPCs. |
+| `08-delete-enrollment.sql` | `delete_enrollment` (sql/61): students blocked, instructor scoped to assigned course, course-scoped data wiped, other courses + account kept, audit trail written. |
 
 ## Personas (fixed UUIDs)
 

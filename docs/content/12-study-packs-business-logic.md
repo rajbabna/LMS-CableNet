@@ -485,8 +485,29 @@ async function syncProgressToCloud() {
 
 ## Checklist
 
-- [ ] Understand offline/online flow (when progress is stored locally vs synced)
-- [ ] Know file structure (single HTML file with embedded data + images)
-- [ ] Understand data model (study_packs table + quiz_scores for progress)
-- [ ] Know how sync works (localStorage → Supabase when online)
-- [ ] Ready to implement first study pack
+- [x] Understand offline/online flow (when progress is stored locally vs synced)
+- [x] Know file structure (single HTML file with embedded data + images)
+- [x] Understand data model (study_packs-style single-file pack + `quiz_scores` for progress)
+- [x] Know how sync works (localStorage → Supabase when online)
+- [x] Ready to implement first study pack
+
+---
+
+## ✅ Build status (implemented 2026-08)
+
+Study packs are **built and live**. See `docs/CURRENT-STATUS.md` §4 and
+`docs/content/not-built-roadmap.md` #9 for the shipped scope. Concretely:
+
+| Doc concept | Implementation |
+|---|---|
+| Single self-contained file | `tools/study-pack-template.html` (offline pack shell: notes + embedded quiz + progress + sync) |
+| Pack content source | `tools/build-study-packs.js` — embeds the **same** quiz banks + lesson bundles the online course uses, per module |
+| Generated packs | `tools/study-packs/<course>-module-<NN>.html` (modules 1–9, both courses) |
+| Entry point | Module card "Study pack → View / download" (`js/load-modules.js`), locked/coming-soon excluded |
+| Offline progress | `localStorage['study-pack:<moduleId>']` — responses, finalScore, `syncedToCloud` (this doc's schema) |
+| Online sync | Results screen: when online, save best score via `submit_quiz_score` (existing RPC); a downloaded `file://` pack offers an inline course-account sign-in first |
+| Retake | "Try Again" starts a fresh attempt; server-best merge is handled by `quiz_scores` `GREATEST(best_score, …)` in `submit_quiz_score` |
+| Notes rendering | Markdown → HTML table/list/heading conversion in `build-study-packs.js` (tables, `-`/`1.` lists, `###`, `**bold**`, `` `code` ``) |
+
+**Authoring flow:** edit the quiz bank / lesson bundle markdown → run
+`node tools/build-study-packs.js` → commit the regenerated packs.

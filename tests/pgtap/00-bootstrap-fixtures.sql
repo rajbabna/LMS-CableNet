@@ -61,9 +61,11 @@ $$;
 
 SELECT 'pgtap fixtures';
 
--- Clear anything from a previous run (FK children first).
-DELETE FROM public.student_batch_members WHERE student_id IN ('a0000000-0000-0000-0000-000000000011','a0000000-0000-0000-0000-000000000012');
-DELETE FROM public.student_batches WHERE id = 'pgtap-test';
+-- Clear anything from a previous run (FK children first). Batches are wiped
+-- wholesale: sql/59 seeds a QA roster batch on the TEST project, and the suite
+-- asserts a deterministic single fixture batch.
+DELETE FROM public.student_batch_members;
+DELETE FROM public.student_batches;
 DELETE FROM public.quiz_scores       WHERE user_id IN ('a0000000-0000-0000-0000-000000000011','a0000000-0000-0000-0000-000000000012');
 DELETE FROM public.module_completions WHERE user_id IN ('a0000000-0000-0000-0000-000000000011','a0000000-0000-0000-0000-000000000012');
 DELETE FROM public.mentor_sessions   WHERE student_id IN ('a0000000-0000-0000-0000-000000000011','a0000000-0000-0000-0000-000000000012');
@@ -121,6 +123,13 @@ VALUES
 -- Module completion: student1 completed networking module 27.
 INSERT INTO public.module_completions (user_id, module_id, status)
 VALUES ('a0000000-0000-0000-0000-000000000011', 27, 'completed');
+
+-- Stable fixture module for the RLS insert tests (04): module ids are
+-- re-numbered by sql/31 on the TEST project, so tests must not assume a
+-- specific catalog id. This dedicated row gives INSERT tests a real FK target.
+INSERT INTO public.modules (id, course_id, module_number, title, description, content_type, content_url)
+VALUES (9001, 'cabling', 90, 'PgTAP fixture module', 'dedicated RLS-insert test target', 'lesson', 'https://pgtap.invalid/fixture')
+ON CONFLICT (id) DO NOTHING;
 
 -- quiz_scores tied to the networking quiz module (27)
 INSERT INTO public.quiz_scores (user_id, module_id, attempts, best_score)

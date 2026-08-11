@@ -26,16 +26,16 @@ SELECT is((SELECT count(*)::bigint
            WHERE user_id = 'a0000000-0000-0000-0000-000000000012'), 0::bigint,
           'student1 cannot see student2''s completions');
 
--- 3. student1 CAN insert their own completion for a fresh module (module 1).
+-- 3. student1 CAN insert their own completion for a fresh module (fixture 9001).
 SELECT lives_ok(
   'INSERT INTO public.module_completions (user_id, module_id, status, completion_percentage, completed_at)
-   VALUES (''a0000000-0000-0000-0000-000000000011'', 1, ''completed'', 100, now())',
+   VALUES (''a0000000-0000-0000-0000-000000000011'', 9001, ''completed'', 100, now())',
   'student1 can insert own completion');
 
 -- 4. student1 CANNOT insert a completion for student2 (WITH CHECK violation).
 SELECT throws_ok(
   'INSERT INTO public.module_completions (user_id, module_id, status, completion_percentage, completed_at)
-   VALUES (''a0000000-0000-0000-0000-000000000012'', 1, ''completed'', 100, now())',
+   VALUES (''a0000000-0000-0000-0000-000000000012'', 9001, ''completed'', 100, now())',
   '42501',
   NULL,
   'student1 cannot insert a completion for student2');

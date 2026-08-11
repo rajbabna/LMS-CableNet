@@ -244,6 +244,21 @@
     .btn-reset-solid:hover { background: #7A2E16; }
     .btn-reset-solid:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .btn-remove {
+      background: transparent;
+      color: #B3261E;
+      border: 1px solid #B3261E;
+    }
+    .btn-remove:hover { background: #FDE8E8; }
+
+    .btn-remove-solid {
+      background: #B3261E;
+      color: #fff;
+      border: 1px solid #B3261E;
+    }
+    .btn-remove-solid:hover { background: #8E1B15; }
+    .btn-remove-solid:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .btn-extend {
       background: transparent;
       color: var(--teal-dark, #0F766E);
@@ -1616,6 +1631,33 @@
     </div>
   </div>
 
+  <!-- Modal: Remove from course -->
+  <div id="removeModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="removeModalTitle">
+    <div class="modal">
+      <h3 id="removeModalTitle">🗑️ Remove Student from Course</h3>
+
+      <p id="removeStudentCopy" style="margin:0.4rem 0 1rem; color:var(--ink-soft); font-size:0.9rem; line-height:1.5;">
+        This will remove this student from this course entirely: enrollment, all progress,
+        quiz scores, certificates, stalled flags and AI mentor history for THIS course are
+        deleted. The account itself (and any other course enrollments) are kept.
+        This cannot be undone.
+      </p>
+
+      <label class="toggle-line" style="margin-bottom:1.2rem;">
+        <input type="checkbox" id="removeConfirmCheck">
+        <span>
+          <span class="toggle-title">I understand</span>
+          <span class="toggle-hint">Remove this student from this course — this cannot be undone.</span>
+        </span>
+      </label>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeRemoveModal()">Cancel</button>
+        <button class="btn btn-remove-solid" id="removeSubmitBtn" onclick="submitRemoveStudent()" disabled>Remove Student</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Extend / Renew Access -->
   <div id="extendModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="extendModalTitle">
     <div class="modal">
@@ -2118,6 +2160,10 @@
                 <button class="btn btn-table btn-reset"
                   onclick="openResetModal('${row.student_id}', '${row.student_name}', '${row.course_id}')">
                   Reset
+                </button>
+                <button class="btn btn-table btn-remove"
+                  onclick="openRemoveModal('${row.student_id}', '${row.student_name}', '${row.course_id}', '${row.course_title}')">
+                  Remove
                 </button>
                 ${row.is_stalled
                   ? `<button class="btn btn-table btn-unstall"
@@ -2966,6 +3012,80 @@
     document.addEventListener('change', (e) => {
       if (e.target && e.target.id === 'resetConfirmCheck') {
         document.getElementById('resetSubmitBtn').disabled = !e.target.checked;
+      }
+    });
+
+    // ============================================
+    // REMOVE FROM COURSE
+    // ============================================
+    function openRemoveModal(studentId, studentName, courseId, courseTitle) {
+      currentStudentId = studentId;
+      currentCourseId  = courseId;
+      document.getElementById('removeModalTitle').textContent = `🗑️ Remove ${studentName} from ${courseTitle}`;
+      document.getElementById('removeStudentCopy').textContent =
+        `This will remove ${studentName} from ${courseTitle} entirely: enrollment, all progress, ` +
+        `quiz scores, certificates, stalled flags and AI mentor history for this course are ` +
+        `deleted. The account itself (and any other course enrollments) are kept. ` +
+        'This cannot be undone.';
+      const check = document.getElementById('removeConfirmCheck');
+      check.checked = false;
+      document.getElementById('removeSubmitBtn').disabled = true;
+      document.getElementById('removeModal').classList.add('active');
+    }
+
+    function closeRemoveModal() {
+      document.getElementById('removeModal').classList.remove('active');
+      document.getElementById('removeConfirmCheck').checked = false;
+      document.getElementById('removeSubmitBtn').disabled = true;
+    }
+
+    async function submitRemoveStudent() {
+      const check = document.getElementById('removeConfirmCheck');
+      if (!check.checked) { showAlert('Please confirm before removing', 'error'); return; }
+
+      const btn = document.getElementById('removeSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Removing…';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('delete_enrollment', {
+          p_student_id: currentStudentId,
+          p_course_id:  currentCourseId
+        });
+
+        if (error) {
+          showAlert(`Error: ${error.message}`, 'error');
+          btn.textContent = 'Remove Student';
+          return;
+        }
+
+        if (data === 'no_permission') {
+          showAlert('You do not have permission to remove students from this course.', 'error');
+          btn.textContent = 'Remove Student';
+          return;
+        }
+
+        if (data === 'not_found') {
+          showAlert('No enrollment found for this student/course.', 'error');
+          btn.textContent = 'Remove Student';
+          return;
+        }
+
+        showAlert('✓ Student removed from course', 'success');
+        closeRemoveModal();
+        await loadDashboard();
+        await loadQuizScores();
+        await loadAuditLog();
+      } catch (err) {
+        showAlert(`Unexpected error: ${err.message}`, 'error');
+        btn.textContent = 'Remove Student';
+      }
+    }
+
+    // Enable the Remove button only once the confirm box is ticked.
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'removeConfirmCheck') {
+        document.getElementById('removeSubmitBtn').disabled = !e.target.checked;
       }
     });
 

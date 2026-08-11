@@ -137,10 +137,10 @@ This is the core reason for running both — each one is blind to the layer the 
 - [x] Start with a Playwright test covering the three role-based sign-in redirects — highest value, lowest effort first test
 - [x] Add Playwright coverage for student → instructor/admin URL isolation (cross-role redirect)
 - [x] Add a regression guard for the Stalled-students report tab (sql/58)
-- [ ] Set up a dedicated test Supabase project (or isolated schema) before writing any pgTAP tests
-- [ ] Add pgTAP tests for `mentor_ai_sessions` and `enrollments` RLS policies first, since those protect the most sensitive data
-- [ ] Add Playwright coverage for the AI Mentor widget's offline notice — a state that's easy to forget to test manually
-- [ ] Treat a test failure as the first place to check before assuming a GitHub Pages cache issue
+- [x] Set up a dedicated test Supabase project (or isolated schema) before writing any pgTAP tests
+- [x] Add pgTAP tests for `mentor_ai_sessions` and `enrollments` RLS policies first, since those protect the most sensitive data
+- [x] Add Playwright coverage for the AI Mentor widget's offline notice — a state that's easy to forget to test manually
+- [x] Treat a test failure as the first place to check before assuming a GitHub Pages cache issue
 
 ## Playwright suite — how to run
 
@@ -169,3 +169,6 @@ What the suite covers today:
 | `auth-role-redirect.spec.js` | admin → `instructor-dashboard.html`; instructor → same; student → `student-dashboard.html`; bad credentials stay on `login.html` with an error |
 | `cross-role-isolation.spec.js` | a logged-in student who hand-navigates to `instructor-dashboard.html` is bounced to the student dashboard, not just hidden via CSS |
 | `stalled-report.spec.js` | admin opens the Stalled tab; stat cards populate; auto + manual counts equal total; each row has an Un-stall action |
+| `remove-from-course.spec.js` | instructor Remove flow for an enrolled student — regression guard for sql/61 (`delete_enrollment`) |
+| `batches.spec.js` | partner batch behavior for the batch-management UI (sql/59) |
+| `ai-mentor-offline.spec.js` | offline notice in the AI Mentor widget (`navigator.onLine === false` → `.ai-mentor-offline` bar; no offline notice while online) |

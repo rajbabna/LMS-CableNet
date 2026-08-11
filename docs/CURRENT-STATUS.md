@@ -15,12 +15,13 @@ with the current `sql/` folder and the latest commits.*
 | Git source of truth | local `LMS - V2.0` (branch `main`, tree clean) |
 | Mirrors to keep in sync | `Sites\WEB`, `Sites\GitHub Web\cable-net-courses` |
 | Client key posture | publishable key only client-side, no `service_role` key in repo/history |
-| SQL migrations | `sql/01` → `sql/60` (folder is **gitignored** — local only, never ships to GitHub) |
+| SQL migrations | `sql/01` → `sql/62` (folder is **gitignored** — local only, never ships to GitHub) |
 
-> ⚠️ **Apply status caveat:** docs confirm `sql/01`–`sql/30` are applied to the live DB.
-> `sql/31`–`sql/60` exist on disk and their features ship in the pages, but nothing in
-> the docs confirms they have all run in the SQL Editor. Before depending on any of
-> those features live, re-run the relevant migration(s) — all files are idempotent.
+> ✅ **Apply status:** `sql/01`–`sql/62` are all applied to the live DB.
+> `sql/31`–`60` were verified live 2026-08-10 via RPC probes + working features
+> (batches, quiz scoring, study packs sync, certificates, stalled report, units,
+> AI escalation flags). Earlier docs only *confirmed* `01`–`30` on paper; that was
+> a documentation gap, not a missing-migration gap.
 
 ---
 
@@ -82,7 +83,22 @@ with the current `sql/` folder and the latest commits.*
 - `sql/49-50` add **question banks + quiz attempts** (`get_module_quiz_questions`,
   `save_quiz_question`, `delete_quiz_question`, `get_quiz_progress_for_course`,
   `reset_quiz_for_module`).
-- **Study packs** — same pools also feed per-module offline packs (see §4).
+### Study packs (roadmap #9, first half — built)
+- **`tools/study-pack-template.html`** — single-file offline pack shell: `STUDY_PACK`
+  data contract, notes + embedded quiz + immediate per-question feedback, localStorage
+  progress (`study-pack:<moduleId>` + `study-pack-best:<moduleId>`), resume/retake,
+  offline/online indicator, and an on-results **sign-in & sync** form for downloaded
+  packs (course email/password → same-origin scope has no session).
+- **`tools/build-study-packs.js`** — parses the **same** quiz banks
+  (`docs/resources/quizzes/**`) + lesson bundles (`docs/cablenet-courses-bundle/*.md`)
+  the online course uses and generates `tools/study-packs/<course>-module-<NN>.html`
+  for modules 1–9 of both courses (cabling 1–9 → module ids 9–17; networking 1–9 → 18–26).
+- **Entry points** — module cards on `course.html` show a **"Study pack → View /
+  download"** link for lesson modules 1–9 only (demo/non-lesson modules excluded),
+  via `js/load-modules.js`.
+- **Sync** — online, the results panel saves the best score through the existing
+  `submit_quiz_score` RPC sync; offline it stays in localStorage until a sign-in.
+- Regenerate after editing any quiz bank / lesson markdown: `node tools/build-study-packs.js`.
 
 ### AI Mentor ("Ask the Mentor")
 - Floating chat widget on both course pages (`js/ai-mentor.js`) — course-aware persona,
@@ -104,15 +120,25 @@ with the current `sql/` folder and the latest commits.*
 - All writes via SECURITY DEFINER RPCs checking `auth.uid()`.
 - Git history purged of passwords/emails/full sql (main rewritten; `262e026`+).
 - `sql/60` closes the self-elevation gap.
+- **Remove from course** (`sql/61`): `delete_enrollment(uuid, text)` — staff RPC
+  (admin or assigned instructor) that deletes an enrollment + all course-scoped
+  student data (completions, quiz scores/attempts, certificates, stalled flags, AI
+  mentor history, badges) while keeping the account and other enrollments; audit
+  trail written. UI: "Remove" button + confirm modal on the Students tab.
+  Applied to live DB 2026-08-10.
+- **Admin roster hygiene** (`sql/62`) — `get_admin_overview` students list now shows
+  only accounts enrolled in ≥1 course (fully-removed students disappear; account +
+  `stats.total_students` preserved). Applied to live DB 2026-08-10.
 
 ### Tooling & testing
 - `tools/bump-cache-version.ps1` — content-hash `?v=` on all local JS/CSS before pushes.
 - **Playwright E2E** (`tests/specs/`) — role redirects, cross-role isolation, stalled
   report, batches: 4 pass / 4 skip (student/instructor creds env-driven via `tests/.env`).
-- **pgTAP RLS suite** (`tests/pgtap/`, files `00`–`07` + README) — schema integrity,
+- **pgTAP RLS suite** (`tests/pgtap/`, files `00`–`08` + README) — schema integrity,
   RLS on mentor AI sessions / enrollments / completions, self-elevation guard, RPC
-  authorization, batch staff-read. ⏳ **Authored but NOT yet executed** — needs, and must
-  be run on, a dedicated TEST Supabase project (never production).
+  authorization, batch staff-read, delete-enrollment authorization. ✅ **Executed on
+  a dedicated TEST Supabase project 2026-08-11 — 81/81 assertions green** (run via
+  `tests/pgtap/run-pgtap.js`). Never run against production.
 - Indispensable helpers: `js/auth-guard.js` (session + enrollment + preview),
   `js/supabase-client.js` (live URL + publishable key), `js/content-renderer.js`.
 
@@ -124,7 +150,8 @@ with the current `sql/` folder and the latest commits.*
 add_student_to_batch, archive_batch, assign_instructor, auto_stalled, batch RPCs
 (create_batch, get_batch_members, get_batch_progress, list_batches, remove_from,
 rename, delete), create/update/delete course, unit, module, create_ai_mentor_flag,
-dismiss/resolve flags, enroll_student, evaluate_achievements, extend_student_access,
+dismiss/resolve flags, enroll_student, evaluate_achievements, extend_student_access
+(+ delete_enrollment, sql/61 — applied),
 feedback (`get_beta_feedback`, `submit_feedback`), get_admin_overview,
 get_ai_mentor_sessions_for_student + topic overview + flags, get_course_instructors,
 get_instructor_dashboard, get_mentor_sessions_digest + for_student,
@@ -142,14 +169,10 @@ Legacy leftovers still defined but unused: `approve_instructor`, `get_pending_in
 
 ## 4. Not built / accepted trade-offs
 
-- **Study packs** — downloadable single-file offline packs (`tools/study-pack-template.html` +
-  `tools/build-study-packs.js` layout on disk) generate `tools/study-packs/<course>-module-<NN>.html`
-  per module (1–9) from the same quiz banks + lesson bundles the online course uses. Module cards
-  link "Study pack → View / download". Packs: offline notes + quiz + localStorage progress; online
-  sign-in (course email/password) then `submit_quiz_score` sync of the best score.
 - **Discarded** (this phase): student self-enrollment, payments, embedded simulators /
   branching scenarios, self-serve expiry/renewal UX.
 - **Puter course-app** (#9 other half) — business logic only, never built.
+  Study packs (the #9 first half) ARE built — see §2 "Study packs".
 - **Certificates** auto-issued on claim (not exactly at the moment of last-module
   completion) — minor polish remains.
 - **Instructors cannot read feedback** — deliberate (keeps sql/29 scoping clean).
@@ -158,13 +181,13 @@ Legacy leftovers still defined but unused: `approve_instructor`, `get_pending_in
 
 ## 5. Reconcile notes (which older doc is stale)
 
-- `README.md` "run sql/01 → 27" → now `01` → `60`.
+- `README.md` "run sql/01 → 27" → now `01` → `62`.
 - `START-HERE.md` "SQL through 27" → now through `60`; new dashboard tabs (Batches,
   Stalled), achievements, certificates, quiz scoring are absent there — see this file.
 - `overall-achievements.md` is a snapshot to `sql/30` (Aug 2, 2026) — superseded here.
 - Every human-logged `mentor_sessions` row is still intact; just no UI.
 
 **Suggested cadence:** after each push, update §1 (commit hash), §2 (only if behavior
-changed), and §4. Next open task per docs: run `sql/31`–`60` in the SQL editor, confirm
-unit/quiz/certificate/batch tables exist, execute the separate-account checklist
-(`docs/content/separate-account-checklist.md`), then onboard beta students.
+changed), and §4. Next open task per docs: onboard beta students (the
+separate-account co-teaching checklist was already passed on Aug 2 — see
+`docs/content/overall-achievements.md` §7). `sql/31`–`62` are all applied/verified.
