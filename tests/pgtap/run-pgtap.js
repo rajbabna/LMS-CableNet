@@ -191,8 +191,8 @@ async function main() {
       process.exit(1);
     }
 
-    // 01..08 test files, each already wrapped in BEGIN / finish / ROLLBACK.
-    for (let n = 1; n <= 8; n++) {
+    // 01..09 test files, each already wrapped in BEGIN / finish / ROLLBACK.
+    for (let n = 1; n <= 9; n++) {
       const file = fs.readdirSync(PGTAP_DIR).find(x => x.startsWith(`${String(n).padStart(2, '0')}-`));
       if (!file) { console.log(`?    missing 0${n}`); continue; }
       const sql = fs.readFileSync(path.join(PGTAP_DIR, file), 'utf8');

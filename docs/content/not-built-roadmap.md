@@ -32,12 +32,16 @@ Features we're building now. Everything else in the original checklist was revie
 - ✅ Real video hosting via **Supabase Storage**: `sql/44` creates a public `course-videos` bucket + staff upload policies; the module editor's video modal gains an "Upload .mp4" control that uploads and auto-fills the Content URL; the course-page renderer plays the `.mp4` inline.
 
 ## 8. Certificate issuance
-- ✅ **Claim flow live** (sql/41 + certificate.html): completing every module shows the completion banner → "View certificate" → `certificate.html` calls `issue_certificate` and the student's Certificates tab lists them via `get_my_certificates`.
-- Minor polish later: auto-issuing at the exact moment the last module completes (vs. on claim).
+- ✅ **Claim flow plus auto-issue live** (sql/41 + certificate.html + sql/63 trigger):
+  completing every module now auto-issues the certificate at the instant the last
+  module completes, then shows the completion banner → "View certificate" →
+  `certificate.html` (claim is display-only/idempotent), and the student's
+  Certificates tab lists them via `get_my_certificates`. Covered by
+  `tests/pgtap/09-certificates-auto-issue.sql`.
 
 ## 9. Study packs & Puter course-app
 - ✅ **Downloadable study packs built** (study-pack half of #9): `tools/study-pack-template.html` (single-file offline pack: notes + embedded quiz + localStorage progress + cloud sync) and `tools/build-study-packs.js`, which generates `tools/study-packs/<course>-module-<NN>.html` per module from the **same** quiz banks + lesson bundles the online course uses. Module cards on `course.html` show a "Study pack → View / download" link for modules 1–9; demo/non-lesson modules are excluded. Packs work fully offline; when online they offer click-to-sign-in (course email/password) then sync the best score via `submit_quiz_score`. See `docs/content/12-study-packs-business-logic.md`.
-- ⏳ **Puter course-app** not built — business logic only. See `docs/content/13-puter-course-app-business-logic.md`.
+- ✅ **Puter course-app built** (the other half of #9): `tools/puter-course-companion-template.html` + `tools/build-puter-course-app.js`, which generates `tools/puter-apps/<course>-companion.html` for both live courses — a single-file, Puter-hosted "Course Companion" app with study notes, embedded quizzes, and a built-in AI Mentor (`puter.ai.chat`, user-pays model) grounded in the course curriculum. Progress is private per student (Puter cloud KV when signed in, localStorage fallback). The app is a satellite practice tool and does not touch Supabase (Option A). See `docs/content/13-puter-course-app-business-logic.md`.
 
 ## 10. Automated testing
 - ✅ **Playwright E2E suite** in `tests/`: role redirects, cross-role isolation, stalled-report, batches — 4 pass / 4 skip (student/instructor creds unknown → env-driven skips).

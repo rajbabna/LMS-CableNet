@@ -1,5 +1,25 @@
 # Step 13 — Custom Puter App for Courses
 
+## Implemented Status
+
+The generic design below was realized as a **Course Companion** app:
+
+- **Builder:** `tools/build-puter-course-app.js` reads the same quiz banks
+  (`docs/resources/quizzes/**`) and lesson bundles (`docs/cablenet-courses-bundle/*.md`)
+  the live course/study packs use, and emits one single-file app per course:
+  `tools/puter-apps/<course>-companion.html` (cabling + networking).
+- **Template:** `tools/puter-course-companion-template.html` — dark AwsomeDesign
+  glassmorphism shell with a module rail and three tabs (Study notes / Quiz / AI Mentor).
+- **AI Mentor:** built-in `puter.ai.chat()` chat (user-pays model — ga student's own
+  free Puter account covers usage, no API key), grounded in the course curriculum and the
+  active module.
+- **Storage:** per-student private progress via `puter.kv` when signed in with Puter;
+  localStorage fallback for anonymous use. The app never touches Supabase (Option A below).
+- **Entry point:** "Course Companion ↗" link in the course-header footer on `course.html`.
+- **Deploy (owner action):** upload each generated `.html` to Puter under the trainer's
+  account → Puter issues a shareable URL → post the link on the course page.
+- Regenerate after editing quiz banks / lesson markdown: `node tools/build-puter-course-app.js`.
+
 ## Business Logic & System Design
 
 ---
@@ -141,8 +161,8 @@ Two deliberate options, decided per-app rather than by default:
 
 ## Checklist
 
-- [ ] Confirm whether the tool is practice-only or needs official tracking
-- [ ] Decide on sync strategy (none vs. explicit "Save to Dashboard")
-- [ ] Keep the app's content editable independently of the main course materials
-- [ ] Share the app link through the existing course page, not as a separate system
-- [ ] Avoid duplicating enrolment/grading logic that already lives in Supabase
+- [x] Confirm whether the tool is practice-only or needs official tracking — **practice-only (Option A)**
+- [x] Decide on sync strategy (none vs. explicit "Save to Dashboard") — **none; progress is private to the student's Puter cloud**
+- [x] Keep the app's content editable independently of the main course materials — **generator consumes the same authored quiz banks + lesson bundles**
+- [x] Share the app link through the existing course page, not as a separate system — **"Course Companion ↗" in the course-header footer**
+- [x] Avoid duplicating enrolment/grading logic that already lives in Supabase — **app never calls Supabase**

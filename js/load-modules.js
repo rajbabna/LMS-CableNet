@@ -515,7 +515,13 @@ async function loadModulesForCourse(courseId) {
         const label = firstOpen
           ? `Continue: ${firstOpen.title} →`
           : (completedCount === totalModules && totalModules > 0 ? 'Course complete — review modules' : 'Start Course →');
-        footer.innerHTML = `<a class="btn btn-primary course-cta" href="#moduleList">${label}</a>`;
+        const companionHref = (courseId === 'cabling' || courseId === 'networking')
+          ? (window.PUTER_COMPANION_URLS && window.PUTER_COMPANION_URLS[courseId]) || `tools/puter-apps/${courseId}-companion.html`
+          : '';
+        footer.innerHTML = `<a class="btn btn-primary course-cta" href="#moduleList">${label}</a>` +
+          (companionHref
+            ? `<a class="btn btn-ghost course-companion-link" href="${companionHref}" target="_blank" rel="noopener" title="Open the Course Companion app — study, quiz and ask the AI Mentor in your own Puter space" aria-label="Open Course Companion app">Course Companion ↗</a>`
+            : '');
       }
     }
 

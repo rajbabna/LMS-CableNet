@@ -29,3 +29,11 @@ window.SUPABASE_CONFIG = {
 // Networking flashcard quiz (Step 13 satellite tool). Hosted same-origin
 // so one Puter sign-in covers both the quiz and the AI Mentor widget.
 window.PUTER_QUIZ_URL = "tools/basic-network-quiz.html";
+
+// Course Companion apps (tools/puter-apps/<course>-companion.html) hosted on
+// Puter. Owner action: upload each generated app, then paste the share URLs here.
+// Leave empty to keep using the same-repo local copy (works for preview/testing).
+window.PUTER_COMPANION_URLS = {
+  cabling: "",
+  networking: ""
+};

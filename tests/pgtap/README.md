@@ -61,6 +61,7 @@ supabase test db --pgpgtap ...   # docker-based, migrations applied (per-strateg
 | `06-rpc-authorization.sql` | SECURITY DEFINER RPCs respect role + course assignment (instructor scoping). |
 | `07-batches-staff-read.sql` | batches staff SELECT only; admin-only mutation RPCs. |
 | `08-delete-enrollment.sql` | `delete_enrollment` (sql/61): students blocked, instructor scoped to assigned course, course-scoped data wiped, other courses + account kept, audit trail written. |
+| `09-certificates-auto-issue.sql` | Certificate auto-issue (sql/63): no cert before completion, one row at final-module completion, `issued_at` present, idempotent on re-complete + claim, module-27 exclusion, non-completed status doesn't fire. |
 
 ## Personas (fixed UUIDs)
 

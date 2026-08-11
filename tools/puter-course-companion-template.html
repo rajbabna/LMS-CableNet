@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     AwsomeDesign tokens (dark glassmorphism) — see AwsomeDesign/DESIGN.md
+     ============================================================ */
+  :root {
+    --bg-dark: #0b0f19;
+    --bg-surface: #111827;
+    --bg-surface-elevated: #1f293d;
+    --bg-glass: rgba(17, 24, 39, 0.75);
+    --bg-glass-hover: rgba(31, 41, 61, 0.85);
+
+    --primary: #6366f1;
+    --primary-glow: #818cf8;
+    --accent-cyan: #06b6d4;
+    --accent-violet: #8b5cf6;
+    --accent-emerald: #10b981;
+
+    --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    --gradient-surface: linear-gradient(180deg, rgba(31, 41, 61, 0.6) 0%, rgba(17, 24, 39, 0.8) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(99, 102, 241, 0.4);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+    --red: #ef4444;
+    --green: #10b981;
+
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 0.2s;
+    --duration-normal: 0.35s;
+
+    --font-display: "Outfit", "Inter", sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 96px; }
+  body {
+    margin: 0;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 85% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 5% 20%, rgba(6, 182, 212, 0.10) 0%, transparent 40%),
+      linear-gradient(180deg, #0b0f19 0%, #0e1424 100%);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: var(--gradient-glow);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  a { color: var(--primary-glow); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .app { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; position: relative; z-index: 1; }
+
+  /* ---- Top bar ---- */
+  .app-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.9rem 1.1rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+  }
+  .brand .brand-grad {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .auth-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .auth-pill {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 0.35em 0.85em;
+  }
+  .auth-pill.on { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.45); }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    padding: 0.62em 1.15em;
+    cursor: pointer;
+    transition: background var(--duration-fast), transform 0.1s ease, box-shadow var(--duration-fast);
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--gradient-brand);
+    color: #fff;
+    box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+  }
+  .btn-primary:hover { box-shadow: 0 6px 18px -6px rgba(99, 102, 241, 0.55); }
+  .btn-ghost {
+    background: var(--bg-glass);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+  }
+  .btn-ghost:hover { background: var(--bg-glass-hover); border-color: var(--border-glow); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ---- Hero ---- */
+  .app-hero {
+    margin-top: 1.5rem;
+    padding: 2.2rem 2rem 1.8rem;
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-glow);
+    display: block;
+    margin-bottom: 0.6em;
+  }
+  .app-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 800;
+    margin: 0 0 0.4em;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  .app-hero .lede {
+    color: var(--text-muted);
+    max-width: 64ch;
+    margin: 0 0 1.4rem;
+    font-size: 0.98rem;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .hero-stats b {
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .hero-stats .stat { border: 1px solid var(--border-subtle); border-radius: 999px; padding: 0.35em 0.9em; background: rgba(255,255,255,0.03); }
+
+  /* ---- Tabs (view switch) ---- */
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.6em 1.2em;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+  }
+  .tab:hover { border-color: var(--border-glow); color: var(--text-main); }
+  .tab.active { background: var(--gradient-brand); color: #fff; border-color: transparent; }
+
+  /* ---- Module rail ---- */
+  .module-rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .mod-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: left;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+    color: var(--text-main);
+    font-family: var(--font-body);
+  }
+  .mod-chip:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: 0 8px 20px -8px rgba(99,102,241,0.35); }
+  .mod-chip.active { border-color: var(--primary); background: var(--bg-glass-hover); }
+  .mod-chip .mod-tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--primary-glow); text-transform: uppercase; }
+  .mod-chip .mod-title { font-weight: 600; font-size: 0.92rem; line-height: 1.3; }
+  .mod-chip .mod-best { font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent-emerald); }
+  .mod-chip .mod-best.none { color: var(--text-dim); }
+
+  /* ---- Panels ---- */
+  .panel-wrap {
+    display: none;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 1.8rem 1.8rem 2rem;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+    animation: fadeInUp 0.4s var(--ease-spring);
+  }
+  .panel-wrap.active { display: block; }
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .panel-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; margin: 0; }
+  .panel-head .sub { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Study notes ---- */
+  .notes-body { color: var(--text-muted); font-size: 0.95rem; }
+  .notes-body h1, .notes-body h2, .notes-body h3, .notes-body h4 { color: var(--text-main); font-family: var(--font-display); }
+  .notes-body h2 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
+  .notes-body h3 { font-size: 1.02rem; margin: 1.3rem 0 0.4rem; }
+  .notes-body p { margin: 0 0 0.9rem; }
+  .notes-body ul, .notes-body ol { padding-left: 1.4rem; margin: 0 0 0.9rem; }
+  .notes-body li { margin-bottom: 0.3rem; }
+  .notes-body code, .notes-body kbd {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 0.1em 0.4em;
+    color: var(--primary-glow);
+  }
+  .notes-body table { border-collapse: collapse; width: 100%; margin: 0 0 1rem; font-size: 0.9rem; }
+  .notes-body th, .notes-body td { border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; text-align: left; }
+  .notes-body th { background: var(--bg-surface-elevated); font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); }
+  .notes-body img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border-subtle); }
+
+  /* ---- Quiz ---- */
+  .progress-track { height: 6px; background: var(--bg-surface-elevated); border-radius: 3px; overflow: hidden; margin: 0 0 1.4rem; }
+  .progress-fill { height: 100%; background: var(--gradient-brand); width: 0%; transition: width 0.3s var(--ease-spring); }
+  .q-num { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent-cyan); margin-bottom: 0.6rem; }
+  .q-text { font-size: 1.15rem; font-weight: 600; margin: 0; color: var(--text-main); }
+  .options { display: grid; gap: 0.7rem; margin-top: 1.3rem; }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    text-align: left;
+    transition: border-color var(--duration-fast), background var(--duration-fast), transform 0.1s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--border-glow); background: var(--bg-glass-hover); }
+  .option .letter {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .option.correct { border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12); }
+  .option.correct .letter { background: var(--accent-emerald); color: #05130c; border-color: var(--accent-emerald); }
+  .option.wrong { border-color: var(--red); background: rgba(239, 68, 68, 0.10); }
+  .option.wrong .letter { background: var(--red); color: #200b0b; border-color: var(--red); }
+  .option:disabled { cursor: default; opacity: 0.95; }
+  .feedback {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+  }
+  .feedback.good { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
+  .feedback.bad  { background: rgba(239, 68, 68, 0.10); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+  .quiz-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1.4rem; flex-wrap: wrap; }
+  .quiz-results { text-align: center; padding: 1.4rem 1rem; }
+  .quiz-results h3 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 0.5rem; }
+  .big-score {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    line-height: 1;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0.6rem 0;
+  }
+  .best-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--accent-emerald);
+    border: 1px solid rgba(16,185,129,0.45);
+    border-radius: 999px;
+    padding: 0.25em 0.8em;
+    margin-top: 0.5rem;
+  }
+  .sync-note { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-top: 1.1rem; }
+  .sync-note.err { color: var(--red); }
+
+  /* ---- Chat ---- */
+  .chat-messages { display: flex; flex-direction: column; gap: 0.8rem; max-height: 46vh; overflow-y: auto; padding: 0.4rem 0.2rem 0.8rem; }
+  .msg { max-width: 88%; border-radius: 12px; padding: 0.7rem 0.95rem; font-size: 0.92rem; line-height: 1.55; word-wrap: break-word; }
+  .msg.user { align-self: flex-end; background: var(--gradient-brand); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.assistant { align-self: flex-start; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-bottom-left-radius: 4px; }
+  .msg.assistant p { margin: 0.35rem 0; color: var(--text-muted); }
+  .msg.assistant p:first-child { margin-top: 0; }
+  .msg.assistant p:last-child { margin-bottom: 0; }
+  .msg.assistant ul, .msg.assistant ol { margin: 0.35rem 0; padding-left: 1.3rem; color: var(--text-muted); }
+  .msg.assistant code { font-family: var(--font-mono); font-size: 0.85em; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 0.1em 0.35em; color: var(--primary-glow); }
+  .msg.assistant strong, .msg.assistant b { color: var(--text-main); }
+  .msg.assistant em { color: var(--text-muted); }
+  .msg.assistant h3, .msg.assistant h4 { font-family: var(--font-display); color: var(--text-main); margin: 0.7rem 0 0.3rem; }
+  .msg.assistant h3 { font-size: 1.05rem; }
+  .msg.assistant h4 { font-size: 0.95rem; }
+  .msg.error { align-self: flex-start; color: #fca5a5; background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.35); }
+  .msg.typing { color: var(--text-dim); font-style: italic; }
+  .chat-inputbar { display: flex; gap: 0.6rem; padding-top: 0.9rem; border-top: 1px solid var(--border-subtle); margin-top: 0.4rem; }
+  .chat-inputbar input {
+    flex: 1;
+    padding: 0.7em 0.95em;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    color: var(--text-main);
+  }
+  .chat-inputbar input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .chat-inputbar input::placeholder { color: var(--text-dim); }
+  .chat-note {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .chat-auth {
+    margin-bottom: 0.8rem;
+    padding: 0.7rem 0.95rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .chat-auth button { margin-top: 0.5rem; }
+
+  .pill-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--accent-cyan);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    border-radius: 999px;
+    padding: 0.25em 0.7em;
+    margin: 0 0 0.8rem;
+  }
+
+  @media (max-width: 720px) {
+    .app { padding: 1rem 0.9rem 3rem; }
+    .app-hero { padding: 1.5rem 1.1rem 1.3rem; }
+    .panel-wrap { padding: 1.2rem 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="app-top">
+    <div class="brand"><span class="brand-grad">CABLE&amp;NET</span> · Course Companion</div>
+    <div class="auth-row">
+      <span class="auth-pill" id="authPill">Checking…</span>
+      <button class="btn btn-ghost" id="signInBtn" style="display:none;" type="button">Sign in with Puter</button>
+    </div>
+  </header>
+
+  <section class="app-hero">
+    <span class="eyebrow" id="appEyebrow">Course Companion · Run on Puter</span>
+    <h1 id="courseTitle">Course Companion</h1>
+    <p class="lede" id="courseLede"></p>
+    <div class="hero-stats" id="heroStats"></div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button type="button" class="tab active" data-view="notes" role="tab">Study notes</button>
+    <button type="button" class="tab" data-view="quiz" role="tab">Quiz</button>
+    <button type="button" class="tab" data-view="chat" role="tab">Ask the Mentor</button>
+  </div>
+
+  <div class="module-rail" id="moduleRail" role="tablist" aria-label="Modules"></div>
+
+  <!-- STUDY NOTES -->
+  <section class="panel-wrap active" id="panel-notes">
+    <div class="panel-head">
+      <h2 id="notesTitle">Study notes</h2>
+      <span class="sub" id="notesMeta"></span>
+    </div>
+    <div class="notes-body" id="notesBody"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel-wrap" id="panel-quiz">
+    <div class="panel-head">
+      <h2>Quiz <span id="quizModule"></span></h2>
+      <span class="sub" id="quizMeta"></span>
+    </div>
+    <div id="quizZone">
+      <div class="quiz-strip" id="quizScreen">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="q-num" id="qNum">—</div>
+        <p class="q-text" id="qText"></p>
+        <div class="options" id="qOptions"></div>
+        <div class="feedback" id="qFeedback"></div>
+        <div class="quiz-controls">
+          <button class="btn btn-primary" id="nextBtn" style="display:none;" type="button">Next Question →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI MENTOR -->
+  <section class="panel-wrap" id="panel-chat">
+    <div class="panel-head">
+      <h2>Ask the Mentor</h2>
+      <span class="sub">AI assistant — not a human instructor · never grades</span>
+    </div>
+    <div class="chat-auth" id="chatAuth"></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-inputbar">
+      <input type="text" id="chatInput" placeholder="Ask about this module, the course, cabling, networking…" autocomplete="off">
+      <button class="btn btn-primary" id="chatSend" type="button">Ask</button>
+    </div>
+    <div class="chat-note">
+      The AI Mentor runs on your own free Puter account (User-Pays) — no API key, no card. AI answers are for practice only and are never graded.
+    </div>
+  </section>
+</div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // EMBEDDED COURSE DATA — injected by tools/build-puter-course-app.js.
+  // The shape mirrors what the live course + study packs use
+  // (quiz: id / question / options / correct_index / explanation).
+  // ============================================================
+  var COURSE_COMPANION = {
+    courseId: 'replace-me',
+    title: 'Replace with course title',
+    port: 'PORT 01',
+    version: '1.0',
+    note: 'Course Companion — study, quiz, and ask the mentor on your own Puter account.',
+    modules: [
+      // {
+      //   num: 1,
+      //   dbId: 9,
+      //   title: 'Module title',
+      //   notes: { sections: [{ title: '...', html: '...' }] },
+      //   quiz: { questions: [] }
+      // }
+    ]
+  };
+
+  // ============================================================
+  // Storage: private per-student. When signed in with Puter, the
+  // progress lives in the student's own Puter cloud KV (private to
+  // them and this app). Otherwise it falls back to this device only.
+  // ============================================================
+  var LIB_KEY = 'cn_companion_' + COURSE_COMPANION.courseId; // puter.kv key
+  var LS_KEY = 'cn_companion_' + COURSE_COMPANION.courseId;  // localStorage fallback
+  var progress = loadLocal();
+
+  function loadLocal() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(progress)); } catch (e) {}
+  }
+  function puterSignedIn() {
+    return !!(window.puter && puter.auth && puter.auth.isSignedIn());
+  }
+
+  // Two-way mirror: load cloud KV into memory, then keep both in sync.
+  function refreshStorage() {
+    if (!puterSignedIn()) return Promise.resolve();
+    return puter.kv.get(LIB_KEY).then(function (raw) {
+      if (raw) {
+        try {
+          var cloud = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          Object.keys(cloud).forEach(function (k) { progress[k] = cloud[k]; });
+        } catch (e) {}
+      }
+      saveLocal();
+    }).catch(function () { /* anonymous or blocked */ });
+  }
+  function persist() {
+    saveLocal();
+    if (!puterSignedIn()) return Promise.resolve(false);
+    return puter.kv.set(LIB_KEY, JSON.stringify(progress))
+      .then(function () { return true; })
+      .catch(function () { return false; });
+  }
+  function bestScore(moduleNum) {
+    var m = progress.modules && progress.modules[moduleNum];
+    return m ? (m.best || 0) : 0;
+  }
+
+  // ============================================================
+  // Element refs + state
+  // ============================================================
+  function $(id) { return document.getElementById(id); }
+  var modules = COURSE_COMPANION.modules || [];
+  var activeModule = modules.length ? modules[0].num : null;
+  var activeView = 'notes';
+  var quiz = null;    // { idx, correct, responses, answered, finished, source }
+  var chatHistory = [];
+  var chatBusy = false;
+
+  // ============================================================
+  // Header
+  // ============================================================
+  function renderHead() {
+    $('courseTitle').textContent = COURSE_COMPANION.title;
+    $('appEyebrow').textContent = 'Course Companion · ' + COURSE_COMPANION.port +
+      ' · v' + COURSE_COMPANION.version;
+    document.title = COURSE_COMPANION.title + ' — Course Companion';
+    if (COURSE_COMPANION.note) $('courseLede').textContent = COURSE_COMPANION.note;
+  }
+
+  function renderHeroStats() {
+    var done = 0, bestSum = 0;
+    modules.forEach(function (m) {
+      if (bestScore(m.num) > 0) { done++; bestSum += bestScore(m.num); }
+    });
+    var avg = done ? Math.round(bestSum / done) : 0;
+    $('heroStats').innerHTML =
+      '<span class="stat">Modules <b>' + modules.length + '</b></span>' +
+      '<span class="stat">Best <b>' + avg + '%</b> avg</span>' +
+      '<span class="stat">Private progress <b>' + (puterSignedIn() ? 'Puter cloud' : 'this device') + '</b></span>';
+    $('authPill').textContent = puterSignedIn() ? '● Signed in with Puter' : '○ Not signed in';
+    $('authPill').className = 'auth-pill' + (puterSignedIn() ? ' on' : '');
+    $('signInBtn').style.display = puterSignedIn() ? 'none' : 'inline-block';
+  }
+
+  $('signInBtn').addEventListener('click', function () {
+    if (!window.puter || !puter.auth) return;
+    puter.auth.signIn().then(function () {
+      return refreshStorage();
+    }).then(function () {
+      renderHeroStats();
+      renderRail();
+      var m = current();
+      renderModule(m);
+    }).catch(function (err) {
+      appendChat('error', 'Sign-in failed or was cancelled: ' + (err && err.message ? err.message : 'unknown'));
+    });
+  });
+
+  function current() {
+    for (var i = 0; i < modules.length; i++) if (modules[i].num === activeModule) return modules[i];
+    return modules[0];
+  }
+
+  // ============================================================
+  // Module rail
+  // ============================================================
+  function renderRail() {
+    var html = '';
+    modules.forEach(function (m) {
+      var best = bestScore(m.num);
+      html +=
+        '<button type="button" class="mod-chip' + (m.num === activeModule ? ' active' : '') + '" data-module="' + m.num + '" role="tab">' +
+          '<span class="mod-tag">MOD ' + pad(m.num) + '</span>' +
+          '<span class="mod-title">' + escapeHtml(m.title) + '</span>' +
+          '<span class="mod-best' + (best > 0 ? '' : ' none') + '">' + (best > 0 ? '★ ' + best + '%' : 'Not attempted') + '</span>' +
+        '</button>';
+    });
+    $('moduleRail').innerHTML = html;
+    $('moduleRail').querySelectorAll('.mod-chip').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var num = parseInt(b.getAttribute('data-module'), 10);
+        if (num !== activeModule) {
+          activeModule = num;
+          chatHistory = [];
+          renderRail();
+          chatRender();
+        }
+        renderModule(current());
+      });
+    });
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ============================================================
+  // View switching
+  // ============================================================
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      activeView = t.getAttribute('data-view');
+      document.querySelectorAll('.tab').forEach(function (x) {
+        x.classList.toggle('active', x === t);
+      });
+      ['notes', 'quiz', 'chat'].forEach(function (v) {
+        $('panel-' + v).classList.toggle('active', v === activeView);
+      });
+      var m = current();
+      if (activeView === 'notes') renderNotes(m);
+      if (activeView === 'quiz') renderQuiz(m);
+      if (activeView === 'chat') chatRender();
+    });
+  });
+
+  // ============================================================
+  // Study notes
+  // ============================================================
+  function renderModule(m) {
+    if (!m) return;
+    renderNotes(m);
+    if (activeView === 'quiz') renderQuiz(m);
+    if (activeView === 'chat') chatRender();
+  }
+
+  function renderNotes(m) {
+    $('notesTitle').textContent = 'MOD ' + pad(m.num) + ' — ' + m.title;
+    $('notesMeta').textContent = 'Study notes';
+    var sections = (m.notes && m.notes.sections) || [];
+    var html = '';
+    sections.forEach(function (s) {
+      html += s.title ? '<h2>' + escapeHtml(s.title) + '</h2>' : '';
+      html += s.html || '';
+    });
+    $('notesBody').innerHTML = html || '<p style="color:var(--text-dim)">No study notes for this module yet.</p>';
+  }
+
+  // ============================================================
+  // Quiz engine (mirrors the study-pack quiz behaviour)
+  // ============================================================
+  function questionsFor(m) {
+    return (m && m.quiz && m.quiz.questions) || [];
+  }
+
+  function renderQuiz(m) {
+    var qs = questionsFor(m);
+    $('quizModule').textContent = '— MOD ' + pad(m.num);
+    if (!qs.length) {
+      $('quizZone').innerHTML = '<div class="quiz-results"><h3>No questions yet</h3>' +
+        '<p style="color:var(--text-muted)">This module has no quiz questions yet.</p></div>';
+      return;
+    }
+    quiz = { idx: 0, correct: 0, responses: [], answered: false, finished: false, source: m.num };
+    rebuildQuizDom();
+    drawQuestion();
+  }
+
+  function rebuildQuizDom() {
+    $('quizZone').innerHTML =
+      '<div class="quiz-strip" id="quizScreen">' +
+        '<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>' +
+        '<div class="q-num" id="qNum"></div>' +
+        '<p class="q-text" id="qText"></p>' +
+        '<div class="options" id="qOptions"></div>' +
+        '<div class="feedback" id="qFeedback"></div>' +
+        '<div class="quiz-controls"><button class="btn btn-primary" id="nextBtn" style="display:none;" type="button">Next Question →</button></div>' +
+      '</div>';
+    $('nextBtn').addEventListener('click', quizNext);
+  }
+
+  function drawQuestion() {
+    var m = current();
+    var qs = questionsFor(m);
+    var gotAnswered = quiz.answered;
+    var q = qs[quiz.idx];
+    $('qNum').textContent = 'Question ' + (quiz.idx + 1) + ' of ' + qs.length;
+    $('qText').textContent = q.question;
+    $('progressFill').style.width = (quiz.idx / qs.length * 100) + '%';
+
+    var opts = '';
+    q.options.forEach(function (o, i) {
+      var letter = String.fromCharCode(65 + i);
+      var cls = 'option';
+      var extra = '';
+      if (gotAnswered) {
+        if (i === q.correct_index) { cls += ' correct'; extra = ' ✓'; }
+        else if (quiz.selectedIndex === i) { cls += ' wrong'; extra = ' ✗'; }
+      }
+      opts += '<button type="button" class="' + cls + '" data-i="' + i + '"' + (gotAnswered ? ' disabled' : '') + '>' +
+        '<span class="letter">' + letter + '</span><span>' + escapeHtml(o) + extra + '</span></button>';
+    });
+    $('qOptions').innerHTML = opts;
+    $('qOptions').querySelectorAll('.option').forEach(function (b) {
+      b.addEventListener('click', function () { onChoose(parseInt(b.getAttribute('data-i'), 10)); });
+    });
+
+    if (gotAnswered) {
+      showFeedback(quiz.selectedIndex === q.correct_index, q);
+      $('nextBtn').style.display = 'inline-block';
+      $('nextBtn').textContent = (quiz.idx === qs.length - 1) ? 'Finish Quiz' : 'Next Question →';
+    } else {
+      $('qFeedback').style.display = 'none';
+      $('nextBtn').style.display = 'none';
+    }
+  }
+
+  function onChoose(i) {
+    if (!quiz || quiz.answered) return;
+    var m = current();
+    var qs = questionsFor(m);
+    var q = qs[quiz.idx];
+    quiz.answered = true;
+    quiz.selectedIndex = i;
+    var isCorrect = i === q.correct_index;
+    if (isCorrect) quiz.correct++;
+
+    $('qOptions').querySelectorAll('.option').forEach(function (b) {
+      var k = parseInt(b.getAttribute('data-i'), 10);
+      b.disabled = true;
+      if (k === q.correct_index) b.classList.add('correct');
+      else if (k === i) b.classList.add('wrong');
+    });
+    quiz.responses.push({ questionId: (q.id || quiz.idx + 1), selectedIndex: i, isCorrect: isCorrect });
+    saveProgress(m.num);
+    showFeedback(isCorrect, q);
+    $('nextBtn').style.display = 'inline-block';
+    $('nextBtn').textContent = (quiz.idx === qs.length - 1) ? 'Finish Quiz' : 'Next Question →';
+  }
+
+  function showFeedback(isCorrect, q) {
+    var f = $('qFeedback');
+    f.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    f.textContent = isCorrect ? 'Correct ✓' : (q.explanation || 'Incorrect');
+    f.style.display = 'block';
+  }
+
+  function quizNext() {
+    var m = current();
+    var qs = questionsFor(m);
+    quiz.idx++;
+    if (quiz.idx >= qs.length) { finishQuiz(); return; }
+    quiz.answered = false;
+    quiz.selectedIndex = null;
+    drawQuestion();
+  }
+
+  function finishQuiz() {
+    if (!quiz || quiz.finished) return;
+    quiz.finished = true;
+    var m = current();
+    var qs = questionsFor(m);
+    var score = Math.round(quiz.correct / qs.length * 100);
+    var prev = bestScore(m.num);
+    if (score > prev) {
+      progress.modules = progress.modules || {};
+      progress.modules[m.num] = progress.modules[m.num] || {};
+      progress.modules[m.num].best = score;
+      persist();
+    }
+    saveLocal();
+    renderHeroStats();
+    renderRail();
+    quiz.syncMsg = '';
+
+    var saved = bestScore(m.num);
+    $('quizZone').innerHTML =
+      '<div class="quiz-results">' +
+        '<h3>Quiz Complete</h3>' +
+        '<div class="big-score">' + score + '%</div>' +
+        '<p style="color:var(--text-muted)">' + quiz.correct + ' correct out of ' + qs.length + '.</p>' +
+        (saved > 0 ? '<span class="best-badge">Best: ' + saved + '%</span>' : '') +
+        '<div class="sync-note" id="syncNote"></div>' +
+        '<div class="quiz-controls">' +
+          '<button class="btn btn-primary" id="retryBtn" type="button">Try Again</button>' +
+          '<button class="btn btn-ghost" id="notesBtn" type="button">Read Notes</button>' +
+        '</div>' +
+      '</div>';
+    var note = $('syncNote');
+    note.textContent = puterSignedIn()
+      ? '✓ Saved to your private Puter cloud.'
+      : 'Saved on this device. Sign in with Puter to back it up to your private cloud.';
+    $('retryBtn').addEventListener('click', function () { renderQuiz(current()); });
+    $('notesBtn').addEventListener('click', function () {
+      activeView = 'notes';
+      document.querySelectorAll('.tab').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-view') === 'notes');
+      });
+      ['notes', 'quiz', 'chat'].forEach(function (v) {
+        $('panel-' + v).classList.toggle('active', v === 'notes');
+      });
+      renderNotes(current());
+    });
+  }
+
+  // Keep persistent progress fresh as answers land (best = max seen).
+  function saveProgress(num) {
+    var seen = quiz.responses.filter(function (r) { return r.isCorrect; }).length;
+    var pct = current() && current().quiz && current().quiz.questions.length
+      ? Math.round(seen / current().quiz.questions.length * 100) : 0;
+    progress.modules = progress.modules || {};
+    progress.modules[num] = progress.modules[num] || {};
+    if (pct > (progress.modules[num].best || 0)) progress.modules[num].best = pct;
+    saveLocal();
+  }
+
+  // ============================================================
+  // AI Mentor (Puter user-pays keyless chat, course-aware)
+  // ============================================================
+  var MODEL = 'gpt-5.4-nano';
+
+  function mentorContext() {
+    var m = current();
+    var lines = [
+      'You are the AI Mentor for Cable&Net Courses, a friendly, patient study buddy for students of data cabling and networking.',
+      'Explain concepts clearly in simple language with analogies. Guide students toward understanding — you may ask a guiding question back — but never refuse to help.',
+      'Stay strictly on-topic: data cabling, networking, the internet, and related course material. If asked something off-topic or inappropriate, politely decline and steer back to the course.',
+      'You are an AI assistant, NOT a human instructor, and you never grade or decide pass/fail.',
+      '',
+      'COURSE CONTEXT: ' + COURSE_COMPANION.title + ' (' + COURSE_COMPANION.port + ').',
+      'Modules:',
+      modules.map(function (x) {
+        return 'MOD ' + pad(x.num) + ' — ' + x.title;
+      }).join('\n')
+    ];
+    if (m) {
+      lines.push('');
+      lines.push('The student is currently studying: MOD ' + pad(m.num) + ' — ' + m.title +
+        (m.notes && m.notes.sections && m.notes.sections[0] ? '. Topics: ' + m.notes.sections.map(function (s) { return s.title; }).join(', ') : ''));
+    }
+    return lines.join('\n');
+  }
+
+  function chatEls() {
+    return { auth: $('chatAuth'), messages: $('chatMessages'), input: $('chatInput'), send: $('chatSend') };
+  }
+
+  function chatRender() {
+    var e = chatEls();
+    e.auth.innerHTML = '';
+    if (!puterSignedIn()) {
+      e.auth.textContent = 'Chat uses your own free Puter account (User-Pays — no API key, no card). ';
+      var btn = document.createElement('button');
+      btn.className = 'btn btn-ghost';
+      btn.type = 'button';
+      btn.textContent = 'Sign in with Puter';
+      btn.addEventListener('click', function () {
+        puter.auth.signIn().then(function () {
+          renderHeroStats();
+          chatRender();
+        }).catch(function () { appendChat('error', 'Sign-in failed or was cancelled.'); });
+      });
+      e.auth.appendChild(btn);
+    } else {
+      e.auth.textContent = '● Signed in — answers stream from your Puter account. The mentor keeps topics general; it never grades you.';
+    }
+    if (!chatHistory.length && e.messages.children.length === 0) {
+      e.messages.innerHTML = '<div class="msg assistant">Hi — I\'m the AI Mentor for <strong>' +
+        escapeHtml(COURSE_COMPANION.title) + '</strong>. Ask me anything about the module you\'re on. I\'m here to help you understand, not to judge or grade.</div>';
+    }
+  }
+
+  function appendChat(role, html) {
+    var e = chatEls();
+    var div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.innerHTML = html;
+    e.messages.appendChild(div);
+    e.messages.scrollTop = e.messages.scrollHeight;
+    return div;
+  }
+
+  $('chatSend').addEventListener('click', sendChat);
+  $('chatInput').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') sendChat();
+  });
+
+  function sendChat() {
+    var e = chatEls();
+    var text = e.input.value.trim();
+    if (!text || chatBusy) return;
+    if (!puterSignedIn()) {
+      appendChat('error', 'Please sign in with Puter (free) to chat — the mentor runs on your own account.');
+      chatRender();
+      return;
+    }
+    if (navigator.onLine === false) {
+      appendChat('error', 'No connection — the AI Mentor needs the internet to answer.');
+      return;
+    }
+
+    appendChat('user', escapeHtml(text));
+    e.input.value = '';
+    chatHistory.push({ role: 'user', content: text });
+    chatBusy = true;
+    e.send.disabled = true;
+
+    var typing = appendChat('assistant', '…');
+    typing.classList.add('typing');
+
+    var messages = [{ role: 'system', content: mentorContext() }].concat(chatHistory.slice(-8));
+
+    callChat(messages).then(function (reply) {
+      if (reply) {
+        typing.classList.remove('typing');
+        typing.innerHTML = renderMarkdown(reply);
+        chatHistory.push({ role: 'assistant', content: reply });
+      } else {
+        typing.remove();
+        appendChat('error', 'No reply received — try again.');
+        chatHistory.pop();
+      }
+    }).catch(function (err) {
+      var msg = (err && err.message) || String(err);
+      var busy = /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+      typing.remove();
+      appendChat('error', busy
+        ? 'The AI Mentor is busy right now — give it a few seconds and try again.'
+        : 'Could not reach the AI Mentor: ' + msg);
+      chatHistory.pop();
+    }).finally(function () {
+      chatBusy = false;
+      e.send.disabled = false;
+      e.input.focus();
+    });
+  }
+
+  async function callChat(messages) {
+    var lastErr = null;
+    var attempts = 4;
+    for (var i = 0; i < attempts; i++) {
+      try {
+        var resp = await chatStream(messages);
+        return resp;
+      } catch (err) {
+        lastErr = err;
+        if (!isBusy(err) || i === attempts - 1) break;
+        await new Promise(function (r) { setTimeout(r, 1000 * Math.pow(2, i)); });
+      }
+    }
+    throw lastErr;
+  }
+
+  function isBusy(err) {
+    var msg = (err && err.message) || String(err);
+    return /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+  }
+
+  async function chatStream(messages) {
+    var e = chatEls();
+    var typing = e.messages.lastChild;
+    var out = '';
+    var resp = await puter.ai.chat(messages, { model: MODEL, stream: true });
+    for await (var part of resp) {
+      if (part && part.text) {
+        out += part.text;
+        if (typing && typing.classList && typing.classList.contains('typing')) {
+          typing.classList.remove('typing');
+        }
+        typing.innerHTML = renderMarkdown(out);
+        e.messages.scrollTop = e.messages.scrollHeight;
+      }
+    }
+    return out;
+  }
+
+  // ---- Lightweight markdown -> HTML (escaped first) ----
+  function renderMarkdown(text) {
+    var lines = escapeHtml(text).split('\n');
+    var out = [];
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      var heading = line.match(/^(#{1,4})\s+(.*)$/);
+      if (heading) {
+        var level = Math.min(heading[1].length + 1, 5);
+        out.push('<h' + level + '>' + inline(heading[2]) + '</h' + level + '>');
+        i++; continue;
+      }
+      if (/^\s*[-*]\s+/.test(line)) {
+        var items = [];
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+          items.push('<li>' + inline(lines[i].replace(/^\s*[-*]\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ul>' + items.join('') + '</ul>'); continue;
+      }
+      if (/^\s*\d+\.\s+/.test(line)) {
+        var items2 = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+          items2.push('<li>' + inline(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ol>' + items2.join('') + '</ol>'); continue;
+      }
+      var para = [];
+      while (i < lines.length && lines[i].trim() &&
+        !/^(#{1,4})\s+/.test(lines[i]) &&
+        !/^\s*[-*]\s+/.test(lines[i]) &&
+        !/^\s*\d+\.\s+/.test(lines[i])) {
+        para.push(inline(lines[i]));
+        i++;
+      }
+      out.push('<p>' + para.join('<br>') + '</p>');
+    }
+    return out.join('');
+  }
+
+  function inline(s) {
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  }
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  function boot() {
+    renderHead();
+    renderHeroStats();
+
+    if (!modules.length) {
+      $('moduleRail').innerHTML = '<p style="color:var(--text-dim)" class="mod-chip">No modules embedded yet.</p>';
+      $('notesBody').innerHTML = '<p style="color:var(--text-dim)">This companion app has no course data embedded yet. Run <code>tools/build-puter-course-app.js</code> to generate it.</p>';
+      return;
+    }
+
+    activeModule = modules[0].num;
+    renderRail();
+    renderModule(current());
+    chatRender();
+
+    refreshStorage().then(function () {
+      renderHeroStats();
+      renderRail();
+    });
+
+    window.addEventListener('online', renderHeroStats);
+    window.addEventListener('offline', renderHeroStats);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

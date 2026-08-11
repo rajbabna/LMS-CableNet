@@ -31,8 +31,8 @@ do not delete:
 ## Business logic & roadmap
 
 The `docs/content/` folder holds the interactive-module plan (07–11, partly built),
-business-logic docs for study packs (12, built), the Puter course-app (13, not
-built), and the AI Mentor flow (14–16, built):
+business-logic docs for study packs (12, built), the Puter course-app (13, built),
+and the AI Mentor flow (14–16, built):
 
 - `content/not-built-roadmap.md` — what's built / pending / discarded
 - `content/cablenet-lms-issues-to-flag.md` — known issues worth flagging

@@ -33,11 +33,11 @@ directly.
 - Bootstrap + personas + fixture rows: `00-bootstrap-fixtures.sql`
 - Reconstructed pre-schema for tables that exist in production but were never
   captured in `sql/`: `00-base-schema.sql`
-- Test files `01`–`08`, each a transaction that ROLLBACKs (fixtures never persist)
+- Test files `01`–`09`, each a transaction that ROLLBACKs (fixtures never persist)
 - Runner: `run-pgtap.js` (reset → apply full `sql/` schema → grants sweep →
   bootstrap → per-statement TAP capture)
 
-**Current state: 81 assertions across `01`–`08`, all passing** on the TEST
+**Current state: 93 assertions across `01`–`09`, all passing** on the TEST
 project (`2026-08-11`).
 
 | File | Proves |
@@ -50,6 +50,7 @@ project (`2026-08-11`).
 | `06-rpc-authorization` | SECURITY DEFINER RPCs respect role + course assignment |
 | `07-batches-staff-read` | Batches staff-SELECT; mutations admin-only RPCs |
 | `08-delete-enrollment` | `delete_enrollment` authz + course-scoped cleanup scope |
+| `09-certificates-auto-issue` | sql/63 trigger auto-issues at final-module completion; no issue on partial/non-completed; idempotent on re-complete and claim; module-27 exclusion |
 
 How tests impersonate users: `tests.set_uid(...)` writes `request.jwt.claims`
 so `auth.uid()` resolves to a persona; `set_role_authenticated()` +

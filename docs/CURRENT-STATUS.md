@@ -12,15 +12,18 @@ with the current `sql/` folder and the latest commits.*
 |------|-------|
 | Live site | https://rajbabna.github.io/LMS-CableNet (GitHub Pages, auto-deploy on push to `main`) |
 | Backend | Supabase project `mantjzpfhikezztonrga` — email/password auth, email confirmation OFF |
-| Git source of truth | local `LMS - V2.0` (branch `main`, tree clean) |
+| Git source of truth | local `LMS - V2.0` (branch `main`; uncommitted = Course Companion apps + docs, see §2) |
 | Mirrors to keep in sync | `Sites\WEB`, `Sites\GitHub Web\cable-net-courses` |
 | Client key posture | publishable key only client-side, no `service_role` key in repo/history |
-| SQL migrations | `sql/01` → `sql/62` (folder is **gitignored** — local only, never ships to GitHub) |
+| SQL migrations | `sql/01` → `sql/63` (folder is **gitignored** — local only, never ships to GitHub) |
 
-> ✅ **Apply status:** `sql/01`–`sql/62` are all applied to the live DB.
+> ✅ **Apply status:** `sql/01`–`sql/63` are all applied to the live DB.
 > `sql/31`–`60` were verified live 2026-08-10 via RPC probes + working features
 > (batches, quiz scoring, study packs sync, certificates, stalled report, units,
-> AI escalation flags). Earlier docs only *confirmed* `01`–`30` on paper; that was
+> AI escalation flags); `sql/61`–`62` applied 2026-08-10; `sql/63` (certificate
+> auto-issue) applied to production 2026-08-11 after passing the pgTAP suite on
+> the TEST project.
+> Earlier docs only *confirmed* `01`–`30` on paper; that was
 > a documentation gap, not a missing-migration gap.
 
 ---
@@ -55,6 +58,9 @@ with the current `sql/` folder and the latest commits.*
 - **Achievements gallery** — badges driven by `evaluate_achievements` (`sql/38`).
 - **Certificates** — "View certificate" on completion → `certificate.html` →
   `issue_certificate`; Certificates list via `get_my_certificates` (`sql/41`).
+  **Auto-issued at the moment the last module completes** (`sql/63` trigger on
+  `module_completions`), so the certificate's `issued_at` reflects actual
+  completion time; the page claim is display-only and idempotent.
 - **Give Feedback** modal — 1–5 stars + comment, optional course → `submit_feedback`
   (`sql/30`); students own-row only.
 - "Reset progress" flow (`reset_student_progress`) — also clears quiz state + badges.
@@ -100,6 +106,25 @@ with the current `sql/` folder and the latest commits.*
   `submit_quiz_score` RPC sync; offline it stays in localStorage until a sign-in.
 - Regenerate after editing any quiz bank / lesson markdown: `node tools/build-study-packs.js`.
 
+### Puter course-app (roadmap #9, second half — built)
+- **`tools/puter-course-companion-template.html`** — single-file, dark-glassmorphism
+  (AwsomeDesign) "Course Companion" app shell: `COURSE_COMPANION` data contract,
+  module rail + Study / Quiz / AI Mentor tabs, immediate-feedback quiz with best-score
+  per module, and `puter.ai.chat` (user-pays model — each student's free Puter account
+  covers usage; no API key).
+- **`tools/build-puter-course-app.js`** — regenerates `tools/puter-apps/<course>-companion.html`
+  for cabling + networking from the **same** quiz banks and lesson bundles as the
+  online course/study packs.
+- **Privacy** — signed-in progress lives in the student's own Puter cloud KV
+  (`puter.kv`, private to them + this app); anonymous use falls back to localStorage.
+  The app never touches Supabase (satellite practice tool, no sync decision).
+- **Entry point** — course-header footer on `course.html` shows a "Course Companion ↗"
+  link beside the primary CTA (via `js/load-modules.js`).
+- **Deploy** — upload each generated single-file `.html` to Puter under the trainer's
+  account, then share the generated URL on the course page.
+- Regenerate after editing quiz banks / lesson markdown: `node tools/build-puter-course-app.js`.
+  See `docs/content/13-puter-course-app-business-logic.md`.
+
 ### AI Mentor ("Ask the Mentor")
 - Floating chat widget on both course pages (`js/ai-mentor.js`) — course-aware persona,
   streaming, themed markdown, offline notice, clearly labelled AI.
@@ -134,10 +159,11 @@ with the current `sql/` folder and the latest commits.*
 - `tools/bump-cache-version.ps1` — content-hash `?v=` on all local JS/CSS before pushes.
 - **Playwright E2E** (`tests/specs/`) — role redirects, cross-role isolation, stalled
   report, batches: 4 pass / 4 skip (student/instructor creds env-driven via `tests/.env`).
-- **pgTAP RLS suite** (`tests/pgtap/`, files `00`–`08` + README) — schema integrity,
+- **pgTAP RLS suite** (`tests/pgtap/`, files `00`–`09` + README) — schema integrity,
   RLS on mentor AI sessions / enrollments / completions, self-elevation guard, RPC
-  authorization, batch staff-read, delete-enrollment authorization. ✅ **Executed on
-  a dedicated TEST Supabase project 2026-08-11 — 81/81 assertions green** (run via
+  authorization, batch staff-read, delete-enrollment authorization, certificate
+  auto-issue. ✅ **Executed on
+  a dedicated TEST Supabase project 2026-08-11 — 93/93 assertions green** (run via
   `tests/pgtap/run-pgtap.js`). Never run against production.
 - Indispensable helpers: `js/auth-guard.js` (session + enrollment + preview),
   `js/supabase-client.js` (live URL + publishable key), `js/content-renderer.js`.
@@ -171,13 +197,11 @@ Legacy leftovers still defined but unused: `approve_instructor`, `get_pending_in
 
 - **Discarded** (this phase): student self-enrollment, payments, embedded simulators /
   branching scenarios, self-serve expiry/renewal UX.
-- **Puter course-app** (#9 other half) — business logic only, never built.
-  Study packs (the #9 first half) ARE built — see §2 "Study packs".
-- **Certificates** auto-issued on claim (not exactly at the moment of last-module
-  completion) — minor polish remains.
+- **Puter course-app** (#9 other half) IS built — see §2 "Puter course-app".
+  Not yet deployed to Puter (owner action: upload + share URL).
+- **Certificates** auto-issue at last-module completion (`sql/63`), so claim-vs-completion timing is no longer a gap.
 - **Instructors cannot read feedback** — deliberate (keeps sql/29 scoping clean).
 - **Topics summaries only** — AI Mentor raw messages are never stored or shown, by design.
-- **pgTAP suite unexecuted** — the only testing gap; needs a throwaway TEST Supabase.
 
 ## 5. Reconcile notes (which older doc is stale)
 
@@ -188,6 +212,7 @@ Legacy leftovers still defined but unused: `approve_instructor`, `get_pending_in
 - Every human-logged `mentor_sessions` row is still intact; just no UI.
 
 **Suggested cadence:** after each push, update §1 (commit hash), §2 (only if behavior
-changed), and §4. Next open task per docs: onboard beta students (the
+changed), and §4. Next open task per docs: deploy the Course Companion apps to Puter +
+onboard beta students (the
 separate-account co-teaching checklist was already passed on Aug 2 — see
-`docs/content/overall-achievements.md` §7). `sql/31`–`62` are all applied/verified.
+`docs/content/overall-achievements.md` §7). `sql/31`–`63` are all applied/verified.

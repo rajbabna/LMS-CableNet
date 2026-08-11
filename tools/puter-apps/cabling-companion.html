@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     AwsomeDesign tokens (dark glassmorphism) — see AwsomeDesign/DESIGN.md
+     ============================================================ */
+  :root {
+    --bg-dark: #0b0f19;
+    --bg-surface: #111827;
+    --bg-surface-elevated: #1f293d;
+    --bg-glass: rgba(17, 24, 39, 0.75);
+    --bg-glass-hover: rgba(31, 41, 61, 0.85);
+
+    --primary: #6366f1;
+    --primary-glow: #818cf8;
+    --accent-cyan: #06b6d4;
+    --accent-violet: #8b5cf6;
+    --accent-emerald: #10b981;
+
+    --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    --gradient-surface: linear-gradient(180deg, rgba(31, 41, 61, 0.6) 0%, rgba(17, 24, 39, 0.8) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(99, 102, 241, 0.4);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+    --red: #ef4444;
+    --green: #10b981;
+
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 0.2s;
+    --duration-normal: 0.35s;
+
+    --font-display: "Outfit", "Inter", sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 96px; }
+  body {
+    margin: 0;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 85% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 5% 20%, rgba(6, 182, 212, 0.10) 0%, transparent 40%),
+      linear-gradient(180deg, #0b0f19 0%, #0e1424 100%);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: var(--gradient-glow);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  a { color: var(--primary-glow); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .app { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; position: relative; z-index: 1; }
+
+  /* ---- Top bar ---- */
+  .app-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.9rem 1.1rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+  }
+  .brand .brand-grad {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .auth-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .auth-pill {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 0.35em 0.85em;
+  }
+  .auth-pill.on { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.45); }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    padding: 0.62em 1.15em;
+    cursor: pointer;
+    transition: background var(--duration-fast), transform 0.1s ease, box-shadow var(--duration-fast);
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--gradient-brand);
+    color: #fff;
+    box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+  }
+  .btn-primary:hover { box-shadow: 0 6px 18px -6px rgba(99, 102, 241, 0.55); }
+  .btn-ghost {
+    background: var(--bg-glass);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+  }
+  .btn-ghost:hover { background: var(--bg-glass-hover); border-color: var(--border-glow); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ---- Hero ---- */
+  .app-hero {
+    margin-top: 1.5rem;
+    padding: 2.2rem 2rem 1.8rem;
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-glow);
+    display: block;
+    margin-bottom: 0.6em;
+  }
+  .app-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 800;
+    margin: 0 0 0.4em;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  .app-hero .lede {
+    color: var(--text-muted);
+    max-width: 64ch;
+    margin: 0 0 1.4rem;
+    font-size: 0.98rem;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .hero-stats b {
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .hero-stats .stat { border: 1px solid var(--border-subtle); border-radius: 999px; padding: 0.35em 0.9em; background: rgba(255,255,255,0.03); }
+
+  /* ---- Tabs (view switch) ---- */
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.6em 1.2em;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+  }
+  .tab:hover { border-color: var(--border-glow); color: var(--text-main); }
+  .tab.active { background: var(--gradient-brand); color: #fff; border-color: transparent; }
+
+  /* ---- Module rail ---- */
+  .module-rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .mod-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: left;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+    color: var(--text-main);
+    font-family: var(--font-body);
+  }
+  .mod-chip:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: 0 8px 20px -8px rgba(99,102,241,0.35); }
+  .mod-chip.active { border-color: var(--primary); background: var(--bg-glass-hover); }
+  .mod-chip .mod-tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--primary-glow); text-transform: uppercase; }
+  .mod-chip .mod-title { font-weight: 600; font-size: 0.92rem; line-height: 1.3; }
+  .mod-chip .mod-best { font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent-emerald); }
+  .mod-chip .mod-best.none { color: var(--text-dim); }
+
+  /* ---- Panels ---- */
+  .panel-wrap {
+    display: none;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 1.8rem 1.8rem 2rem;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+    animation: fadeInUp 0.4s var(--ease-spring);
+  }
+  .panel-wrap.active { display: block; }
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .panel-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; margin: 0; }
+  .panel-head .sub { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Study notes ---- */
+  .notes-body { color: var(--text-muted); font-size: 0.95rem; }
+  .notes-body h1, .notes-body h2, .notes-body h3, .notes-body h4 { color: var(--text-main); font-family: var(--font-display); }
+  .notes-body h2 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
+  .notes-body h3 { font-size: 1.02rem; margin: 1.3rem 0 0.4rem; }
+  .notes-body p { margin: 0 0 0.9rem; }
+  .notes-body ul, .notes-body ol { padding-left: 1.4rem; margin: 0 0 0.9rem; }
+  .notes-body li { margin-bottom: 0.3rem; }
+  .notes-body code, .notes-body kbd {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 0.1em 0.4em;
+    color: var(--primary-glow);
+  }
+  .notes-body table { border-collapse: collapse; width: 100%; margin: 0 0 1rem; font-size: 0.9rem; }
+  .notes-body th, .notes-body td { border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; text-align: left; }
+  .notes-body th { background: var(--bg-surface-elevated); font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); }
+  .notes-body img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border-subtle); }
+
+  /* ---- Quiz ---- */
+  .progress-track { height: 6px; background: var(--bg-surface-elevated); border-radius: 3px; overflow: hidden; margin: 0 0 1.4rem; }
+  .progress-fill { height: 100%; background: var(--gradient-brand); width: 0%; transition: width 0.3s var(--ease-spring); }
+  .q-num { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent-cyan); margin-bottom: 0.6rem; }
+  .q-text { font-size: 1.15rem; font-weight: 600; margin: 0; color: var(--text-main); }
+  .options { display: grid; gap: 0.7rem; margin-top: 1.3rem; }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    text-align: left;
+    transition: border-color var(--duration-fast), background var(--duration-fast), transform 0.1s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--border-glow); background: var(--bg-glass-hover); }
+  .option .letter {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .option.correct { border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12); }
+  .option.correct .letter { background: var(--accent-emerald); color: #05130c; border-color: var(--accent-emerald); }
+  .option.wrong { border-color: var(--red); background: rgba(239, 68, 68, 0.10); }
+  .option.wrong .letter { background: var(--red); color: #200b0b; border-color: var(--red); }
+  .option:disabled { cursor: default; opacity: 0.95; }
+  .feedback {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+  }
+  .feedback.good { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
+  .feedback.bad  { background: rgba(239, 68, 68, 0.10); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+  .quiz-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1.4rem; flex-wrap: wrap; }
+  .quiz-results { text-align: center; padding: 1.4rem 1rem; }
+  .quiz-results h3 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 0.5rem; }
+  .big-score {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    line-height: 1;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0.6rem 0;
+  }
+  .best-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--accent-emerald);
+    border: 1px solid rgba(16,185,129,0.45);
+    border-radius: 999px;
+    padding: 0.25em 0.8em;
+    margin-top: 0.5rem;
+  }
+  .sync-note { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-top: 1.1rem; }
+  .sync-note.err { color: var(--red); }
+
+  /* ---- Chat ---- */
+  .chat-messages { display: flex; flex-direction: column; gap: 0.8rem; max-height: 46vh; overflow-y: auto; padding: 0.4rem 0.2rem 0.8rem; }
+  .msg { max-width: 88%; border-radius: 12px; padding: 0.7rem 0.95rem; font-size: 0.92rem; line-height: 1.55; word-wrap: break-word; }
+  .msg.user { align-self: flex-end; background: var(--gradient-brand); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.assistant { align-self: flex-start; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-bottom-left-radius: 4px; }
+  .msg.assistant p { margin: 0.35rem 0; color: var(--text-muted); }
+  .msg.assistant p:first-child { margin-top: 0; }
+  .msg.assistant p:last-child { margin-bottom: 0; }
+  .msg.assistant ul, .msg.assistant ol { margin: 0.35rem 0; padding-left: 1.3rem; color: var(--text-muted); }
+  .msg.assistant code { font-family: var(--font-mono); font-size: 0.85em; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 0.1em 0.35em; color: var(--primary-glow); }
+  .msg.assistant strong, .msg.assistant b { color: var(--text-main); }
+  .msg.assistant em { color: var(--text-muted); }
+  .msg.assistant h3, .msg.assistant h4 { font-family: var(--font-display); color: var(--text-main); margin: 0.7rem 0 0.3rem; }
+  .msg.assistant h3 { font-size: 1.05rem; }
+  .msg.assistant h4 { font-size: 0.95rem; }
+  .msg.error { align-self: flex-start; color: #fca5a5; background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.35); }
+  .msg.typing { color: var(--text-dim); font-style: italic; }
+  .chat-inputbar { display: flex; gap: 0.6rem; padding-top: 0.9rem; border-top: 1px solid var(--border-subtle); margin-top: 0.4rem; }
+  .chat-inputbar input {
+    flex: 1;
+    padding: 0.7em 0.95em;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    color: var(--text-main);
+  }
+  .chat-inputbar input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .chat-inputbar input::placeholder { color: var(--text-dim); }
+  .chat-note {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .chat-auth {
+    margin-bottom: 0.8rem;
+    padding: 0.7rem 0.95rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .chat-auth button { margin-top: 0.5rem; }
+
+  .pill-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--accent-cyan);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    border-radius: 999px;
+    padding: 0.25em 0.7em;
+    margin: 0 0 0.8rem;
+  }
+
+  @media (max-width: 720px) {
+    .app { padding: 1rem 0.9rem 3rem; }
+    .app-hero { padding: 1.5rem 1.1rem 1.3rem; }
+    .panel-wrap { padding: 1.2rem 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="app-top">
+    <div class="brand"><span class="brand-grad">CABLE&amp;NET</span> · Course Companion</div>
+    <div class="auth-row">
+      <span class="auth-pill" id="authPill">Checking…</span>
+      <button class="btn btn-ghost" id="signInBtn" style="display:none;" type="button">Sign in with Puter</button>
+    </div>
+  </header>
+
+  <section class="app-hero">
+    <span class="eyebrow" id="appEyebrow">Course Companion · Run on Puter</span>
+    <h1 id="courseTitle">Course Companion</h1>
+    <p class="lede" id="courseLede"></p>
+    <div class="hero-stats" id="heroStats"></div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button type="button" class="tab active" data-view="notes" role="tab">Study notes</button>
+    <button type="button" class="tab" data-view="quiz" role="tab">Quiz</button>
+    <button type="button" class="tab" data-view="chat" role="tab">Ask the Mentor</button>
+  </div>
+
+  <div class="module-rail" id="moduleRail" role="tablist" aria-label="Modules"></div>
+
+  <!-- STUDY NOTES -->
+  <section class="panel-wrap active" id="panel-notes">
+    <div class="panel-head">
+      <h2 id="notesTitle">Study notes</h2>
+      <span class="sub" id="notesMeta"></span>
+    </div>
+    <div class="notes-body" id="notesBody"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel-wrap" id="panel-quiz">
+    <div class="panel-head">
+      <h2>Quiz <span id="quizModule"></span></h2>
+      <span class="sub" id="quizMeta"></span>
+    </div>
+    <div id="quizZone">
+      <div class="quiz-strip" id="quizScreen">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="q-num" id="qNum">—</div>
+        <p class="q-text" id="qText"></p>
+        <div class="options" id="qOptions"></div>
+        <div class="feedback" id="qFeedback"></div>
+        <div class="quiz-controls">
+          <button class="btn btn-primary" id="nextBtn" style="display:none;" type="button">Next Question →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI MENTOR -->
+  <section class="panel-wrap" id="panel-chat">
+    <div class="panel-head">
+      <h2>Ask the Mentor</h2>
+      <span class="sub">AI assistant — not a human instructor · never grades</span>
+    </div>
+    <div class="chat-auth" id="chatAuth"></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-inputbar">
+      <input type="text" id="chatInput" placeholder="Ask about this module, the course, cabling, networking…" autocomplete="off">
+      <button class="btn btn-primary" id="chatSend" type="button">Ask</button>
+    </div>
+    <div class="chat-note">
+      The AI Mentor runs on your own free Puter account (User-Pays) — no API key, no card. AI answers are for practice only and are never graded.
+    </div>
+  </section>
+</div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // EMBEDDED COURSE DATA — injected by tools/build-puter-course-app.js.
+  // The shape mirrors what the live course + study packs use
+  // (quiz: id / question / options / correct_index / explanation).
+  // ============================================================
+  var COURSE_COMPANION = {
+      "courseId": "cabling",
+      "title": "Network Foundations — Cabling & Infrastructure",
+      "port": "PORT 01",
+      "version": "1.0",
+      "note": "Study, quiz, and ask the AI Mentor for this course. Your progress is private to you — sign in with Puter to back it up to your own cloud.",
+      "modules": [
+        {
+          "num": 1,
+          "dbId": 9,
+          "title": "Module 1: OSI Model & Network Topologies",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "By the end of this session, students will be able to:\n<ul><li>Name and describe the 7 layers of the OSI model</li>\n<li>Explain what happens at each layer in plain language</li>\n<li>Compare the OSI and TCP/IP models (protocol suites)</li>\n<li>Identify and compare Bus, Star, Ring, and Mesh topologies</li>\n<li>Recommend a topology for a given real-world scenario</li>\n</ul>"
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>The OSI Model</h3>\nThe OSI (Open Systems Interconnection) model breaks network communication\ninto 7 layers, from the physical wire up to the application a user sees:\n<ul><li><strong>Physical</strong> — cables, connectors, voltages, radio signals (this layer)</li>\n<li><strong>Data Link</strong> — MAC addresses, switches, framing</li>\n<li><strong>Network</strong> — IP addresses, routers, routing</li>\n<li><strong>Transport</strong> — TCP/UDP, ports, reliable delivery</li>\n<li><strong>Session</strong> — establishing/maintaining connections</li>\n<li><strong>Presentation</strong> — encryption, data formatting</li>\n<li><strong>Application</strong> — what the user interacts with (browser, email)</li>\n</ul>\n<strong>How data travels:</strong> at the sending device data is <strong>encapsulated</strong> — each\nlayer adds a header as it moves down; at the receiving device the layers\n<strong>de-encapsulate</strong> (strip headers) as data moves up. This is one of the most\ntested ideas in networking (from Cisco Networking Basics, Module 5).\nTeaching tip: use the mnemonic <em>&quot;Please Do Not Throw Sausage Pizza Away&quot;</em>\nto help students recall the order bottom-up.\nThis course lives mostly at <strong>Layer 1 (Physical)</strong> and touches Layer 2\n(switches) — but understanding the full stack helps students see where\ntheir cabling work fits into the bigger picture.\n<h3>OSI vs TCP/IP (two ways to think about the stack)</h3>\n<table><thead><tr><th>OSI (7 layers)</th><th>TCP/IP (4 layers)</th><th>What lives there in practice</th></tr></thead><tbody><tr><td>Application / Presentation / Session</td><td>Application</td><td>HTTP, DNS, FTP, email</td></tr><tr><td>Transport</td><td>Transport</td><td>TCP, UDP, port numbers</td></tr><tr><td>Network</td><td>Internet</td><td>IP, ICMP, ARP (this course's IP addressing)</td></tr><tr><td>Physical / Data Link</td><td>Network Access</td><td>Cables, Ethernet, switches, MAC</td></tr></tbody></table>\nCompare-and-contrast note: **TCP/IP is the model actually used on the\ninternet; OSI is the teaching/reference model.**\n<h3>Network Topologies</h3>\n<table><thead><tr><th>Topology</th><th>Layout</th><th>Pros</th><th>Cons</th></tr></thead><tbody><tr><td><strong>Bus</strong></td><td>Single shared cable</td><td>Cheap, simple</td><td>One break kills the network</td></tr><tr><td><strong>Star</strong></td><td>All devices to central switch</td><td>Easy to troubleshoot, most common today</td><td>Switch is single point of failure</td></tr><tr><td><strong>Ring</strong></td><td>Devices connected in a loop</td><td>Predictable traffic flow</td><td>One break can disrupt the ring</td></tr><tr><td><strong>Mesh</strong></td><td>Every device connects to many others</td><td>Highly redundant</td><td>Expensive, complex cabling</td></tr></tbody></table>\nEmphasize: **Star topology is what students will build in almost every lab\nin this course** — it's the real-world default.\n<h3>Network Types (quick orientation)</h3>\n<ul><li><strong>LAN</strong> — Local Area Network (one building/office)</li>\n<li><strong>WAN</strong> — Wide Area Network (connects LANs over distance; the internet is a WAN)</li>\n<li><strong>WLAN</strong> — Wireless LAN (Wi-Fi)</li>\n<li><strong>PAN</strong> — Personal Area Network (Bluetooth, a few devices)</li>\n</ul>"
+              },
+              {
+                "title": "Lab 1: Topology Design Exercises (10:45–12:30)",
+                "html": "<ul><li>Draw a LAN for a small office building (10–15 devices)</li>\n<li>Draw a topology for a hospital network (redundancy matters — patient</li>\n</ul> safety systems can't go down) — note which OSI layers each part touches\n<ul><li>For each scenario below, have students pick and justify a topology:</li>\n</ul> - A single classroom with 20 laptops\n - A hospital ICU\n - A budget internet café\n<ul><li>Use paper/whiteboard or a simple drawing app — no software required yet</li>\n<li>Quick pair-share: label your drawn LAN with &quot;this is a LAN, client/server,</li>\n</ul> star topology, Layer 1–2&quot; using new vocabulary"
+              },
+              {
+                "title": "Afternoon Activity (1:15–2:15)",
+                "html": "<ul><li>Watch a short cable basics video (10 min)</li>\n<li>Group discussion: &quot;Where do you see networks in daily life?&quot; (home WiFi,</li>\n</ul> school computer labs, ATMs, mobile networks) — say which is a LAN, WLAN, WAN\n<ul><li>Open Q&amp;A</li>\n</ul>"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What layer of the OSI model do Ethernet cables operate at?</li>\n<li>Why is Star topology more common today than Bus?</li>\n<li>Name one advantage and one disadvantage of Mesh topology.</li>\n<li>What is encapsulation, and to which layer does it relate?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Read the cabling standards handout (2 pages)</li>\n<li>Watch the &quot;Ethernet cable basics&quot; video (10 min)</li>\n<li>Identify and photograph/list the cables in your own home or workplace</li>\n<li>Label each network you use today as LAN / WLAN / WAN</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "Which OSI layer do Ethernet cables and connectors operate at?",
+                "options": [
+                  "Layer 2 — Data Link",
+                  "Layer 1 — Physical",
+                  "Layer 3 — Network",
+                  "Layer 4 — Transport"
+                ],
+                "correct_index": 1,
+                "explanation": "Layer 1 (Physical): cables, connectors, voltages (module §OSI Model)."
+              },
+              {
+                "id": 2,
+                "question": "Which topology connects every device to a central switch?",
+                "options": [
+                  "Bus",
+                  "Ring",
+                  "Star",
+                  "Mesh"
+                ],
+                "correct_index": 2,
+                "explanation": "Star topology (module §Network Topologies)."
+              },
+              {
+                "id": 3,
+                "question": "In the OSI model, which layer is responsible for routing packets by IP address?",
+                "options": [
+                  "Physical",
+                  "Data Link",
+                  "Network",
+                  "Transport"
+                ],
+                "correct_index": 2,
+                "explanation": "Network layer: IP addresses, routers, routing."
+              },
+              {
+                "id": 4,
+                "question": "What is the main advantage of a Mesh topology?",
+                "options": [
+                  "Cheapest to build",
+                  "Highly redundant / fault-tolerant",
+                  "Easiest to troubleshoot",
+                  "Uses the least cabling"
+                ],
+                "correct_index": 1,
+                "explanation": "Redundancy is the defining benefit of Mesh."
+              },
+              {
+                "id": 5,
+                "question": "TCP/IP is best described as:",
+                "options": [
+                  "A single network cable standard",
+                  "The model actually used on the internet",
+                  "A replacement for the OSI model",
+                  "A hardware topology"
+                ],
+                "correct_index": 1,
+                "explanation": "TCP/IP is the model actually used on the internet; OSI is the teaching model (§OSI vs TCP/IP)."
+              },
+              {
+                "id": 6,
+                "question": "Which of the following maps to the \"Network Access\" layer of the TCP/IP model?",
+                "options": [
+                  "HTTP and DNS",
+                  "TCP and UDP",
+                  "IP and ICMP",
+                  "Ethernet, cables, switches, MAC"
+                ],
+                "correct_index": 3,
+                "explanation": "Cables/Ethernet/switches/MAC live in the Network Access layer of the TCP/IP table."
+              }
+            ]
+          }
+        },
+        {
+          "num": 2,
+          "dbId": 10,
+          "title": "Module 2: Cabling Standards & Cable Types",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Distinguish Cat5e, Cat6, and Cat6A cable specifications</li>\n<li>Explain the difference between UTP and STP cable</li>\n<li>Describe fiber optic cable at a basic level</li>\n<li>Reference the EIA/TIA-568 structured cabling standard</li>\n<li>Explain why twisted pairs cancel electromagnetic interference</li>\n</ul>"
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>The Cable Hierarchy</h3>\nA network cable is a <strong>Layer 1 (Physical)</strong> medium — it carries electrical or\nlight signals between devices. Three families dominate:\n<table><thead><tr><th>Family</th><th>Medium</th><th>Typical use</th><th>Reach limit</th></tr></thead><tbody><tr><td>Copper UTP</td><td>Twisted copper pairs</td><td>Office/home LANs</td><td>~100 m</td></tr><tr><td>Copper STP</td><td>Twisted pairs + foil/braid</td><td>Noisy industrial environments</td><td>~100 m</td></tr><tr><td>Fiber optic</td><td>Glass/plastic core</td><td>Backbones, WAN, data centers</td><td>100 m – 40 km+</td></tr><tr><td>Coaxial</td><td>Central conductor + shield</td><td>Legacy cable TV, older LANs</td><td>~500 m</td></tr></tbody></table>\n<strong>Why twisted pairs?</strong> Twisting the two wires of a circuit **cancels\nelectromagnetic interference (EMI)** from adjacent pairs and the environment.\nThis is what lets Cat5e/Cat6 run fast without each pair radiating into\nanother — untwist the wires and the crosstalk/EMI returns.\n<h3>Cable Categories</h3>\n<table><thead><tr><th>Category</th><th>Max Speed</th><th>Max Distance</th><th>Notes</th></tr></thead><tbody><tr><td>Cat5e</td><td>1 Gbps</td><td>100m</td><td>Still common, budget option</td></tr><tr><td>Cat6</td><td>1–10 Gbps</td><td>55–100m</td><td>Best balance of cost/performance</td></tr><tr><td>Cat6A</td><td>10 Gbps</td><td>100m</td><td>Thicker, better shielding</td></tr><tr><td>Cat8</td><td>40 Gbps (≤30 m)</td><td>30m</td><td>Data-center short links</td></tr></tbody></table>\n<strong>Installer rule:</strong> residential/office → Cat5e or Cat6; new structured\ninstalls today → <strong>Cat6A</strong> is the safe future-proof choice; Cat8 is niche\n(very short switch-to-server runs only).\n<h3>UTP vs STP</h3>\n<ul><li><strong>UTP</strong> (Unshielded Twisted Pair) — standard for most office/home use,</li>\n</ul> cheaper, twisting alone reduces interference\n<ul><li><strong>STP</strong> (Shielded Twisted Pair) — added foil/braid shielding, used near</li>\n</ul> heavy electrical interference (factories, near power lines)\n<h3>Fiber Optic (overview only — not hands-on this course)</h3>\n<ul><li>Uses light instead of electricity</li>\n<li>Immune to electrical interference, much longer distances</li>\n<li><strong>Multi-mode</strong> (OM2/OM3/OM4) = short high-speed links inside a building</li>\n<li><strong>Single-mode</strong> (OS2) = long-haul WAN (10s of km)</li>\n<li>More expensive, requires specialized tools to terminate</li>\n</ul>\n<h3>Standards &amp; Structured Cabling</h3>\n<ul><li><strong>EIA/TIA-568</strong> governs commercial building cabling in most of the world</li>\n<li>&quot;Structured cabling&quot; = planned, labeled, standardized cable runs rather</li>\n</ul> than ad-hoc wiring — critical for maintainability in real buildings\n<ul><li><strong>Safety/code:</strong> cable run above ceilings must be <strong>plenum-rated</strong></li>\n</ul> (low-smoke, low-flame jacket); never run parallel alongside mains power\n for long distances (induction noise)"
+              },
+              {
+                "title": "Lab 2A: Cable Identification & Inspection (10:45–11:30)",
+                "html": "<ul><li>Examine different cable types (Cat5e, Cat6, Cat6A samples)</li>\n<li>Feel the physical difference between UTP and STP</li>\n<li>Measure jacket diameter, count twists per inch</li>\n<li>Identify connector types on hand (RJ45, keystone, fiber LC/SC)</li>\n<li>Read the jacket printing: category rating, plenum/fire rating, AWG</li>\n</ul>"
+              },
+              {
+                "title": "Lab 2B: Cable Anatomy Video (11:30–12:30)",
+                "html": "<ul><li>Cross-section view of a twisted pair cable</li>\n<li>Discuss why twisting matters (cancels electromagnetic interference)</li>\n<li>Discuss jacket materials and what they protect against</li>\n<li>Test the interference idea: hold wires near a speaker/EM source and</li>\n</ul> observe — twisted vs untwisted difference"
+              },
+              {
+                "title": "Afternoon Design Task (1:15–2:15)",
+                "html": "<strong>Scenario:</strong> &quot;A small office needs 50 network drops.&quot;\n<ul><li>What cable category should they recommend, and why?</li>\n<li>How many cables/meters are needed given the office layout?</li>\n<li>Discuss trade-offs: budget Cat5e vs future-proof Cat6A</li>\n<li>What standard documents a &quot;structured&quot; plan, and why label it?</li>\n<li>Which would you run to the far building: copper or fiber, and why?</li>\n</ul>"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What does &quot;UTP&quot; stand for and when would you choose STP instead?</li>\n<li>Which cable category would you recommend for a 10 Gbps office network?</li>\n<li>What standard governs commercial cabling installs?</li>\n<li>Why are copper pairs twisted (electrical reason)?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Memorize the RJ45 pin order (colors 1–8) ahead of next week</li>\n<li>Watch the RJ45 tutorial video (5 min), twice</li>\n<li>Find a damaged cable at home or school to bring in</li>\n<li>Read: docs/resources/cabling/cable-types-and-categories.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "Why are copper pairs twisted inside a network cable?",
+                "options": [
+                  "To make the cable flexible",
+                  "To cancel electromagnetic interference (EMI)",
+                  "To reduce the cost of copper",
+                  "To increase the cable's length limit"
+                ],
+                "correct_index": 1,
+                "explanation": "Twisting cancels EMI/crosstalk from adjacent pairs and the environment (§1, §Key Takeaways)."
+              },
+              {
+                "id": 2,
+                "question": "Which UTP category supports 10 Gbps up to 100 m and is the recommended future-proof choice for new structured installs?",
+                "options": [
+                  "Cat5e",
+                  "Cat6",
+                  "Cat6a",
+                  "Cat8"
+                ],
+                "correct_index": 2,
+                "explanation": "Cat6a: 10 Gbps at 100 m, 500 MHz, recommended future-proof choice (§2)."
+              },
+              {
+                "id": 3,
+                "question": "A cable with a foil/braid shield around the twisted pairs is called:",
+                "options": [
+                  "UTP",
+                  "STP",
+                  "Coaxial",
+                  "Fiber"
+                ],
+                "correct_index": 1,
+                "explanation": "STP (Shielded Twisted Pair) (§1, module §UTP vs STP)."
+              },
+              {
+                "id": 4,
+                "question": "What is the practical reach limit of copper UTP for LAN runs?",
+                "options": [
+                  "10 m",
+                  "100 m",
+                  "500 m",
+                  "40 km"
+                ],
+                "correct_index": 1,
+                "explanation": "~100 m (§1 cable hierarchy table)."
+              },
+              {
+                "id": 5,
+                "question": "Which standard governs commercial building cabling?",
+                "options": [
+                  "IEEE 802.3",
+                  "ISO 9001",
+                  "EIA/TIA-568",
+                  "RFC 1918"
+                ],
+                "correct_index": 2,
+                "explanation": "EIA/TIA-568 (§6 in resource, module §Standards)."
+              },
+              {
+                "id": 6,
+                "question": "Which cable family is immune to electrical interference and best for runs over 100 m between buildings?",
+                "options": [
+                  "UTP Cat5e",
+                  "STP Cat6",
+                  "Fiber optic",
+                  "Coaxial"
+                ],
+                "correct_index": 2,
+                "explanation": "Fiber: immune to EMI, 100 m – 40 km+ (§1)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 3,
+          "dbId": 11,
+          "title": "Module 3: RJ45 Connectors & Wiring Standards",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Identify the 8 pins of an RJ45 connector and their purpose</li>\n<li>Recall the T568B wiring order from memory</li>\n<li>Explain the difference between T568A and T568B</li>\n<li>Explain when a straight-through vs crossover cable is needed</li>\n<li>Describe the real pair-to-pin circuits (1-2, 3-6, 4-5, 7-8) and why order matters</li>\n</ul>"
+              },
+              {
+                "title": "Quick Recall Quiz (8:30–9:00)",
+                "html": "Open with a rapid pin-order recall check from last week's homework."
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>RJ45 Pin Anatomy</h3>\n8 pins, numbered 1–8 left to right when the clip faces down/away from you.\nThree physical parts matter for the crimp:\n<ul><li><strong>8 gold contact pins</strong> — each pierces one conductor</li>\n<li><strong>Transparent body/housing</strong> — lets you verify colors before crimping</li>\n<li><strong>Locking tab</strong> — clicks into the port/keystone so the plug stays seated</li>\n</ul>\n<h3>T568B (most common — use this as the default standard)</h3>\n<table><thead><tr><th>Pin</th><th>Color</th></tr></thead><tbody><tr><td>1</td><td>White/Orange</td></tr><tr><td>2</td><td>Orange</td></tr><tr><td>3</td><td>White/Green</td></tr><tr><td>4</td><td>Blue</td></tr><tr><td>5</td><td>White/Blue</td></tr><tr><td>6</td><td>Green</td></tr><tr><td>7</td><td>White/Brown</td></tr><tr><td>8</td><td>Brown</td></tr></tbody></table>\n<h3>The Real Pair Circuits (the part students miss)</h3>\nEthernet does NOT use pins in simple 1..8 order. The cable is 4 twisted\n<strong>pairs</strong>, and the usable circuit pairs are:\n<ul><li><strong>1-2, 3-6, 4-5, 7-8</strong></li>\n</ul>\nOnly <strong>pairs 1-2 and 3-6</strong> are needed for 100 Mbps; all four pairs (8\nconductors) are used for Gigabit. This is why &quot;pins 3 and 6 are the green\npair&quot; — they are not physically adjacent, and getting them right is the\nsingle most common cause of dead cables.\n<h3>T568A (crossover standard)</h3>\nSwaps the orange and green pairs relative to T568B (pins 1↔3, 2↔6). The\nonly difference between the two standards is swapping pairs 2 and 3.\n<h3>Straight-Through vs Crossover</h3>\n<ul><li><strong>Straight-through</strong> (T568B both ends, or T568A both ends) — connects</li>\n</ul> unlike devices, e.g., PC to switch. This is what students will make\n ~90% of the time.\n<ul><li><strong>Crossover</strong> (T568A one end, T568B the other) — historically used to</li>\n</ul> connect like devices directly (PC to PC, switch to switch). Modern\n switches auto-detect (auto-MDIX), but understanding crossover is still\n tested and useful for troubleshooting older equipment.\n<h3>Why Order Matters</h3>\nWrong pin order can mean partial connectivity, wrong speed negotiation,\nor a completely dead cable — this is the #1 cause of &quot;the cable doesn't\nwork&quot; in the field. ***Pick ONE standard (T568B) and use it consistently on\nboth ends.*** Consistency matters more than which standard you choose.\n<h3>Common Termination Mistakes to Know in Advance</h3>\n<table><thead><tr><th>Mistake</th><th>Symptom</th><th>Prevention</th></tr></thead><tbody><tr><td>Wires in wrong order</td><td>Tester shows crossed/missing pins</td><td>Verify colours before crimping</td></tr><tr><td>Jacket not past the barb</td><td>Pull test fails; plug pulls out</td><td>Push cable deeper before crimping</td></tr><tr><td>Untwisted too far</td><td>Flaky Gigabit links</td><td>Keep twists as close to the plug as possible</td></tr><tr><td>Trim not flush</td><td>Some pins don't make contact</td><td>Re-cut, re-insert</td></tr></tbody></table>"
+              },
+              {
+                "title": "Lab 3A: RJ45 Connector Anatomy (10:45–11:30)",
+                "html": "<ul><li>Examine RJ45 connectors with a magnifier</li>\n<li>Identify the 8 pin contacts and where each wire seats</li>\n<li>Discuss: why does order matter physically, not just electrically?</li>\n<li>Note where the strain-relief barb is and why the jacket must pass it</li>\n</ul>"
+              },
+              {
+                "title": "Lab 3B: Pin Order Practice (11:30–12:30)",
+                "html": "<ul><li>Using a laminated diagram, arrange colored wires in T568B order</li>\n<li>Practice with dummy (non-terminated) wire sets first</li>\n<li>Repeat the sequence 5 times to build muscle memory —</li>\n</ul> frame it as &quot;color sequence is muscle memory,&quot; not just memorization\n<ul><li>Bonus challenge: arrange T568A and note exactly which two pairs move</li>\n</ul>"
+              },
+              {
+                "title": "Lab 3C: Pre-Crimping Preparation (1:15–2:15)",
+                "html": "<ul><li>Review cable construction diagram (jacket, pairs, conductors)</li>\n<li>Demonstrate proper cable hold and hand position</li>\n<li>Show stripping measurement: <strong>10–12mm of jacket removed</strong> — no nicking</li>\n</ul> the insulation of the inner conductors\n<ul><li>Explain conductor pairs stay twisted as close to the plug as possible</li>\n<li>Safety briefing on crimping tools (no live crimping yet — that's next week)</li>\n<li>Discuss failure modes in advance: uneven wire length, wires not fully</li>\n</ul> seated, jacket stripped too far back"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>Write the T568B pin order from memory (colors 1–8)</li>\n<li>When would you use a crossover cable instead of straight-through?</li>\n<li>What's the correct strip length before crimping?</li>\n<li>What are the four usable pair circuits, and why are 1-2 and 3-6 the key pairs?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Write the T568B pin order from memory, 3 times</li>\n<li>Watch a crimping tutorial video</li>\n<li>Stretch and warm up fingers — crimping is physically demanding on day one</li>\n<li>Read: docs/resources/cabling/rj45-crimping-field-guide.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "Holding an RJ45 plug with the clip facing down and contacts facing you, pins are numbered:",
+                "options": [
+                  "8 to 1, right to left",
+                  "1 to 8, left to right",
+                  "Randomly, per plug",
+                  "1–4 top row, 5–8 bottom row"
+                ],
+                "correct_index": 1,
+                "explanation": "1–8 left to right, clip down (field guide §Front View Pinout)."
+              },
+              {
+                "id": 2,
+                "question": "In the T568B standard, which pair occupies pins 3 and 6?",
+                "options": [
+                  "Orange pair",
+                  "Green pair",
+                  "Blue pair",
+                  "Brown pair"
+                ],
+                "correct_index": 1,
+                "explanation": "Green pair (W-Green, Green) on pins 3 and 6 (module §T568B)."
+              },
+              {
+                "id": 3,
+                "question": "Ethernet's usable pair circuits are:",
+                "options": [
+                  "1-2, 3-4, 5-6, 7-8",
+                  "1-2, 3-6, 4-5, 7-8",
+                  "1-3, 2-4, 5-7, 6-8",
+                  "1-6, 2-5, 3-8, 4-7"
+                ],
+                "correct_index": 1,
+                "explanation": "Real pair circuits 1-2, 3-6, 4-5, 7-8 (module §Real Pair Circuits)."
+              },
+              {
+                "id": 4,
+                "question": "How many pairs are needed for 100 Mbps (vs Gigabit)?",
+                "options": [
+                  "All 4 pairs",
+                  "Only pairs 1-2 and 3-6",
+                  "Only pair 1-2",
+                  "3 pairs"
+                ],
+                "correct_index": 1,
+                "explanation": "Only pairs 1-2 and 3-6 for 100 Mbps; all four for Gigabit (module §Real Pair Circuits)."
+              },
+              {
+                "id": 5,
+                "question": "The only difference between T568A and T568B is:",
+                "options": [
+                  "They use different numbers of wires",
+                  "Swapping pairs 2 and 3 (orange/green)",
+                  "One uses more shielding",
+                  "The clip orientation"
+                ],
+                "correct_index": 1,
+                "explanation": "Swapping pairs 2 and 3 (orange/green) (module §T568A)."
+              },
+              {
+                "id": 6,
+                "question": "When would you use a crossover cable?",
+                "options": [
+                  "PC to switch",
+                  "PC to router LAN port",
+                  "Two like devices directly (e.g., PC to PC)",
+                  "PC to keystone wall jack"
+                ],
+                "correct_index": 2,
+                "explanation": "Crossover = like devices directly; straight-through = unlike devices. Auto-MDIX makes it rare today (module §Straight-Through vs Crossover)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 4,
+          "dbId": 12,
+          "title": "Module 4: Crimping Theory & First Practice",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Hold a crimping tool and cable with correct technique</li>\n<li>Execute a full crimp from strip to test-ready connector</li>\n<li>Recognize the visual difference between a good and bad crimp</li>\n<li>Explain the role of each crimping tool and the correct strip length</li>\n</ul>"
+              },
+              {
+                "title": "Safety Briefing (8:30–9:00)",
+                "html": "<ul><li>Correct grip on the crimping tool</li>\n<li>Correct way to hold the cable during stripping and insertion</li>\n<li>Common mistakes: rushing, uneven pressure, wrong hand position</li>\n<li>Safety focus: fingers, eyes (wire ends can flick), posture during</li>\n</ul> repetitive motion\n<ul><li>Inspect tools before use — a worn/dirty crimper gives weak crimps</li>\n</ul>"
+              },
+              {
+                "title": "Live Demonstration (9:00–10:30)",
+                "html": "Instructor crimps a cable slowly, narrating every step:\n<strong>Tools first</strong> — know what each is for (adapted from the field guide):\n<table><thead><tr><th>Tool</th><th>Purpose</th></tr></thead><tbody><tr><td>Crimp tool (crimper)</td><td>Terminates RJ45 plugs with a ratcheting press</td></tr><tr><td>Cable stripper</td><td>Removes the outer jacket without nicking wires</td></tr><tr><td>Wire cutter</td><td>Trims the bundle to exact length</td></tr><tr><td>Punch-down tool</td><td>Terminates keystones/patch panels (110-style)</td></tr><tr><td>Cable tester</td><td>Verifies continuity &amp; pin order (mandatory before install)</td></tr></tbody></table>\n<strong>The 7-step process:</strong>\n<ul><li>Strip 10–12mm of outer jacket — shear, don't nick the inner insulation</li>\n<li>Untwist and straighten the 4 pairs; keep twist as close to the jacket</li>\n</ul> as possible (short untwisted run = low crosstalk)\n<ul><li>Arrange wires into T568B order: W-Orange, Orange, W-Green, Blue,</li>\n</ul> W-Blue, Green, W-Brown, Brown\n<ul><li>Trim wires evenly to ~12–13mm past the jacket — all 8 flush</li>\n<li>Insert fully into the RJ45 connector (clip/tab down) — wires reach</li>\n</ul> the front and the jacket passes the strain-relief barb\n<ul><li>Crimp with firm, even pressure in one motion until the ratchet releases</li>\n<li>Inspect: all 8 pins show copper contact, clip flush, no jacket trapped</li>\n</ul> between conductors\nPause frequently to quiz students: <em>&quot;What color is pin 4?&quot;</em>\nShow a side-by-side comparison of a good crimp vs a bad crimp (loose\nwires, uneven length, connector not fully seated)."
+              },
+              {
+                "title": "Lab 4A: Students' First Crimping (10:45–12:30)",
+                "html": "<ul><li>Each student receives 2 blank cables + connectors</li>\n<li>Instructor circulates, watching grip and pressure</li>\n<li><strong>Cable 1:</strong> focus purely on technique, not speed</li>\n<li><strong>Cable 2:</strong> try to improve on Cable 1</li>\n<li>No testing yet — that comes next week</li>\n<li>Reassure students: &quot;It's OK if your first one fails&quot;</li>\n</ul>"
+              },
+              {
+                "title": "Lab 4B: Practice Video + Feedback (1:15–2:15)",
+                "html": "<ul><li>Watch a video highlighting common crimping mistakes</li>\n<li>Instructor gives individual feedback per student</li>\n<li>Group discussion: what felt different between Cable 1 and Cable 2?</li>\n</ul> (tool pressure, wire arrangement, insertion depth)\n<ul><li>Review the common-mistakes table from the resource guide and check each</li>\n</ul> student's work against it"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Students keep their two cables. Preview: &quot;Next week we test them.&quot;\nReinforce: even pressure + wire depth + twist length are the three habits\nthat separate reliable cables from interrogators' rejects."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What is the correct strip length before crimping?</li>\n<li>Name two visual signs of a bad crimp.</li>\n<li>Why is even pressure important during the crimp?</li>\n<li>Name the two tools you must use before <em>and</em> after crimping to ensure</li>\n</ul> a reliable cable."
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Bring 4 more blank cables for Saturday 5</li>\n<li>Practice the finger grip motion without a cable</li>\n<li>Re-watch the crimping video twice</li>\n<li>Note: don't test your cables yet — testing is next session</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "What is the correct strip length for removing the outer jacket?",
+                "options": [
+                  "3–5 mm",
+                  "10–13 mm",
+                  "25 mm",
+                  "50 mm"
+                ],
+                "correct_index": 1,
+                "explanation": "Strip 10–13 mm (module: 10–12 mm; field guide: ~13 mm) (§3, module §7-step process)."
+              },
+              {
+                "id": 2,
+                "question": "Which tool verifies continuity and pin order and is **mandatory** before installation?",
+                "options": [
+                  "Cable stripper",
+                  "Wire cutter",
+                  "Cable tester",
+                  "Punch-down tool"
+                ],
+                "correct_index": 2,
+                "explanation": "Cable tester is mandatory before install (field guide §2, module §Tools)."
+              },
+              {
+                "id": 3,
+                "question": "When inserting wires into the RJ45 plug, the jacket must pass the:",
+                "options": [
+                  "Gold contact pins",
+                  "Locking tab",
+                  "Strain-relief barb",
+                  "Transparent body"
+                ],
+                "correct_index": 2,
+                "explanation": "Jacket must pass the strain-relief barb so the plug doesn't pull loose (field guide §3 step 5)."
+              },
+              {
+                "id": 4,
+                "question": "Why must the untwisted section of wire be kept short?",
+                "options": [
+                  "To save copper",
+                  "To keep crosstalk low",
+                  "To make the cable flexible",
+                  "To fit the crimp tool"
+                ],
+                "correct_index": 1,
+                "explanation": "Short untwisted run = low crosstalk (module §7-step process step 2)."
+              },
+              {
+                "id": 5,
+                "question": "During crimping, the crimp tool should be squeezed:",
+                "options": [
+                  "Multiple times, briefly",
+                  "With one firm, even squeeze until the ratchet releases",
+                  "As hard and fast as possible",
+                  "Only partway"
+                ],
+                "correct_index": 1,
+                "explanation": "One firm, even squeeze to ratchet release (module step 6)."
+              },
+              {
+                "id": 6,
+                "question": "What is the FIRST step in the 7-step crimping process?",
+                "options": [
+                  "Trim the wires flush",
+                  "Insert into the connector",
+                  "Strip the outer jacket",
+                  "Test the cable"
+                ],
+                "correct_index": 2,
+                "explanation": "Strip the outer jacket first (module §7-step process)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 5,
+          "dbId": 13,
+          "title": "Module 5: Crimping Practice Marathon & Testing Intro",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Crimp cables with increasing consistency (target: 5+ this session)</li>\n<li>Operate a cable tester and interpret its results</li>\n<li>Diagnose which pin(s) failed and begin connecting failures to causes</li>\n<li>Read a tester pattern and map it to a termination mistake</li>\n</ul>"
+              },
+              {
+                "title": "Quick Q&A on Technique (8:30–9:00)",
+                "html": "Revisit last week's grip/pressure lessons before diving back in."
+              },
+              {
+                "title": "Lecture: How a Cable Tester Works (9:00–9:15)",
+                "html": "<ul><li>The tester sends a signal down each pin in turn and lights an LED per pin</li>\n</ul> on the remote unit\n<ul><li><strong>Lit LED in order = that pin is wired and continuous</strong></li>\n<li><strong>No light = broken or miswired pin (open)</strong></li>\n<li><strong>Light on the wrong pin = a crossed/shorted pair</strong> (order error)</li>\n<li>Read the tester end-to-end: the pattern tells you the <em>kind</em> of fault,</li>\n</ul> not just &quot;pass/fail&quot;"
+              },
+              {
+                "title": "Intensive Crimping Practice (9:15–10:30)",
+                "html": "<ul><li>Students bring pre-measured cables from home</li>\n<li>Each student aims for <strong>5+ cables</strong> this session</li>\n<li>Instructor circulates, correcting form in real time — focus areas:</li>\n</ul> - Wire insertion depth (jacket past the strain-relief barb)\n - Even crimp pressure (one firm squeeze to ratchet release)\n - Full connector seating (8 pins show copper contact)\n<ul><li>Faster finishers assist slower students (peer teaching reinforces</li>\n</ul> their own technique)"
+              },
+              {
+                "title": "Continued Crimping + Testing Introduction (10:45–12:30)",
+                "html": "<ul><li>Continue crimping as needed</li>\n<li>Introduce the <strong>cable tester</strong>:</li>\n</ul> - A light per pin means that pin is wired correctly\n - No light = broken or miswired pin\n - Test immediately after each crimp — build the habit:\n <strong>Crimp → Test → Read → Fix</strong>\n<ul><li>Each student tests their own cables for the first time</li>\n</ul>"
+              },
+              {
+                "title": "Testing Lab (1:15–2:15)",
+                "html": "<ul><li>All students test the cables made in Saturday 4</li>\n<li>Record results: which pins work, which fail, per cable</li>\n<li>Guided failure analysis — ask diagnostic questions:</li>\n</ul> - &quot;Why did pin 3 fail?&quot;\n - &quot;Are you inserting the wires fully?&quot;\n - &quot;Is your crimp pressure even across all pins?&quot;\n - Map each tester pattern to the mistake table from Module 3:\n - All 8 pass → good\n - 4 of 8 fail on one side → uneven pressure / shallow insertion\n - Crossed pins → wire order error\n - No lights at all → connector not seated / wrong end tested\n<ul><li>Troubleshoot as a group, cable by cable</li>\n</ul>"
+              },
+              {
+                "title": "Wrap-Up: Homework Challenge (2:15–2:30)",
+                "html": "Frame remaining failures as a discussion topic for home, not a failure —\nthis sets up next week's troubleshooting-focused module.\nCelebrate first full-PASS cable per student."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What does a lit LED on a cable tester pin indicate?</li>\n<li>If 4 consecutive pins fail on the same side, what's the likely cause?</li>\n<li>What's the difference between a testing failure and a crimping failure?</li>\n<li>If a tester shows a light on the wrong pin, what fault does that mean?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Inspect your tested cables — which failed, and why?</li>\n<li>Write 2–3 sentences per failed cable explaining the likely issue</li>\n<li>Watch a troubleshooting video on failed crimps</li>\n<li>Prepare 4 more blank cables for Saturday 6</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "On a cable tester, a lit LED on a pin indicates:",
+                "options": [
+                  "That pin is broken",
+                  "That pin is wired and continuous",
+                  "The cable is miswired",
+                  "The tester is faulty"
+                ],
+                "correct_index": 1,
+                "explanation": "Lit LED = that pin is wired and continuous (module §How a Cable Tester Works)."
+              },
+              {
+                "id": 2,
+                "question": "If the tester shows a light on the WRONG pin, the fault is:",
+                "options": [
+                  "An open circuit",
+                  "A crossed/shorted pair (order error)",
+                  "Uneven crimp pressure",
+                  "A bad connector"
+                ],
+                "correct_index": 1,
+                "explanation": "Light on wrong pin = crossed/shorted pair, i.e., an order error (module §Lecture)."
+              },
+              {
+                "id": 3,
+                "question": "If 4 of 8 pins fail clustered on one side, the likely cause is:",
+                "options": [
+                  "Wires in wrong order",
+                  "Uneven pressure / shallow insertion",
+                  "Wrong cable category",
+                  "The cable is too long"
+                ],
+                "correct_index": 1,
+                "explanation": "4 of 8 on one side → uneven pressure / shallow insertion (module §Testing Lab)."
+              },
+              {
+                "id": 4,
+                "question": "What is the correct habit cycle for testing every cable?",
+                "options": [
+                  "Crimp → Test → Read → Fix",
+                  "Test → Crimp → Fix → Read",
+                  "Crimp → Read → Fix → Test",
+                  "Read → Crimp → Test → Fix"
+                ],
+                "correct_index": 0,
+                "explanation": "Crimp → Test → Read → Fix (module §Continued Crimping + Testing)."
+              },
+              {
+                "id": 5,
+                "question": "A \"no lights at all\" result on one end most likely means:",
+                "options": [
+                  "All pins are fine",
+                  "Connector not seated or wrong end tested",
+                  "The cable is shielded",
+                  "Too much untwisting"
+                ],
+                "correct_index": 1,
+                "explanation": "No lights = connector not seated or wrong end tested (module §Testing Lab)."
+              },
+              {
+                "id": 6,
+                "question": "The tester sends a signal down each pin and:",
+                "options": [
+                  "Prints a label",
+                  "Lights an LED per pin on the remote unit",
+                  "Measures the cable length only",
+                  "Tests the jacket color"
+                ],
+                "correct_index": 1,
+                "explanation": "Lights an LED per pin on the remote unit (module §Lecture)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 6,
+          "dbId": 14,
+          "title": "Module 6: Troubleshooting & Fixing Cables",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Diagnose common crimping failure patterns from tester results</li>\n<li>Remake a failed cable successfully</li>\n<li>Build a repeatable &quot;crimp → test → learn&quot; feedback loop</li>\n<li>Explain the troubleshooting method (define → test → fix → verify)</li>\n</ul>"
+              },
+              {
+                "title": "Review of Homework Failures (8:30–9:00)",
+                "html": "Open discussion: what patterns did students notice in their own failed\ncables? Surface common issues before the lecture."
+              },
+              {
+                "title": "Lecture: Common Crimping Failures (9:00–10:30)",
+                "html": "<table><thead><tr><th>Failure Pattern (tester)</th><th>Likely Cause</th></tr></thead><tbody><tr><td>4 of 8 pins fail</td><td>Uneven crimping pressure</td></tr><tr><td>One entire side fails</td><td>Wires not fully inserted on that side</td></tr><tr><td>Random, scattered pins fail</td><td>Bent or damaged wires before crimping</td></tr><tr><td>Connector physically damaged</td><td>Tool misuse or wrong tool</td></tr><tr><td>Crossed/out-of-order lights</td><td>Wire color order error (verify T568B)</td></tr><tr><td>No lights at all</td><td>Connector not seated / tested wrong end</td></tr></tbody></table>\nCover prevention strategies for each pattern.\n<h3>The Troubleshooting Method (a habit, not a trick)</h3>\n<ul><li><strong>Define</strong> the problem — what exactly fails? (which pins)</li>\n<li><strong>Gather</strong> info — run the tester, record the pattern</li>\n<li><strong>Hypothesize</strong> — which mistake matches that pattern?</li>\n<li><strong>Test the fix</strong> — re-terminate, re-test immediately</li>\n<li><strong>Verify</strong> — the cable passes AND stays passing under slight flex/pull</li>\n<li><strong>Document</strong> — note the cause so the same mistake is caught faster next time</li>\n</ul>"
+              },
+              {
+                "title": "Lab 6A: Diagnosing Failures (10:45–11:30)",
+                "html": "<ul><li>Examine last week's failed cables under a magnifier</li>\n<li>Identify the specific issue per cable using the failure-pattern table</li>\n<li>Compare good vs bad crimps side by side</li>\n<li>Look through the transparent plug: can you SEE the mistake before testing?</li>\n</ul>"
+              },
+              {
+                "title": "Lab 6B: Remaking Failed Cables (11:30–12:30)",
+                "html": "<ul><li>Take a failed cable, strip it back</li>\n<li>Re-crimp with corrected technique</li>\n<li>Test immediately</li>\n<li><strong>Goal: fix 3 failed cables this session</strong></li>\n</ul>"
+              },
+              {
+                "title": "Continued Practice & Testing (1:15–2:15)",
+                "html": "<ul><li>More crimping with new blank cables</li>\n<li>Test immediately after each crimp — reinforce the feedback loop:</li>\n</ul> <strong>Crimp → Test → Get result → Learn → Crimp better</strong>\n<ul><li>By this point, quality should be visibly improving</li>\n<li>Quick pull-test habit: after a pass, gently pull the plug — if the clip</li>\n</ul> holds and the cable stays live, the strain relief engaged"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Track and celebrate progress — count working cables per student.\nPreview: &quot;By Saturday 7, we start certifying cables.&quot;"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>If a cable fails on 4 pins clustered on one side, what's the likely fix?</li>\n<li>Why is immediate testing after crimping more effective than testing</li>\n</ul> in a batch later?\n<ul><li>Describe the crimp-test-learn feedback loop in your own words.</li>\n<li>What does a &quot;crossed&quot; tester pattern mean, and how do you prevent it?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Bring 4 more blank cables</li>\n<li>Target: 8 total working cables by Saturday 7</li>\n<li>Practice at home if tools are available</li>\n<li>Study: &quot;What makes a good crimp?&quot; — be ready to explain it</li>\n<li>Read: docs/resources/cabling/rj45-crimping-field-guide.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "When one ENTIRE side of the tester fails, the likely cause is:",
+                "options": [
+                  "Uneven crimp pressure",
+                  "Wires not fully inserted on that side",
+                  "Wrong cable category",
+                  "Shielding problem"
+                ],
+                "correct_index": 1,
+                "explanation": "One entire side fails = wires not fully inserted on that side (module §Failure Pattern table)."
+              },
+              {
+                "id": 2,
+                "question": "Random, scattered pins failing is most likely due to:",
+                "options": [
+                  "Wires in wrong color order",
+                  "Bent or damaged wires before crimping",
+                  "Too much untwisting",
+                  "A good termination"
+                ],
+                "correct_index": 1,
+                "explanation": "Random scattered pins = bent or damaged wires before crimping (module §Failure Pattern table)."
+              },
+              {
+                "id": 3,
+                "question": "What is the FIRST step of the 6-step troubleshooting method?",
+                "options": [
+                  "Test the fix",
+                  "Hypothesize",
+                  "Define the problem",
+                  "Document"
+                ],
+                "correct_index": 2,
+                "explanation": "Define the problem (module §The Troubleshooting Method)."
+              },
+              {
+                "id": 4,
+                "question": "A \"crossed/out-of-order\" tester pattern means:",
+                "options": [
+                  "The cable is too long",
+                  "A wire color order error — verify T568B",
+                  "The tester is broken",
+                  "Uneven pressure"
+                ],
+                "correct_index": 1,
+                "explanation": "Crossed/out-of-order = wire color order error; verify T568B (module §Failure Pattern table)."
+              },
+              {
+                "id": 5,
+                "question": "After a cable passes, what quick pull-test verifies the strain relief engaged?",
+                "options": [
+                  "Twist the cable tightly",
+                  "Gently pull the plug — if the clip holds and it stays live, good",
+                  "Bend it at 90°",
+                  "Re-crimp it"
+                ],
+                "correct_index": 1,
+                "explanation": "Gentle pull-test; holds + stays live = strain relief engaged (module §Continued Practice)."
+              },
+              {
+                "id": 6,
+                "question": "Which feedback loop best builds reliable crimping?",
+                "options": [
+                  "Crimp → Test → Get result → Learn → Crimp better",
+                  "Test → Fix → Repeat",
+                  "Crimp all → test batch → fix → forget",
+                  "Guess → check"
+                ],
+                "correct_index": 0,
+                "explanation": "Crimp → Test → Get result → Learn → Crimp better (module §Continued Practice)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 7,
+          "dbId": 15,
+          "title": "Module 7: Device Overview & Packet Tracer Intro",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Describe the role of switches, routers, and modems in a network</li>\n<li>Identify ports, LEDs, and cable connections on real equipment</li>\n<li>Build and test a simple 2-device network in Cisco Packet Tracer</li>\n<li>Explain the Layer-2 vs Layer-3 difference between switch and router</li>\n</ul>"
+              },
+              {
+                "title": "Quiz on Cabling Standards (8:30–9:00)",
+                "html": "Quick recall check before moving into new material."
+              },
+              {
+                "title": "Lecture: Network Devices (9:00–10:30)",
+                "html": "<ul><li><strong>Switches</strong> — connect devices within a network (<strong>Layer 2</strong>), forward</li>\n</ul> traffic based on <strong>MAC addresses</strong>. Maintain a MAC address table so each\n port can carry full bandwidth at once.\n<ul><li><strong>Routers</strong> — connect different networks together (<strong>Layer 3</strong>), forward</li>\n</ul> traffic based on <strong>IP addresses</strong>. Choose the best path via a routing table.\n<ul><li><strong>Modems</strong> — connect a local network to an ISP's external connection</li>\n<li><strong>Network cards (NICs)</strong> — where cables physically plug into a device</li>\n<li><strong>Ports &amp; speeds</strong> — 100 Mbps (Fast Ethernet) vs 1 Gbps (Gigabit) ports</li>\n<li>Show real equipment or photos to make ports and LEDs tangible</li>\n</ul>\n<strong>Rule of thumb:</strong> Switch = MAC, &quot;inside&quot; the network. Router = IP,\n&quot;between&quot; networks. A typical home &quot;router&quot; is actually a router + switch\n+ wireless access point combined."
+              },
+              {
+                "title": "Lab 7A: Device Identification (10:45–11:30)",
+                "html": "<ul><li>Hands-on inspection of real switches/routers</li>\n<li>Identify ports, status LEDs, and cable types in use</li>\n<li>Discuss: how many devices/cables can a given switch support?</li>\n<li>Trace physical cables through a real (or classroom) network setup</li>\n<li>Count how many ports are 100 Mbps vs 1 Gbps on each device</li>\n</ul>"
+              },
+              {
+                "title": "Lab 7B: Intro to Packet Tracer (11:30–12:30)",
+                "html": "<ul><li>Launch Cisco Packet Tracer</li>\n<li>Open the pre-made &quot;Simple 2-device network&quot; file</li>\n<li>Drag 2 PCs onto the canvas</li>\n<li>Connect them with a straight-through cable</li>\n<li>Observe the simulated packet flow</li>\n<li>Try it again through a switch (3+ PCs) and watch the switch forward</li>\n</ul>"
+              },
+              {
+                "title": "Packet Tracer Lab Continued (1:15–2:15)",
+                "html": "<ul><li>Assign IP addresses to both PCs</li>\n<li>Ping between them and watch the simulation animate the packet</li>\n<li>Discuss: &quot;Where is the data actually going?&quot;</li>\n<li>Compare: two PCs on the same subnet (switch handles it) vs two PCs on</li>\n</ul> different subnets (a router is required) — a preview of Part 2\n<ul><li>Connect it back to Module 3–6: *&quot;The cable you crimped is what makes</li>\n</ul> this possible.&quot;*"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Reinforce the link between physical cabling and logical connectivity.\nPreview: &quot;Saturday 8 is final assessment prep.&quot;"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What's the functional difference between a switch and a router?</li>\n<li>What device connects your home network to your ISP?</li>\n<li>In Packet Tracer, what did assigning IP addresses allow you to do?</li>\n<li>Which layer does a switch operate at, and what does it forward on?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Finish the Packet Tracer file at home if possible</li>\n<li>Prepare final crimped cables for Saturday 8</li>\n<li>Memorize the T568B order — it will be tested</li>\n<li>Review all lab notes from Modules 1–7</li>\n<li>Read: docs/resources/networking/routing-and-switching.md (switches/routers)</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "A switch operates at which layer and forwards traffic based on what?",
+                "options": [
+                  "Layer 3, IP addresses",
+                  "Layer 2, MAC addresses",
+                  "Layer 1, electrical signals",
+                  "Layer 4, port numbers"
+                ],
+                "correct_index": 1,
+                "explanation": "Switch = Layer 2, forwards by MAC (resource §1, module §Lecture)."
+              },
+              {
+                "id": 2,
+                "question": "A router operates at which layer and routes by what?",
+                "options": [
+                  "Layer 2, MAC addresses",
+                  "Layer 1, cables",
+                  "Layer 3, IP addresses",
+                  "Layer 7, applications"
+                ],
+                "correct_index": 2,
+                "explanation": "Router = Layer 3, forwards by IP (resource §1, module §Lecture)."
+              },
+              {
+                "id": 3,
+                "question": "What device connects a local network to an ISP's external connection?",
+                "options": [
+                  "Switch",
+                  "Router",
+                  "Modem",
+                  "NIC"
+                ],
+                "correct_index": 2,
+                "explanation": "Modem (module §Lecture)."
+              },
+              {
+                "id": 4,
+                "question": "A typical home \"router\" is actually a combination of:",
+                "options": [
+                  "Router + switch + wireless access point",
+                  "Modem + UPS only",
+                  "Switch + firewall + printer",
+                  "NIC + hub + bridge"
+                ],
+                "correct_index": 0,
+                "explanation": "Router + switch + WAP combined (module §Lecture)."
+              },
+              {
+                "id": 5,
+                "question": "In Packet Tracer, two PCs on the SAME subnet can reach each other through a:",
+                "options": [
+                  "Router (required)",
+                  "Switch alone",
+                  "Modem",
+                  "Firewall"
+                ],
+                "correct_index": 1,
+                "explanation": "Same subnet → switch handles it (module §Lab 7B, §Packet Tracer Lab)."
+              },
+              {
+                "id": 6,
+                "question": "Which port speed category is \"Fast Ethernet\"?",
+                "options": [
+                  "10 Mbps",
+                  "100 Mbps",
+                  "1 Gbps",
+                  "40 Gbps"
+                ],
+                "correct_index": 1,
+                "explanation": "100 Mbps = Fast Ethernet; 1 Gbps = Gigabit (module §Lecture)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 8,
+          "dbId": 16,
+          "title": "Module 8: Certification Prep & Final Practice",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Consolidate all Part 1 concepts into a single review pass</li>\n<li>Complete one final, unscored practice crimp under exam-like conditions</li>\n<li>Enter the final assessment with clear expectations and reduced anxiety</li>\n<li>Know how this course maps to the Cisco CCST Networking certification path</li>\n</ul>"
+              },
+              {
+                "title": "Arrival (8:30–9:00)",
+                "html": "Open space for students to voice nerves about the upcoming assessment —\nnormalize the feeling before reviewing material."
+              },
+              {
+                "title": "Review Session (9:00–10:30)",
+                "html": "High-level recap across all modules:\n<ul><li>OSI layers + TCP/IP comparison (recap from Module 1)</li>\n<li>Cable standards overview, UTP vs STP, why twisting matters (Module 2)</li>\n<li>RJ45 pin order and crimping checklist (Modules 3–4)</li>\n<li>Tester reading + failure-pattern diagnosis (Modules 5–6)</li>\n<li>Switch vs router, Packet Tracer preview (Module 7)</li>\n</ul>\n<h3>The Certification Path (why this course matters)</h3>\nPart 1 + Part 2 together align with the <strong>Cisco CCST Networking</strong>\ncertification and the Network Technician career path. The three free\nCisco courses that feed our curriculum:\n<ul><li><strong>Networking Basics</strong> (22 h)</li>\n<li><strong>Network Addressing and Basic Troubleshooting</strong> (14 h)</li>\n<li><strong>Network Support and Security</strong> (12 h)</li>\n</ul>\nStudents who continue into Part 2 and the Cisco courses earn industry\ndigital badges and are prepared for the CCST exam."
+              },
+              {
+                "title": "Final Practice Lab (10:45–12:30)",
+                "html": "<ul><li>Students crimp their final &quot;assessment-style&quot; cable</li>\n<li><strong>Not graded</strong> — but run under the same process/conditions as the real exam</li>\n<li>Instructor observes and gives final individual feedback</li>\n<li>Test the cable and discuss results</li>\n<li>Run the pull-test and visual-inspection checklist used on exam day</li>\n</ul>"
+              },
+              {
+                "title": "Final Q&A + Expectations (1:15–2:15)",
+                "html": "<ul><li>What to expect on Saturday 9 (exam structure)</li>\n<li>Grading criteria walkthrough</li>\n<li>Time limits per exam section</li>\n<li>Open floor for questions</li>\n<li>Confidence-building discussion</li>\n</ul>"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Encouragement and dismissal — no new material introduced."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>Walk through the full crimping checklist from memory.</li>\n<li>What are the 3 components of the Saturday 9 exam?</li>\n<li>What's one common mistake you personally want to avoid tomorrow?</li>\n<li>Name the three Cisco feeder courses that continue this path after Part 1.</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li><strong>Rest</strong> — seriously, no new crimping (risk of injury from over-practice)</li>\n<li>Review notes only</li>\n<li>Get good sleep before Saturday 9</li>\n<li>Bring confidence and a good attitude</li>\n<li>Optional: browse the free Cisco Networking Basics course to see what's next</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "Part 1 + Part 2 together align to which Cisco certification?",
+                "options": [
+                  "CCNA",
+                  "CCST Networking",
+                  "CompTIA A+",
+                  "CCNP"
+                ],
+                "correct_index": 1,
+                "explanation": "CCST Networking (module §The Certification Path)."
+              },
+              {
+                "id": 2,
+                "question": "Which of the following is a free Cisco feeder course for this path?",
+                "options": [
+                  "Cisco Network Associate",
+                  "Networking Basics (22 h)",
+                  "CompTIA Network+ prep",
+                  "Certified Cabling Technician"
+                ],
+                "correct_index": 1,
+                "explanation": "Networking Basics (22 h) is a feeder (module §Certification Path, resource §1)."
+              },
+              {
+                "id": 3,
+                "question": "The Cisco course \"Network Support and Security\" (12 h) feeds which area of the curriculum?",
+                "options": [
+                  "Cabling and crimping",
+                  "Help desk, troubleshooting practice, and security basics",
+                  "Fiber termination",
+                  "Office productivity"
+                ],
+                "correct_index": 1,
+                "explanation": "Help desk + troubleshooting practice, security basics, access control (resource §1)."
+              },
+              {
+                "id": 4,
+                "question": "How many of the networking course's 9 modules are fully covered by the Cisco feeders?",
+                "options": [
+                  "6/9",
+                  "7/9",
+                  "9/9",
+                  "3/9"
+                ],
+                "correct_index": 2,
+                "explanation": "Networking: 9/9 modules fully covered (resource §4)."
+              },
+              {
+                "id": 5,
+                "question": "Modules 03–05 of the cabling course (RJ45, crimping, marathon) are covered by:",
+                "options": [
+                  "Cisco Networking Basics",
+                  "Our own authored resources (field guides)",
+                  "CompTIA A+ only",
+                  "Not covered by anything"
+                ],
+                "correct_index": 1,
+                "explanation": "Modules 03–05 are hands-on termination covered by our authored resources (resource §4)."
+              },
+              {
+                "id": 6,
+                "question": "What is the total estimated time for the three Cisco feeder courses combined?",
+                "options": [
+                  "~22 hours",
+                  "~48 hours",
+                  "~14 hours",
+                  "~100 hours"
+                ],
+                "correct_index": 1,
+                "explanation": "22 + 14 + 12 = 48 hours (resource §1)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 9,
+          "dbId": 17,
+          "title": "Module 9: Final Assessment & Certification",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Demonstrate crimping proficiency under timed, graded conditions</li>\n<li>Demonstrate cable testing and verification skills</li>\n<li>Demonstrate theory retention through a written assessment</li>\n</ul>"
+              },
+              {
+                "title": "Arrival (8:30–9:00)",
+                "html": "Settle nerves, deliver final instructions and exam logistics."
+              },
+              {
+                "title": "Practical Exam Part A: Cable Crimping (9:00–9:30, 30 min)",
+                "html": "<ul><li>Each student crimps <strong>1 straight-through</strong> cable and <strong>1 crossover</strong> cable</li>\n<li>Scored on:</li>\n</ul> - Proper technique\n - Professional appearance\n - Connector integrity (fully seated, clip intact)"
+              },
+              {
+                "title": "Practical Exam Part B: Cable Testing (9:30–10:00, 30 min)",
+                "html": "<ul><li>Students test their own cables</li>\n<li>All 8 pins must register correctly on the tester</li>\n<li>Results verified and recorded by instructor</li>\n</ul>"
+              },
+              {
+                "title": "Break (10:00–10:30)",
+                "html": ""
+              },
+              {
+                "title": "Written Assessment (10:30–10:45, 15 min)",
+                "html": "Quiz covers:\n<ul><li>T568B pin order (write from memory)</li>\n<li>Difference between straight-through and crossover cables</li>\n<li>The 4 common reasons cables fail</li>\n<li>Which OSI layer cabling operates at</li>\n<li>Basic network device identification</li>\n</ul>"
+              },
+              {
+                "title": "Lunch + Results Scoring (10:45–1:15)",
+                "html": "Instructors score exams while students wait/relax."
+              },
+              {
+                "title": "Results & Feedback (1:15–2:15)",
+                "html": "<ul><li>Return graded exams with individual feedback</li>\n<li>Award <strong>&quot;Network Foundations Graduate&quot;</strong> certificates</li>\n<li>Group photo and celebration</li>\n<li>Discuss next steps:</li>\n</ul> - Continue directly to Part 2: Network Operations\n - Pursue CompTIA A+ Hardware certification independently\n - Explore entry-level cabling/tech jobs with this credential"
+              },
+              {
+                "title": "Completion Pathways",
+                "html": "After Part 1, students can:\n<ul><li>Stop here and use cabling skills for entry-level tech roles</li>\n<li>Pursue CompTIA A+ Hardware certification</li>\n<li>Continue into <strong>Part 2: Network Operations: Configuration &amp; Troubleshooting</strong></li>\n</ul>\n<strong>Congratulations to all Network Foundations graduates.</strong>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "In the Saturday 9 practical exam, each student crimps:",
+                "options": [
+                  "2 straight-through cables",
+                  "1 straight-through + 1 crossover cable",
+                  "1 fiber termination",
+                  "5 identical cables"
+                ],
+                "correct_index": 1,
+                "explanation": "1 straight-through + 1 crossover (module §Practical Exam Part A)."
+              },
+              {
+                "id": 2,
+                "question": "Which OSI layer do the cabling skills in this course operate at?",
+                "options": [
+                  "Layer 7",
+                  "Layer 4",
+                  "Layer 2",
+                  "Layer 1"
+                ],
+                "correct_index": 3,
+                "explanation": "Layer 1 (Physical); the course lives mostly at Layer 1 (module §Lecture Notes)."
+              },
+              {
+                "id": 3,
+                "question": "The written assessment does NOT cover:",
+                "options": [
+                  "T568B pin order from memory",
+                  "Router static route configuration",
+                  "Difference between straight-through and crossover",
+                  "Which OSI layer cabling operates at"
+                ],
+                "correct_index": 1,
+                "explanation": "Static route configuration is Part 2; the Part 1 written test covers pin order, straight/crossover, failure causes, OSI layer, device ID (module §Written Assessment)."
+              },
+              {
+                "id": 4,
+                "question": "For 1 Gbps to work, how many of the 8 conductors must be correctly wired?",
+                "options": [
+                  "4",
+                  "6",
+                  "8",
+                  "2"
+                ],
+                "correct_index": 2,
+                "explanation": "All 8 conductors for 1 Gbps; only 4 (pairs 1-2, 3-6) for 100 Mbps (module-03 §Real Pair Circuits)."
+              },
+              {
+                "id": 5,
+                "question": "Which of these is a common reason cables fail (per Part 1 material)?",
+                "options": [
+                  "Wires in wrong order",
+                  "Jacket not past the strain-relief barb",
+                  "Untwisted too far",
+                  "All of the above"
+                ],
+                "correct_index": 3,
+                "explanation": "All three are termination mistakes from module-03/06 failure tables."
+              },
+              {
+                "id": 6,
+                "question": "Which completion pathway is offered after Part 1?",
+                "options": [
+                  "Straight to CCNA only",
+                  "Continue into Part 2: Network Operations, or pursue CompTIA A+ Hardware",
+                  "Skip all further study",
+                  "Only fiber certification"
+                ],
+                "correct_index": 1,
+                "explanation": "Part 2, CompTIA A+ Hardware, or entry-level cabling/tech roles (module §Completion Pathways)."
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+  // ============================================================
+  // Storage: private per-student. When signed in with Puter, the
+  // progress lives in the student's own Puter cloud KV (private to
+  // them and this app). Otherwise it falls back to this device only.
+  // ============================================================
+  var LIB_KEY = 'cn_companion_' + COURSE_COMPANION.courseId; // puter.kv key
+  var LS_KEY = 'cn_companion_' + COURSE_COMPANION.courseId;  // localStorage fallback
+  var progress = loadLocal();
+
+  function loadLocal() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(progress)); } catch (e) {}
+  }
+  function puterSignedIn() {
+    return !!(window.puter && puter.auth && puter.auth.isSignedIn());
+  }
+
+  // Two-way mirror: load cloud KV into memory, then keep both in sync.
+  function refreshStorage() {
+    if (!puterSignedIn()) return Promise.resolve();
+    return puter.kv.get(LIB_KEY).then(function (raw) {
+      if (raw) {
+        try {
+          var cloud = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          Object.keys(cloud).forEach(function (k) { progress[k] = cloud[k]; });
+        } catch (e) {}
+      }
+      saveLocal();
+    }).catch(function () { /* anonymous or blocked */ });
+  }
+  function persist() {
+    saveLocal();
+    if (!puterSignedIn()) return Promise.resolve(false);
+    return puter.kv.set(LIB_KEY, JSON.stringify(progress))
+      .then(function () { return true; })
+      .catch(function () { return false; });
+  }
+  function bestScore(moduleNum) {
+    var m = progress.modules && progress.modules[moduleNum];
+    return m ? (m.best || 0) : 0;
+  }
+
+  // ============================================================
+  // Element refs + state
+  // ============================================================
+  function $(id) { return document.getElementById(id); }
+  var modules = COURSE_COMPANION.modules || [];
+  var activeModule = modules.length ? modules[0].num : null;
+  var activeView = 'notes';
+  var quiz = null;    // { idx, correct, responses, answered, finished, source }
+  var chatHistory = [];
+  var chatBusy = false;
+
+  // ============================================================
+  // Header
+  // ============================================================
+  function renderHead() {
+    $('courseTitle').textContent = COURSE_COMPANION.title;
+    $('appEyebrow').textContent = 'Course Companion · ' + COURSE_COMPANION.port +
+      ' · v' + COURSE_COMPANION.version;
+    document.title = COURSE_COMPANION.title + ' — Course Companion';
+    if (COURSE_COMPANION.note) $('courseLede').textContent = COURSE_COMPANION.note;
+  }
+
+  function renderHeroStats() {
+    var done = 0, bestSum = 0;
+    modules.forEach(function (m) {
+      if (bestScore(m.num) > 0) { done++; bestSum += bestScore(m.num); }
+    });
+    var avg = done ? Math.round(bestSum / done) : 0;
+    $('heroStats').innerHTML =
+      '<span class="stat">Modules <b>' + modules.length + '</b></span>' +
+      '<span class="stat">Best <b>' + avg + '%</b> avg</span>' +
+      '<span class="stat">Private progress <b>' + (puterSignedIn() ? 'Puter cloud' : 'this device') + '</b></span>';
+    $('authPill').textContent = puterSignedIn() ? '● Signed in with Puter' : '○ Not signed in';
+    $('authPill').className = 'auth-pill' + (puterSignedIn() ? ' on' : '');
+    $('signInBtn').style.display = puterSignedIn() ? 'none' : 'inline-block';
+  }
+
+  $('signInBtn').addEventListener('click', function () {
+    if (!window.puter || !puter.auth) return;
+    puter.auth.signIn().then(function () {
+      return refreshStorage();
+    }).then(function () {
+      renderHeroStats();
+      renderRail();
+      var m = current();
+      renderModule(m);
+    }).catch(function (err) {
+      appendChat('error', 'Sign-in failed or was cancelled: ' + (err && err.message ? err.message : 'unknown'));
+    });
+  });
+
+  function current() {
+    for (var i = 0; i < modules.length; i++) if (modules[i].num === activeModule) return modules[i];
+    return modules[0];
+  }
+
+  // ============================================================
+  // Module rail
+  // ============================================================
+  function renderRail() {
+    var html = '';
+    modules.forEach(function (m) {
+      var best = bestScore(m.num);
+      html +=
+        '<button type="button" class="mod-chip' + (m.num === activeModule ? ' active' : '') + '" data-module="' + m.num + '" role="tab">' +
+          '<span class="mod-tag">MOD ' + pad(m.num) + '</span>' +
+          '<span class="mod-title">' + escapeHtml(m.title) + '</span>' +
+          '<span class="mod-best' + (best > 0 ? '' : ' none') + '">' + (best > 0 ? '★ ' + best + '%' : 'Not attempted') + '</span>' +
+        '</button>';
+    });
+    $('moduleRail').innerHTML = html;
+    $('moduleRail').querySelectorAll('.mod-chip').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var num = parseInt(b.getAttribute('data-module'), 10);
+        if (num !== activeModule) {
+          activeModule = num;
+          chatHistory = [];
+          renderRail();
+          chatRender();
+        }
+        renderModule(current());
+      });
+    });
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ============================================================
+  // View switching
+  // ============================================================
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      activeView = t.getAttribute('data-view');
+      document.querySelectorAll('.tab').forEach(function (x) {
+        x.classList.toggle('active', x === t);
+      });
+      ['notes', 'quiz', 'chat'].forEach(function (v) {
+        $('panel-' + v).classList.toggle('active', v === activeView);
+      });
+      var m = current();
+      if (activeView === 'notes') renderNotes(m);
+      if (activeView === 'quiz') renderQuiz(m);
+      if (activeView === 'chat') chatRender();
+    });
+  });
+
+  // ============================================================
+  // Study notes
+  // ============================================================
+  function renderModule(m) {
+    if (!m) return;
+    renderNotes(m);
+    if (activeView === 'quiz') renderQuiz(m);
+    if (activeView === 'chat') chatRender();
+  }
+
+  function renderNotes(m) {
+    $('notesTitle').textContent = 'MOD ' + pad(m.num) + ' — ' + m.title;
+    $('notesMeta').textContent = 'Study notes';
+    var sections = (m.notes && m.notes.sections) || [];
+    var html = '';
+    sections.forEach(function (s) {
+      html += s.title ? '<h2>' + escapeHtml(s.title) + '</h2>' : '';
+      html += s.html || '';
+    });
+    $('notesBody').innerHTML = html || '<p style="color:var(--text-dim)">No study notes for this module yet.</p>';
+  }
+
+  // ============================================================
+  // Quiz engine (mirrors the study-pack quiz behaviour)
+  // ============================================================
+  function questionsFor(m) {
+    return (m && m.quiz && m.quiz.questions) || [];
+  }
+
+  function renderQuiz(m) {
+    var qs = questionsFor(m);
+    $('quizModule').textContent = '— MOD ' + pad(m.num);
+    if (!qs.length) {
+      $('quizZone').innerHTML = '<div class="quiz-results"><h3>No questions yet</h3>' +
+        '<p style="color:var(--text-muted)">This module has no quiz questions yet.</p></div>';
+      return;
+    }
+    quiz = { idx: 0, correct: 0, responses: [], answered: false, finished: false, source: m.num };
+    rebuildQuizDom();
+    drawQuestion();
+  }
+
+  function rebuildQuizDom() {
+    $('quizZone').innerHTML =
+      '<div class="quiz-strip" id="quizScreen">' +
+        '<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>' +
+        '<div class="q-num" id="qNum"></div>' +
+        '<p class="q-text" id="qText"></p>' +
+        '<div class="options" id="qOptions"></div>' +
+        '<div class="feedback" id="qFeedback"></div>' +
+        '<div class="quiz-controls"><button class="btn btn-primary" id="nextBtn" style="display:none;" type="button">Next Question →</button></div>' +
+      '</div>';
+    $('nextBtn').addEventListener('click', quizNext);
+  }
+
+  function drawQuestion() {
+    var m = current();
+    var qs = questionsFor(m);
+    var gotAnswered = quiz.answered;
+    var q = qs[quiz.idx];
+    $('qNum').textContent = 'Question ' + (quiz.idx + 1) + ' of ' + qs.length;
+    $('qText').textContent = q.question;
+    $('progressFill').style.width = (quiz.idx / qs.length * 100) + '%';
+
+    var opts = '';
+    q.options.forEach(function (o, i) {
+      var letter = String.fromCharCode(65 + i);
+      var cls = 'option';
+      var extra = '';
+      if (gotAnswered) {
+        if (i === q.correct_index) { cls += ' correct'; extra = ' ✓'; }
+        else if (quiz.selectedIndex === i) { cls += ' wrong'; extra = ' ✗'; }
+      }
+      opts += '<button type="button" class="' + cls + '" data-i="' + i + '"' + (gotAnswered ? ' disabled' : '') + '>' +
+        '<span class="letter">' + letter + '</span><span>' + escapeHtml(o) + extra + '</span></button>';
+    });
+    $('qOptions').innerHTML = opts;
+    $('qOptions').querySelectorAll('.option').forEach(function (b) {
+      b.addEventListener('click', function () { onChoose(parseInt(b.getAttribute('data-i'), 10)); });
+    });
+
+    if (gotAnswered) {
+      showFeedback(quiz.selectedIndex === q.correct_index, q);
+      $('nextBtn').style.display = 'inline-block';
+      $('nextBtn').textContent = (quiz.idx === qs.length - 1) ? 'Finish Quiz' : 'Next Question →';
+    } else {
+      $('qFeedback').style.display = 'none';
+      $('nextBtn').style.display = 'none';
+    }
+  }
+
+  function onChoose(i) {
+    if (!quiz || quiz.answered) return;
+    var m = current();
+    var qs = questionsFor(m);
+    var q = qs[quiz.idx];
+    quiz.answered = true;
+    quiz.selectedIndex = i;
+    var isCorrect = i === q.correct_index;
+    if (isCorrect) quiz.correct++;
+
+    $('qOptions').querySelectorAll('.option').forEach(function (b) {
+      var k = parseInt(b.getAttribute('data-i'), 10);
+      b.disabled = true;
+      if (k === q.correct_index) b.classList.add('correct');
+      else if (k === i) b.classList.add('wrong');
+    });
+    quiz.responses.push({ questionId: (q.id || quiz.idx + 1), selectedIndex: i, isCorrect: isCorrect });
+    saveProgress(m.num);
+    showFeedback(isCorrect, q);
+    $('nextBtn').style.display = 'inline-block';
+    $('nextBtn').textContent = (quiz.idx === qs.length - 1) ? 'Finish Quiz' : 'Next Question →';
+  }
+
+  function showFeedback(isCorrect, q) {
+    var f = $('qFeedback');
+    f.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    f.textContent = isCorrect ? 'Correct ✓' : (q.explanation || 'Incorrect');
+    f.style.display = 'block';
+  }
+
+  function quizNext() {
+    var m = current();
+    var qs = questionsFor(m);
+    quiz.idx++;
+    if (quiz.idx >= qs.length) { finishQuiz(); return; }
+    quiz.answered = false;
+    quiz.selectedIndex = null;
+    drawQuestion();
+  }
+
+  function finishQuiz() {
+    if (!quiz || quiz.finished) return;
+    quiz.finished = true;
+    var m = current();
+    var qs = questionsFor(m);
+    var score = Math.round(quiz.correct / qs.length * 100);
+    var prev = bestScore(m.num);
+    if (score > prev) {
+      progress.modules = progress.modules || {};
+      progress.modules[m.num] = progress.modules[m.num] || {};
+      progress.modules[m.num].best = score;
+      persist();
+    }
+    saveLocal();
+    renderHeroStats();
+    renderRail();
+    quiz.syncMsg = '';
+
+    var saved = bestScore(m.num);
+    $('quizZone').innerHTML =
+      '<div class="quiz-results">' +
+        '<h3>Quiz Complete</h3>' +
+        '<div class="big-score">' + score + '%</div>' +
+        '<p style="color:var(--text-muted)">' + quiz.correct + ' correct out of ' + qs.length + '.</p>' +
+        (saved > 0 ? '<span class="best-badge">Best: ' + saved + '%</span>' : '') +
+        '<div class="sync-note" id="syncNote"></div>' +
+        '<div class="quiz-controls">' +
+          '<button class="btn btn-primary" id="retryBtn" type="button">Try Again</button>' +
+          '<button class="btn btn-ghost" id="notesBtn" type="button">Read Notes</button>' +
+        '</div>' +
+      '</div>';
+    var note = $('syncNote');
+    note.textContent = puterSignedIn()
+      ? '✓ Saved to your private Puter cloud.'
+      : 'Saved on this device. Sign in with Puter to back it up to your private cloud.';
+    $('retryBtn').addEventListener('click', function () { renderQuiz(current()); });
+    $('notesBtn').addEventListener('click', function () {
+      activeView = 'notes';
+      document.querySelectorAll('.tab').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-view') === 'notes');
+      });
+      ['notes', 'quiz', 'chat'].forEach(function (v) {
+        $('panel-' + v).classList.toggle('active', v === 'notes');
+      });
+      renderNotes(current());
+    });
+  }
+
+  // Keep persistent progress fresh as answers land (best = max seen).
+  function saveProgress(num) {
+    var seen = quiz.responses.filter(function (r) { return r.isCorrect; }).length;
+    var pct = current() && current().quiz && current().quiz.questions.length
+      ? Math.round(seen / current().quiz.questions.length * 100) : 0;
+    progress.modules = progress.modules || {};
+    progress.modules[num] = progress.modules[num] || {};
+    if (pct > (progress.modules[num].best || 0)) progress.modules[num].best = pct;
+    saveLocal();
+  }
+
+  // ============================================================
+  // AI Mentor (Puter user-pays keyless chat, course-aware)
+  // ============================================================
+  var MODEL = 'gpt-5.4-nano';
+
+  function mentorContext() {
+    var m = current();
+    var lines = [
+      'You are the AI Mentor for Cable&Net Courses, a friendly, patient study buddy for students of data cabling and networking.',
+      'Explain concepts clearly in simple language with analogies. Guide students toward understanding — you may ask a guiding question back — but never refuse to help.',
+      'Stay strictly on-topic: data cabling, networking, the internet, and related course material. If asked something off-topic or inappropriate, politely decline and steer back to the course.',
+      'You are an AI assistant, NOT a human instructor, and you never grade or decide pass/fail.',
+      '',
+      'COURSE CONTEXT: ' + COURSE_COMPANION.title + ' (' + COURSE_COMPANION.port + ').',
+      'Modules:',
+      modules.map(function (x) {
+        return 'MOD ' + pad(x.num) + ' — ' + x.title;
+      }).join('\n')
+    ];
+    if (m) {
+      lines.push('');
+      lines.push('The student is currently studying: MOD ' + pad(m.num) + ' — ' + m.title +
+        (m.notes && m.notes.sections && m.notes.sections[0] ? '. Topics: ' + m.notes.sections.map(function (s) { return s.title; }).join(', ') : ''));
+    }
+    return lines.join('\n');
+  }
+
+  function chatEls() {
+    return { auth: $('chatAuth'), messages: $('chatMessages'), input: $('chatInput'), send: $('chatSend') };
+  }
+
+  function chatRender() {
+    var e = chatEls();
+    e.auth.innerHTML = '';
+    if (!puterSignedIn()) {
+      e.auth.textContent = 'Chat uses your own free Puter account (User-Pays — no API key, no card). ';
+      var btn = document.createElement('button');
+      btn.className = 'btn btn-ghost';
+      btn.type = 'button';
+      btn.textContent = 'Sign in with Puter';
+      btn.addEventListener('click', function () {
+        puter.auth.signIn().then(function () {
+          renderHeroStats();
+          chatRender();
+        }).catch(function () { appendChat('error', 'Sign-in failed or was cancelled.'); });
+      });
+      e.auth.appendChild(btn);
+    } else {
+      e.auth.textContent = '● Signed in — answers stream from your Puter account. The mentor keeps topics general; it never grades you.';
+    }
+    if (!chatHistory.length && e.messages.children.length === 0) {
+      e.messages.innerHTML = '<div class="msg assistant">Hi — I\'m the AI Mentor for <strong>' +
+        escapeHtml(COURSE_COMPANION.title) + '</strong>. Ask me anything about the module you\'re on. I\'m here to help you understand, not to judge or grade.</div>';
+    }
+  }
+
+  function appendChat(role, html) {
+    var e = chatEls();
+    var div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.innerHTML = html;
+    e.messages.appendChild(div);
+    e.messages.scrollTop = e.messages.scrollHeight;
+    return div;
+  }
+
+  $('chatSend').addEventListener('click', sendChat);
+  $('chatInput').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') sendChat();
+  });
+
+  function sendChat() {
+    var e = chatEls();
+    var text = e.input.value.trim();
+    if (!text || chatBusy) return;
+    if (!puterSignedIn()) {
+      appendChat('error', 'Please sign in with Puter (free) to chat — the mentor runs on your own account.');
+      chatRender();
+      return;
+    }
+    if (navigator.onLine === false) {
+      appendChat('error', 'No connection — the AI Mentor needs the internet to answer.');
+      return;
+    }
+
+    appendChat('user', escapeHtml(text));
+    e.input.value = '';
+    chatHistory.push({ role: 'user', content: text });
+    chatBusy = true;
+    e.send.disabled = true;
+
+    var typing = appendChat('assistant', '…');
+    typing.classList.add('typing');
+
+    var messages = [{ role: 'system', content: mentorContext() }].concat(chatHistory.slice(-8));
+
+    callChat(messages).then(function (reply) {
+      if (reply) {
+        typing.classList.remove('typing');
+        typing.innerHTML = renderMarkdown(reply);
+        chatHistory.push({ role: 'assistant', content: reply });
+      } else {
+        typing.remove();
+        appendChat('error', 'No reply received — try again.');
+        chatHistory.pop();
+      }
+    }).catch(function (err) {
+      var msg = (err && err.message) || String(err);
+      var busy = /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+      typing.remove();
+      appendChat('error', busy
+        ? 'The AI Mentor is busy right now — give it a few seconds and try again.'
+        : 'Could not reach the AI Mentor: ' + msg);
+      chatHistory.pop();
+    }).finally(function () {
+      chatBusy = false;
+      e.send.disabled = false;
+      e.input.focus();
+    });
+  }
+
+  async function callChat(messages) {
+    var lastErr = null;
+    var attempts = 4;
+    for (var i = 0; i < attempts; i++) {
+      try {
+        var resp = await chatStream(messages);
+        return resp;
+      } catch (err) {
+        lastErr = err;
+        if (!isBusy(err) || i === attempts - 1) break;
+        await new Promise(function (r) { setTimeout(r, 1000 * Math.pow(2, i)); });
+      }
+    }
+    throw lastErr;
+  }
+
+  function isBusy(err) {
+    var msg = (err && err.message) || String(err);
+    return /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+  }
+
+  async function chatStream(messages) {
+    var e = chatEls();
+    var typing = e.messages.lastChild;
+    var out = '';
+    var resp = await puter.ai.chat(messages, { model: MODEL, stream: true });
+    for await (var part of resp) {
+      if (part && part.text) {
+        out += part.text;
+        if (typing && typing.classList && typing.classList.contains('typing')) {
+          typing.classList.remove('typing');
+        }
+        typing.innerHTML = renderMarkdown(out);
+        e.messages.scrollTop = e.messages.scrollHeight;
+      }
+    }
+    return out;
+  }
+
+  // ---- Lightweight markdown -> HTML (escaped first) ----
+  function renderMarkdown(text) {
+    var lines = escapeHtml(text).split('\n');
+    var out = [];
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      var heading = line.match(/^(#{1,4})\s+(.*)$/);
+      if (heading) {
+        var level = Math.min(heading[1].length + 1, 5);
+        out.push('<h' + level + '>' + inline(heading[2]) + '</h' + level + '>');
+        i++; continue;
+      }
+      if (/^\s*[-*]\s+/.test(line)) {
+        var items = [];
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+          items.push('<li>' + inline(lines[i].replace(/^\s*[-*]\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ul>' + items.join('') + '</ul>'); continue;
+      }
+      if (/^\s*\d+\.\s+/.test(line)) {
+        var items2 = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+          items2.push('<li>' + inline(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ol>' + items2.join('') + '</ol>'); continue;
+      }
+      var para = [];
+      while (i < lines.length && lines[i].trim() &&
+        !/^(#{1,4})\s+/.test(lines[i]) &&
+        !/^\s*[-*]\s+/.test(lines[i]) &&
+        !/^\s*\d+\.\s+/.test(lines[i])) {
+        para.push(inline(lines[i]));
+        i++;
+      }
+      out.push('<p>' + para.join('<br>') + '</p>');
+    }
+    return out.join('');
+  }
+
+  function inline(s) {
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  }
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  function boot() {
+    renderHead();
+    renderHeroStats();
+
+    if (!modules.length) {
+      $('moduleRail').innerHTML = '<p style="color:var(--text-dim)" class="mod-chip">No modules embedded yet.</p>';
+      $('notesBody').innerHTML = '<p style="color:var(--text-dim)">This companion app has no course data embedded yet. Run <code>tools/build-puter-course-app.js</code> to generate it.</p>';
+      return;
+    }
+
+    activeModule = modules[0].num;
+    renderRail();
+    renderModule(current());
+    chatRender();
+
+    refreshStorage().then(function () {
+      renderHeroStats();
+      renderRail();
+    });
+
+    window.addEventListener('online', renderHeroStats);
+    window.addEventListener('offline', renderHeroStats);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

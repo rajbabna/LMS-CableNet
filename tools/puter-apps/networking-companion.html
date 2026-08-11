@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     AwsomeDesign tokens (dark glassmorphism) — see AwsomeDesign/DESIGN.md
+     ============================================================ */
+  :root {
+    --bg-dark: #0b0f19;
+    --bg-surface: #111827;
+    --bg-surface-elevated: #1f293d;
+    --bg-glass: rgba(17, 24, 39, 0.75);
+    --bg-glass-hover: rgba(31, 41, 61, 0.85);
+
+    --primary: #6366f1;
+    --primary-glow: #818cf8;
+    --accent-cyan: #06b6d4;
+    --accent-violet: #8b5cf6;
+    --accent-emerald: #10b981;
+
+    --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    --gradient-surface: linear-gradient(180deg, rgba(31, 41, 61, 0.6) 0%, rgba(17, 24, 39, 0.8) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(99, 102, 241, 0.4);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+    --red: #ef4444;
+    --green: #10b981;
+
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 0.2s;
+    --duration-normal: 0.35s;
+
+    --font-display: "Outfit", "Inter", sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 96px; }
+  body {
+    margin: 0;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 85% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 5% 20%, rgba(6, 182, 212, 0.10) 0%, transparent 40%),
+      linear-gradient(180deg, #0b0f19 0%, #0e1424 100%);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: var(--gradient-glow);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  a { color: var(--primary-glow); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .app { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; position: relative; z-index: 1; }
+
+  /* ---- Top bar ---- */
+  .app-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.9rem 1.1rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+  }
+  .brand .brand-grad {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .auth-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .auth-pill {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 0.35em 0.85em;
+  }
+  .auth-pill.on { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.45); }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    padding: 0.62em 1.15em;
+    cursor: pointer;
+    transition: background var(--duration-fast), transform 0.1s ease, box-shadow var(--duration-fast);
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--gradient-brand);
+    color: #fff;
+    box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+  }
+  .btn-primary:hover { box-shadow: 0 6px 18px -6px rgba(99, 102, 241, 0.55); }
+  .btn-ghost {
+    background: var(--bg-glass);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+  }
+  .btn-ghost:hover { background: var(--bg-glass-hover); border-color: var(--border-glow); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ---- Hero ---- */
+  .app-hero {
+    margin-top: 1.5rem;
+    padding: 2.2rem 2rem 1.8rem;
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-glow);
+    display: block;
+    margin-bottom: 0.6em;
+  }
+  .app-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 800;
+    margin: 0 0 0.4em;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  .app-hero .lede {
+    color: var(--text-muted);
+    max-width: 64ch;
+    margin: 0 0 1.4rem;
+    font-size: 0.98rem;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .hero-stats b {
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .hero-stats .stat { border: 1px solid var(--border-subtle); border-radius: 999px; padding: 0.35em 0.9em; background: rgba(255,255,255,0.03); }
+
+  /* ---- Tabs (view switch) ---- */
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.6em 1.2em;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+  }
+  .tab:hover { border-color: var(--border-glow); color: var(--text-main); }
+  .tab.active { background: var(--gradient-brand); color: #fff; border-color: transparent; }
+
+  /* ---- Module rail ---- */
+  .module-rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .mod-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: left;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+    color: var(--text-main);
+    font-family: var(--font-body);
+  }
+  .mod-chip:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: 0 8px 20px -8px rgba(99,102,241,0.35); }
+  .mod-chip.active { border-color: var(--primary); background: var(--bg-glass-hover); }
+  .mod-chip .mod-tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--primary-glow); text-transform: uppercase; }
+  .mod-chip .mod-title { font-weight: 600; font-size: 0.92rem; line-height: 1.3; }
+  .mod-chip .mod-best { font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent-emerald); }
+  .mod-chip .mod-best.none { color: var(--text-dim); }
+
+  /* ---- Panels ---- */
+  .panel-wrap {
+    display: none;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 1.8rem 1.8rem 2rem;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+    animation: fadeInUp 0.4s var(--ease-spring);
+  }
+  .panel-wrap.active { display: block; }
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .panel-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; margin: 0; }
+  .panel-head .sub { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Study notes ---- */
+  .notes-body { color: var(--text-muted); font-size: 0.95rem; }
+  .notes-body h1, .notes-body h2, .notes-body h3, .notes-body h4 { color: var(--text-main); font-family: var(--font-display); }
+  .notes-body h2 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
+  .notes-body h3 { font-size: 1.02rem; margin: 1.3rem 0 0.4rem; }
+  .notes-body p { margin: 0 0 0.9rem; }
+  .notes-body ul, .notes-body ol { padding-left: 1.4rem; margin: 0 0 0.9rem; }
+  .notes-body li { margin-bottom: 0.3rem; }
+  .notes-body code, .notes-body kbd {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 0.1em 0.4em;
+    color: var(--primary-glow);
+  }
+  .notes-body table { border-collapse: collapse; width: 100%; margin: 0 0 1rem; font-size: 0.9rem; }
+  .notes-body th, .notes-body td { border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; text-align: left; }
+  .notes-body th { background: var(--bg-surface-elevated); font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); }
+  .notes-body img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border-subtle); }
+
+  /* ---- Quiz ---- */
+  .progress-track { height: 6px; background: var(--bg-surface-elevated); border-radius: 3px; overflow: hidden; margin: 0 0 1.4rem; }
+  .progress-fill { height: 100%; background: var(--gradient-brand); width: 0%; transition: width 0.3s var(--ease-spring); }
+  .q-num { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent-cyan); margin-bottom: 0.6rem; }
+  .q-text { font-size: 1.15rem; font-weight: 600; margin: 0; color: var(--text-main); }
+  .options { display: grid; gap: 0.7rem; margin-top: 1.3rem; }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    text-align: left;
+    transition: border-color var(--duration-fast), background var(--duration-fast), transform 0.1s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--border-glow); background: var(--bg-glass-hover); }
+  .option .letter {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .option.correct { border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12); }
+  .option.correct .letter { background: var(--accent-emerald); color: #05130c; border-color: var(--accent-emerald); }
+  .option.wrong { border-color: var(--red); background: rgba(239, 68, 68, 0.10); }
+  .option.wrong .letter { background: var(--red); color: #200b0b; border-color: var(--red); }
+  .option:disabled { cursor: default; opacity: 0.95; }
+  .feedback {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+  }
+  .feedback.good { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
+  .feedback.bad  { background: rgba(239, 68, 68, 0.10); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+  .quiz-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1.4rem; flex-wrap: wrap; }
+  .quiz-results { text-align: center; padding: 1.4rem 1rem; }
+  .quiz-results h3 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 0.5rem; }
+  .big-score {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    line-height: 1;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0.6rem 0;
+  }
+  .best-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--accent-emerald);
+    border: 1px solid rgba(16,185,129,0.45);
+    border-radius: 999px;
+    padding: 0.25em 0.8em;
+    margin-top: 0.5rem;
+  }
+  .sync-note { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-top: 1.1rem; }
+  .sync-note.err { color: var(--red); }
+
+  /* ---- Chat ---- */
+  .chat-messages { display: flex; flex-direction: column; gap: 0.8rem; max-height: 46vh; overflow-y: auto; padding: 0.4rem 0.2rem 0.8rem; }
+  .msg { max-width: 88%; border-radius: 12px; padding: 0.7rem 0.95rem; font-size: 0.92rem; line-height: 1.55; word-wrap: break-word; }
+  .msg.user { align-self: flex-end; background: var(--gradient-brand); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.assistant { align-self: flex-start; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-bottom-left-radius: 4px; }
+  .msg.assistant p { margin: 0.35rem 0; color: var(--text-muted); }
+  .msg.assistant p:first-child { margin-top: 0; }
+  .msg.assistant p:last-child { margin-bottom: 0; }
+  .msg.assistant ul, .msg.assistant ol { margin: 0.35rem 0; padding-left: 1.3rem; color: var(--text-muted); }
+  .msg.assistant code { font-family: var(--font-mono); font-size: 0.85em; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 0.1em 0.35em; color: var(--primary-glow); }
+  .msg.assistant strong, .msg.assistant b { color: var(--text-main); }
+  .msg.assistant em { color: var(--text-muted); }
+  .msg.assistant h3, .msg.assistant h4 { font-family: var(--font-display); color: var(--text-main); margin: 0.7rem 0 0.3rem; }
+  .msg.assistant h3 { font-size: 1.05rem; }
+  .msg.assistant h4 { font-size: 0.95rem; }
+  .msg.error { align-self: flex-start; color: #fca5a5; background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.35); }
+  .msg.typing { color: var(--text-dim); font-style: italic; }
+  .chat-inputbar { display: flex; gap: 0.6rem; padding-top: 0.9rem; border-top: 1px solid var(--border-subtle); margin-top: 0.4rem; }
+  .chat-inputbar input {
+    flex: 1;
+    padding: 0.7em 0.95em;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    color: var(--text-main);
+  }
+  .chat-inputbar input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .chat-inputbar input::placeholder { color: var(--text-dim); }
+  .chat-note {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .chat-auth {
+    margin-bottom: 0.8rem;
+    padding: 0.7rem 0.95rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .chat-auth button { margin-top: 0.5rem; }
+
+  .pill-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--accent-cyan);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    border-radius: 999px;
+    padding: 0.25em 0.7em;
+    margin: 0 0 0.8rem;
+  }
+
+  @media (max-width: 720px) {
+    .app { padding: 1rem 0.9rem 3rem; }
+    .app-hero { padding: 1.5rem 1.1rem 1.3rem; }
+    .panel-wrap { padding: 1.2rem 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="app-top">
+    <div class="brand"><span class="brand-grad">CABLE&amp;NET</span> · Course Companion</div>
+    <div class="auth-row">
+      <span class="auth-pill" id="authPill">Checking…</span>
+      <button class="btn btn-ghost" id="signInBtn" style="display:none;" type="button">Sign in with Puter</button>
+    </div>
+  </header>
+
+  <section class="app-hero">
+    <span class="eyebrow" id="appEyebrow">Course Companion · Run on Puter</span>
+    <h1 id="courseTitle">Course Companion</h1>
+    <p class="lede" id="courseLede"></p>
+    <div class="hero-stats" id="heroStats"></div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button type="button" class="tab active" data-view="notes" role="tab">Study notes</button>
+    <button type="button" class="tab" data-view="quiz" role="tab">Quiz</button>
+    <button type="button" class="tab" data-view="chat" role="tab">Ask the Mentor</button>
+  </div>
+
+  <div class="module-rail" id="moduleRail" role="tablist" aria-label="Modules"></div>
+
+  <!-- STUDY NOTES -->
+  <section class="panel-wrap active" id="panel-notes">
+    <div class="panel-head">
+      <h2 id="notesTitle">Study notes</h2>
+      <span class="sub" id="notesMeta"></span>
+    </div>
+    <div class="notes-body" id="notesBody"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel-wrap" id="panel-quiz">
+    <div class="panel-head">
+      <h2>Quiz <span id="quizModule"></span></h2>
+      <span class="sub" id="quizMeta"></span>
+    </div>
+    <div id="quizZone">
+      <div class="quiz-strip" id="quizScreen">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="q-num" id="qNum">—</div>
+        <p class="q-text" id="qText"></p>
+        <div class="options" id="qOptions"></div>
+        <div class="feedback" id="qFeedback"></div>
+        <div class="quiz-controls">
+          <button class="btn btn-primary" id="nextBtn" style="display:none;" type="button">Next Question →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI MENTOR -->
+  <section class="panel-wrap" id="panel-chat">
+    <div class="panel-head">
+      <h2>Ask the Mentor</h2>
+      <span class="sub">AI assistant — not a human instructor · never grades</span>
+    </div>
+    <div class="chat-auth" id="chatAuth"></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-inputbar">
+      <input type="text" id="chatInput" placeholder="Ask about this module, the course, cabling, networking…" autocomplete="off">
+      <button class="btn btn-primary" id="chatSend" type="button">Ask</button>
+    </div>
+    <div class="chat-note">
+      The AI Mentor runs on your own free Puter account (User-Pays) — no API key, no card. AI answers are for practice only and are never graded.
+    </div>
+  </section>
+</div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // EMBEDDED COURSE DATA — injected by tools/build-puter-course-app.js.
+  // The shape mirrors what the live course + study packs use
+  // (quiz: id / question / options / correct_index / explanation).
+  // ============================================================
+  var COURSE_COMPANION = {
+      "courseId": "networking",
+      "title": "Network Operations — Configuration & Troubleshooting",
+      "port": "PORT 02",
+      "version": "1.0",
+      "note": "Study, quiz, and ask the AI Mentor for this course. Your progress is private to you — sign in with Puter to back it up to your own cloud.",
+      "modules": [
+        {
+          "num": 1,
+          "dbId": 18,
+          "title": "Module 1: IP Addressing Fundamentals",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Explain what an IP address is and how it's structured (32 bits, 4 octets)</li>\n<li>Convert between decimal and binary representations</li>\n<li>Distinguish IPv4 address classes (A, B, C) and private vs public addresses</li>\n<li>Explain the roles of network, host, and gateway components of an address</li>\n</ul>"
+              },
+              {
+                "title": "Arrival & Recap (8:30–9:00)",
+                "html": "Intro to Part 2, set expectations, and quickly recap key Part 1 concepts\n(cabling enables the physical link; this course covers what rides on top)."
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>What Is an IP Address?</h3>\n<ul><li>A 32-bit number, written as 4 decimal octets (e.g., <code>192.168.1.100</code>)</li>\n<li>Each octet ranges from 0–255 (8 bits each)</li>\n<li>Binary underlies everything — networking math is built on powers of 2</li>\n</ul>\n<h3>Address Structure: Network vs Host</h3>\nAn IP address has two logical parts:\n<ul><li><strong>Network portion</strong> — identifies the network</li>\n<li><strong>Host portion</strong> — identifies a specific device on that network</li>\n<li>The <strong>subnet mask</strong> tells you how many leading bits are the network part</li>\n<li>The <strong>default gateway</strong> (usually the first usable host, e.g., <code>.1</code>) is</li>\n</ul> where a device sends traffic destined for other networks\n<h3>Address Classes</h3>\n<table><thead><tr><th>Class</th><th>Range (1st octet)</th><th>Typical Use</th></tr></thead><tbody><tr><td>A</td><td>1–126</td><td>Very large networks</td></tr><tr><td>B</td><td>128–191</td><td>Medium networks</td></tr><tr><td>C</td><td>192–223</td><td>Small networks (most common in labs/home)</td></tr><tr><td>D</td><td>224–239</td><td>Multicast</td></tr><tr><td>E</td><td>240–255</td><td>Experimental</td></tr></tbody></table>\n<h3>Private vs Public</h3>\n<ul><li><strong>Private ranges:</strong> <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li>\n<li><strong>Public</strong> addresses are globally routable on the internet</li>\n<li>Home routers use <strong>NAT</strong> to translate private addresses to a single public one</li>\n</ul>"
+              },
+              {
+                "title": "Lab 1A: Decimal to Binary Conversion (10:45–11:30)",
+                "html": "<ul><li>Worksheet: convert 20 decimal numbers to binary</li>\n<li>Cross-check with an online converter</li>\n<li>Discuss powers of 2 and why binary matters in networking</li>\n<li>Use the 8-bit place table (128 64 32 16 8 4 2 1) for fast conversion</li>\n</ul>"
+              },
+              {
+                "title": "Lab 1B: IP Address Breakdown (11:30–12:30)",
+                "html": "<ul><li>Given <code>192.168.1.100</code>: break down each octet, write it in binary</li>\n<li>Label the network vs host portion (using /24 as the boundary)</li>\n<li>Identify the implied gateway of the subnet</li>\n<li>Practice: break down a few more real addresses and screenshot them</li>\n</ul>"
+              },
+              {
+                "title": "Continued Practice (1:15–2:15)",
+                "html": "<ul><li>More conversions</li>\n<li>Analyze real IP addresses</li>\n<li>Discussion: &quot;What's the IP on your home router?&quot;</li>\n<li>Find a public IP address using an online tool</li>\n<li>Compare your private LAN IP vs your public (internet) IP</li>\n</ul>"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>How many bits make up an IPv4 address?</li>\n<li>Is <code>192.168.1.1</code> a private or public address?</li>\n<li>Convert <code>172</code> to binary.</li>\n<li>What determines the boundary between the network and host portions?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Convert 10 IP addresses to binary (with answers)</li>\n<li>Watch an &quot;IP addressing explained&quot; video (10 min)</li>\n<li>Identify your home router's IP address and your computer's IP address</li>\n<li>Read: docs/resources/networking/ip-addressing-and-subnetting.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "How many bits make up an IPv4 address?",
+                "options": [
+                  "16",
+                  "32",
+                  "64",
+                  "128"
+                ],
+                "correct_index": 1,
+                "explanation": "IPv4 is 32 bits (resource §1, module §What Is an IP Address)."
+              },
+              {
+                "id": 2,
+                "question": "An IPv4 address is written as:",
+                "options": [
+                  "Four decimal octets (0–255)",
+                  "Six hex hextets",
+                  "One long binary string",
+                  "Two hexadecimal pairs"
+                ],
+                "correct_index": 0,
+                "explanation": "Four decimal octets 0–255 (module §What Is an IP Address)."
+              },
+              {
+                "id": 3,
+                "question": "The subnet mask determines:",
+                "options": [
+                  "The cable color",
+                  "How many leading bits belong to the network portion",
+                  "The MAC address",
+                  "The DNS server"
+                ],
+                "correct_index": 1,
+                "explanation": "Subnet mask marks the network/host boundary (resource §1, module §Address Structure)."
+              },
+              {
+                "id": 4,
+                "question": "Is `192.168.1.1` a private or public address?",
+                "options": [
+                  "Public",
+                  "Private",
+                  "Multicast",
+                  "Experimental"
+                ],
+                "correct_index": 1,
+                "explanation": "192.168.x.x is a private range (resource §2, module §Private vs Public)."
+              },
+              {
+                "id": 5,
+                "question": "Which address class is most common for small networks/labs and home?",
+                "options": [
+                  "Class A",
+                  "Class B",
+                  "Class C",
+                  "Class E"
+                ],
+                "correct_index": 2,
+                "explanation": "Class C (192–223) = small networks, most common in labs/home (module §Address Classes)."
+              },
+              {
+                "id": 6,
+                "question": "Home routers use which technique to translate private addresses to a single public one?",
+                "options": [
+                  "DHCP",
+                  "NAT",
+                  "DNS",
+                  "VLAN"
+                ],
+                "correct_index": 1,
+                "explanation": "NAT (module §Private vs Public)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 2,
+          "dbId": 19,
+          "title": "Module 2: Subnetting & CIDR Notation",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Explain what a subnet mask does and represent it in binary</li>\n<li>Calculate network address, broadcast address, and usable host range</li>\n<li>Read and write CIDR notation (e.g., <code>/24</code>, <code>/25</code>)</li>\n<li>Apply the host formula: usable hosts = 2^(32 - prefix) - 2</li>\n</ul>"
+              },
+              {
+                "title": "Quiz: Decimal ↔ Binary (8:30–9:00)",
+                "html": "Quick recall check from last week's homework before moving on."
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>Subnet Masks</h3>\n<ul><li>A subnet mask marks which bits of an IP address are &quot;network&quot; vs &quot;host&quot;</li>\n<li>Common masks: <code>255.255.255.0</code> = <code>/24</code>, <code>255.255.255.128</code> = <code>/25</code></li>\n<li>In binary, mask bits are <code>1</code>s for network, <code>0</code>s for host</li>\n</ul>\n<h3>The Host Formula</h3>\n<strong>Usable hosts = 2^(32 - prefix) - 2</strong> (minus 2 = network + broadcast)\n<ul><li>/24 → 2^8 - 2 = 254</li>\n<li>/26 → 2^6 - 2 = 62</li>\n</ul>\n<h3>Key Calculations</h3>\n<ul><li><strong>Network address:</strong> all host bits set to 0</li>\n<li><strong>Broadcast address:</strong> all host bits set to 1</li>\n<li><strong>Usable host range:</strong> everything between network and broadcast</li>\n<li>Never assign the network or broadcast address to a device</li>\n</ul>\n<h3>CIDR Reference</h3>\n<table><thead><tr><th>CIDR</th><th>Mask</th><th>Usable Hosts</th></tr></thead><tbody><tr><td>/24</td><td>255.255.255.0</td><td>254</td></tr><tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr><tr><td>/26</td><td>255.255.255.192</td><td>62</td></tr><tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr><tr><td>/28</td><td>255.255.255.240</td><td>14</td></tr><tr><td>/29</td><td>255.255.255.248</td><td>6</td></tr><tr><td>/30</td><td>255.255.255.252</td><td>2 (point-to-point)</td></tr></tbody></table>"
+              },
+              {
+                "title": "Lab 2A: Guided Subnet Calculation (10:45–11:30)",
+                "html": "Given <code>192.168.1.0/24</code>:\n<ul><li>Network address → <code>192.168.1.0</code></li>\n<li>Broadcast address → <code>192.168.1.255</code></li>\n<li>Usable range → <code>192.168.1.1</code>–<code>192.168.1.254</code></li>\n<li>Total usable hosts → 254 (formula: 2^8 - 2)</li>\n</ul>"
+              },
+              {
+                "title": "Lab 2B: Subdividing a Network (11:30–12:30)",
+                "html": "Split <code>192.168.1.0/24</code> into 4 equal subnets for 4 departments\n(Accounting, Sales, Support, Backend), each needing ~60 hosts:\n<ul><li>We need 4 subnets → borrow 2 host bits (2^2 = 4)</li>\n<li>New prefix: /24 + 2 = <strong>/26</strong></li>\n<li>Usable per subnet: 2^6 - 2 = <strong>62</strong> (fits 60)</li>\n<li>Block size = 64, subnets start at 0:</li>\n</ul> - <code>192.168.1.0</code> /26 usable <code>192.168.1.1</code>–<code>192.168.1.62</code>\n - <code>192.168.1.64</code> /26 usable <code>192.168.1.65</code>–<code>192.168.1.126</code>\n - <code>192.168.1.128</code>/26 usable <code>192.168.1.129</code>–<code>192.168.1.190</code>\n - <code>192.168.1.192</code>/26 usable <code>192.168.1.193</code>–<code>192.168.1.254</code>"
+              },
+              {
+                "title": "Speed Drills (1:15–2:15)",
+                "html": "<ul><li>Timed subnetting challenge (e.g., &quot;Who can solve <code>10.0.0.0/25</code> fastest?&quot;)</li>\n<li>Celebrate fast, correct answers to build confidence under pressure</li>\n<li>Practice: given N hosts, choose the smallest prefix that fits</li>\n<li>Quick-fire: readable /24–/30 host counts from memory</li>\n</ul>"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What's the broadcast address for <code>192.168.1.0/24</code>?</li>\n<li>How many usable hosts does a <code>/26</code> network support?</li>\n<li>Write <code>255.255.255.192</code> in CIDR notation.</li>\n<li>Using the formula, how many usable hosts are in a <code>/28</code>?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Complete 10 subnetting problems with answers</li>\n<li>Watch a &quot;CIDR notation explained&quot; video (8 min)</li>\n<li>Create a personal subnet cheat sheet</li>\n<li>Prepare for Packet Tracer next week</li>\n<li>Read: docs/resources/networking/ip-addressing-and-subnetting.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "What is the broadcast address of `192.168.1.0/24`?",
+                "options": [
+                  "192.168.1.0",
+                  "192.168.1.254",
+                  "192.168.1.255",
+                  "192.168.0.255"
+                ],
+                "correct_index": 2,
+                "explanation": "192.168.1.255 (all host bits 1) (resource §3)."
+              },
+              {
+                "id": 2,
+                "question": "How many usable hosts does a `/26` network support?",
+                "options": [
+                  "254",
+                  "126",
+                  "62",
+                  "30"
+                ],
+                "correct_index": 2,
+                "explanation": "/26 → 2^6 − 2 = 62 (resource §2, module §CIDR Reference)."
+              },
+              {
+                "id": 3,
+                "question": "`255.255.255.192` in CIDR notation is:",
+                "options": [
+                  "/24",
+                  "/25",
+                  "/26",
+                  "/27"
+                ],
+                "correct_index": 2,
+                "explanation": "255.255.255.192 = /26 (resource §2)."
+              },
+              {
+                "id": 4,
+                "question": "The \"minus 2\" in the host formula `2^(32-prefix) - 2` accounts for:",
+                "options": [
+                  "The gateway and DNS server",
+                  "The network address and broadcast address",
+                  "Two spare hosts",
+                  "The DHCP lease"
+                ],
+                "correct_index": 1,
+                "explanation": "Network + broadcast addresses are not assignable (resource §2)."
+              },
+              {
+                "id": 5,
+                "question": "Which prefix is the standard for a point-to-point link (router to router)?",
+                "options": [
+                  "/24",
+                  "/26",
+                  "/28",
+                  "/30"
+                ],
+                "correct_index": 3,
+                "explanation": "/30 gives exactly 2 usable (point-to-point) (resource §5)."
+              },
+              {
+                "id": 6,
+                "question": "How many usable hosts are in a `/28`?",
+                "options": [
+                  "30",
+                  "14",
+                  "62",
+                  "6"
+                ],
+                "correct_index": 1,
+                "explanation": "/28 → 2^4 − 2 = 14 (resource §5)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 3,
+          "dbId": 20,
+          "title": "Module 3: Packet Tracer — IP Configuration & Connectivity",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Build a simple switched network in Cisco Packet Tracer</li>\n<li>Manually configure static IP addresses on end devices</li>\n<li>Test and verify connectivity using ping</li>\n<li>Explain why same-subnet PCs can reach each other via a switch</li>\n</ul>"
+              },
+              {
+                "title": "Demonstration: Simple Network Build (9:00–10:30)",
+                "html": "<ul><li>Instructor builds a 4-PC network with 1 switch, narrating each step</li>\n<li>Show how to add devices and connect them with straight-through cables</li>\n<li>Everyone follows along on their own machine</li>\n</ul>\n<h3>Lecture: What the Switch Is Doing</h3>\n<ul><li>All 4 PCs share the <strong>same subnet</strong> (<code>192.168.1.0/24</code>), so the switch</li>\n</ul> can forward between them — no router needed\n<ul><li>The switch <strong>learns MAC addresses</strong>: it records which MAC arrives on</li>\n</ul> which port, then forwards only to the right port (no flooding after the\n first message)\n<ul><li>This is <strong>Layer 2 switching</strong> in action</li>\n</ul>"
+              },
+              {
+                "title": "Lab 3A: Students Build the Network (10:45–11:30)",
+                "html": "<ul><li>Each student (or pair) builds the same network:</li>\n</ul> 4 PCs, 1 switch, 5 straight-through cables\n<ul><li>Instructor checks progress as students work</li>\n</ul>"
+              },
+              {
+                "title": "Lab 3B: Assign IP Addresses (11:30–12:30)",
+                "html": "Each student configures IP addresses manually:\n<table><thead><tr><th>Device</th><th>IP Address</th></tr></thead><tbody><tr><td>PC1</td><td>192.168.1.1/24</td></tr><tr><td>PC2</td><td>192.168.1.2/24</td></tr><tr><td>PC3</td><td>192.168.1.3/24</td></tr><tr><td>PC4</td><td>192.168.1.4/24</td></tr></tbody></table>"
+              },
+              {
+                "title": "Lab 3C: Test Connectivity (1:15–2:15)",
+                "html": "<ul><li>Ping from PC1 to PC2</li>\n<li>Watch simulation mode to see packets travel</li>\n<li>Discuss: why does it work?</li>\n<li>Try pinging all device combinations</li>\n<li>Observe how the switch learns MAC addresses over time</li>\n<li><strong>Bonus:</strong> temporarily put PC3 on a different subnet (e.g., <code>192.168.2.3</code>)</li>\n</ul> — ping PC3 fails! Same-switch device but different subnet = a router\n is required. This previews routing next-next week.\n<h3>Reflection</h3>\nThis network runs on the same crimped cables from Part 1 — connecting\nthe physical skills from Module 1–9 (Part 1) to the logical configuration\nskills in this course."
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Save work, preview next week: DHCP will make IP assignment automatic."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What must match for two PCs on the same subnet to ping each other?</li>\n<li>What does &quot;simulation mode&quot; let you observe in Packet Tracer?</li>\n<li>How does a switch learn which MAC address is on which port?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Repeat the same Packet Tracer lab at home if you have access</li>\n<li>Screenshot your working network</li>\n<li>Write 3 sentences: &quot;How does IP addressing work?&quot;</li>\n<li>Prepare for DHCP &amp; DNS next week</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "What must match for two PCs on the same subnet to ping each other?",
+                "options": [
+                  "MAC addresses",
+                  "IP addresses must be on the same subnet",
+                  "Both must use DHCP",
+                  "A router must exist between them"
+                ],
+                "correct_index": 1,
+                "explanation": "Same subnet required; switch handles it (module §Lab 3A/3C)."
+              },
+              {
+                "id": 2,
+                "question": "A switch forwards frames using:",
+                "options": [
+                  "IP addresses",
+                  "MAC addresses",
+                  "Port numbers",
+                  "DNS names"
+                ],
+                "correct_index": 1,
+                "explanation": "Switch = Layer 2, MAC-based forwarding (resource §1, module §Lecture)."
+              },
+              {
+                "id": 3,
+                "question": "When a switch receives a frame with an UNKNOWN destination MAC, it:",
+                "options": [
+                  "Drops the frame",
+                  "Floods it out all ports except the source",
+                  "Sends it to the router",
+                  "Returns it to the sender"
+                ],
+                "correct_index": 1,
+                "explanation": "Unknown MAC → flood all ports except source (resource §2)."
+              },
+              {
+                "id": 4,
+                "question": "Two PCs on DIFFERENT subnets need which device to communicate?",
+                "options": [
+                  "A switch",
+                  "A router",
+                  "A hub",
+                  "A repeater"
+                ],
+                "correct_index": 1,
+                "explanation": "Different subnets require a router (module §Lab 3C bonus)."
+              },
+              {
+                "id": 5,
+                "question": "After the first message, a switch stops flooding by using its:",
+                "options": [
+                  "Routing table",
+                  "MAC address table",
+                  "ARP cache",
+                  "DNS cache"
+                ],
+                "correct_index": 1,
+                "explanation": "MAC address table (resource §2, module §Lecture)."
+              },
+              {
+                "id": 6,
+                "question": "In Packet Tracer's simulation mode, you can observe:",
+                "options": [
+                  "The packets traveling device by device",
+                  "The crimping process",
+                  "DNS records only",
+                  "Physical cable colors"
+                ],
+                "correct_index": 0,
+                "explanation": "Simulation mode animates packet flow (module §Lab 3C)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 4,
+          "dbId": 21,
+          "title": "Module 4: DHCP & DNS Configuration",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Explain the DORA process for DHCP address assignment</li>\n<li>Configure and observe DHCP behavior in Packet Tracer</li>\n<li>Explain how DNS resolves names to IP addresses</li>\n<li>Recognise the APIPA address (<code>169.254.x.x</code>) as &quot;no DHCP answer&quot;</li>\n</ul>"
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>DHCP (Dynamic Host Configuration Protocol)</h3>\n<ul><li>Automatically assigns IP addresses so devices don't need manual config</li>\n<li><strong>DORA process:</strong></li>\n</ul> 1. <strong>Discover</strong> — client broadcasts for a DHCP server\n 2. <strong>Offer</strong> — server offers an available IP\n 3. <strong>Request</strong> — client requests that specific IP\n 4. <strong>Acknowledge</strong> — server confirms the lease\n<ul><li>IP pools have a defined range and a lease expiration time</li>\n</ul>\n<h3>Friendly &quot;is DHCP broken?&quot; checklist</h3>\nIf a device gets <strong>169.254.x.x</strong> (APIPA self-assigned), it got no DHCP answer.\nCheck in order:\n<ul><li>Is the DHCP server running and is its scope not exhausted?</li>\n<li>Is the device on the correct VLAN (Layer-2 path)?</li>\n<li>Is the DHCP relay / helper-address configured if the server is on another subnet?</li>\n<li>Is DHCP traffic (UDP 67/68) allowed by any firewall?</li>\n</ul>\n<h3>DNS (Domain Name System)</h3>\n<ul><li>Translates human-readable names (<code>www.example.com</code>) into IP addresses</li>\n<li>DNS servers hold records mapping names to addresses</li>\n<li>Without DNS, users would need to memorize IP addresses for every site</li>\n</ul>\n<strong>Flow:</strong> browser asks local DNS → local DNS asks forwarders as needed →\nname resolves to an IP → traffic is sent to that IP.\n<strong>Troubleshooting hint:</strong> if ping by IP works but ping by name fails, the\nproblem is DNS, not connectivity."
+              },
+              {
+                "title": "Lab 4A: Packet Tracer DHCP Lab (10:45–11:30)",
+                "html": "<ul><li>Load the pre-made &quot;DHCP network&quot; file (1 router, 1 switch, 5 PCs)</li>\n<li>Router acts as the DHCP server; PCs are set to DHCP mode</li>\n<li>Observe: do PCs receive IP addresses automatically? (Yes)</li>\n<li>Check assigned IPs and watch the DORA process play out in simulation</li>\n</ul>"
+              },
+              {
+                "title": "Lab 4B: Change DHCP Settings (11:30–12:30)",
+                "html": "<ul><li>Modify the IP pool range on the router</li>\n<li>Disable and re-enable one PC to trigger a new lease</li>\n<li>Observe what IP address it receives, and discuss why DHCP matters at scale</li>\n</ul>"
+              },
+              {
+                "title": "Lab 4C: DNS Configuration (1:15–2:15)",
+                "html": "<ul><li>Add a DNS server to the network</li>\n<li>Configure domain names for devices</li>\n<li>Ping devices by name instead of IP address</li>\n<li>Compare: pinging by IP vs. by name</li>\n</ul>\n<h3>Discussion</h3>\nReal-world example: accessing a website.\n<ul><li>Without DNS: typing <code>203.45.12.78</code> (hard to remember)</li>\n<li>With DNS: typing <code>www.example.com</code> (easy!)</li>\n</ul>"
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What do the letters in &quot;DORA&quot; stand for?</li>\n<li>What happens if a device's DHCP lease expires?</li>\n<li>What problem does DNS solve for everyday internet use?</li>\n<li>What does getting <code>169.254.x.x</code> tell you about DHCP?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Reflect: how does DHCP make your life easier at home?</li>\n<li>Find and screenshot your home router's DHCP settings</li>\n<li>Write 2 sentences: &quot;Why does DNS matter?&quot;</li>\n<li>Preview: next week is routing — how will that build on this?</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "What do the letters in \"DORA\" stand for?",
+                "options": [
+                  "Discover, Offer, Request, Acknowledge",
+                  "Define, Offer, Route, Assign",
+                  "Detect, Option, Reply, Accept",
+                  "Discover, Open, Request, Answer"
+                ],
+                "correct_index": 0,
+                "explanation": "Discover, Offer, Request, Acknowledge (module §DHCP)."
+              },
+              {
+                "id": 2,
+                "question": "If a device self-assigns `169.254.x.x` (APIPA), what does it mean?",
+                "options": [
+                  "The device has a valid DHCP lease",
+                  "It received no DHCP answer",
+                  "The subnet mask is wrong",
+                  "DNS is misconfigured"
+                ],
+                "correct_index": 1,
+                "explanation": "No DHCP answer → APIPA self-assigned (module §Friendly checklist, resource §5)."
+              },
+              {
+                "id": 3,
+                "question": "DNS resolves:",
+                "options": [
+                  "MAC addresses to IP addresses",
+                  "Human-readable names to IP addresses",
+                  "IP addresses to MAC addresses",
+                  "Ports to protocols"
+                ],
+                "correct_index": 1,
+                "explanation": "Names → IPs (module §DNS, resource §6)."
+              },
+              {
+                "id": 4,
+                "question": "Which ports does DHCP use?",
+                "options": [
+                  "80 and 443",
+                  "67 and 68",
+                  "22 and 23",
+                  "25 and 110"
+                ],
+                "correct_index": 1,
+                "explanation": "DHCP uses UDP 67/68 (resource §5, module §checklist)."
+              },
+              {
+                "id": 5,
+                "question": "If pinging by IP works but pinging by name fails, the problem is likely:",
+                "options": [
+                  "Connectivity",
+                  "DNS",
+                  "Routing",
+                  "The cable"
+                ],
+                "correct_index": 1,
+                "explanation": "Name resolution problem, not connectivity (resource §6, module §DNS hint)."
+              },
+              {
+                "id": 6,
+                "question": "A DHCP relay / helper-address is needed when:",
+                "options": [
+                  "A device is in a different VLAN than the switch",
+                  "The DHCP server is on another subnet",
+                  "DNS is broken",
+                  "The scope is exhausted"
+                ],
+                "correct_index": 1,
+                "explanation": "DHCP server on another subnet (resource §5, module §checklist)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 5,
+          "dbId": 22,
+          "title": "Module 5: Routing Fundamentals",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Explain what routing is and why it's needed between networks</li>\n<li>Configure static routes in Packet Tracer</li>\n<li>Read and interpret a router's routing table</li>\n</ul>"
+              },
+              {
+                "title": "DHCP Quiz (8:30–9:00)",
+                "html": "Quick recall check before moving into new material."
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>What Is Routing?</h3>\n<ul><li>Routing moves traffic <strong>between</strong> different networks (switching only</li>\n</ul> moves traffic within one network)\n<ul><li>A <strong>routing table</strong> lists known destination networks and how to reach them</li>\n<li><strong>Default gateway</strong> — where a device sends traffic when the destination</li>\n</ul> isn't on its local network\n<ul><li><strong>Next-hop routing</strong> — a route often just points to the next router in</li>\n</ul> the path, not the final destination directly\n<h3>Static vs Dynamic Routing</h3>\n<ul><li><strong>Static</strong> — manually configured by an administrator; simple, predictable,</li>\n</ul> but doesn't adapt automatically\n<ul><li><strong>Dynamic</strong> — routers exchange information automatically using protocols</li>\n</ul> like RIP, OSPF, or EIGRP (overview only in this course — not hands-on)\n<h3>How a Router Picks a Path</h3>\n<ul><li>Examines the destination IP in the packet</li>\n<li>Finds the <strong>longest (most specific) matching route</strong> in its table</li>\n<li>Forwards out that interface / next hop</li>\n</ul>\n<strong>Routing protocol quick map:</strong>\n<table><thead><tr><th>Protocol</th><th>Type</th><th>Metric</th><th>Use</th></tr></thead><tbody><tr><td>RIP</td><td>Distance-vector</td><td>Hop count (max 15)</td><td>Small legacy</td></tr><tr><td>EIGRP</td><td>Advanced DV</td><td>Composite (bandwidth/delay)</td><td>Cisco enterprise</td></tr><tr><td>OSPF</td><td>Link-state</td><td>Cost (bandwidth-based)</td><td>Enterprise, industry standard</td></tr><tr><td>BGP</td><td>Path-vector</td><td>Path attributes</td><td>Internet routing</td></tr></tbody></table>"
+              },
+              {
+                "title": "Lab 5A: Multi-Network Setup (10:45–11:30)",
+                "html": "<ul><li>Load the pre-made &quot;Two networks, one router&quot; file:</li>\n</ul> - Network A: <code>192.168.1.0/24</code> (5 PCs + switch)\n - Network B: <code>192.168.2.0/24</code> (5 PCs + switch)\n - A single router connects both\n<ul><li>Discuss: can A talk to B yet? (Not yet!)</li>\n</ul>"
+              },
+              {
+                "title": "Lab 5B: Configure Static Routes (11:30–12:30)",
+                "html": "<ul><li>On the router, add a static route: &quot;to reach <code>192.168.2.0/24</code>, go via</li>\n</ul> the router's port 1&quot;\n<ul><li>Add the reverse route on the other side</li>\n<li>Test: PCs in Network A can now ping PCs in Network B</li>\n<li>Celebrate the first successful routing configuration</li>\n</ul>"
+              },
+              {
+                "title": "Lab 5C: Analyze Routing Tables (1:15–2:15)",
+                "html": "<ul><li>View the router's routing table and explain what each entry means</li>\n<li>Discuss: &quot;How did the packet actually get there?&quot;</li>\n<li>Add more routes and observe the table change</li>\n<li>Experiment: remove a route and observe what breaks</li>\n</ul>\n<h3>Simulation</h3>\nWatch a packet travel between networks — leaving Network A through the\nrouter, and arriving in Network B."
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Routing is what enables the internet at scale — &quot;your data crosses many\nrouters to reach a site like YouTube.&quot; Preview: troubleshooting these\nnetworks is next."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What's the difference between switching and routing?</li>\n<li>What is a default gateway used for?</li>\n<li>What breaks if a static route is missing or misconfigured?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Draw a 3-network topology on paper</li>\n<li>Identify what static routes would be needed to connect them</li>\n<li>Study: what happens to traffic if routing is misconfigured?</li>\n<li>Prepare for troubleshooting next week</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "What is the difference between switching and routing?",
+                "options": [
+                  "Switching is wireless; routing is wired",
+                  "Switching moves traffic within one network; routing moves it between networks",
+                  "Switching uses IP; routing uses MAC",
+                  "There is no difference"
+                ],
+                "correct_index": 1,
+                "explanation": "Switching within, routing between networks (module §What Is Routing, resource §1)."
+              },
+              {
+                "id": 2,
+                "question": "A routing table lists:",
+                "options": [
+                  "Known destination networks and how to reach them",
+                  "MAC addresses of all devices",
+                  "DNS records",
+                  "DHCP leases"
+                ],
+                "correct_index": 0,
+                "explanation": "Known destination networks + how to reach them (module §What Is Routing)."
+              },
+              {
+                "id": 3,
+                "question": "A default gateway is where a device sends traffic when:",
+                "options": [
+                  "The destination is on its local network",
+                  "The destination isn't on its local network",
+                  "DHCP fails",
+                  "The cable is broken"
+                ],
+                "correct_index": 1,
+                "explanation": "Destination not on the local network (module §What Is Routing)."
+              },
+              {
+                "id": 4,
+                "question": "Which routing protocol is the industry-standard enterprise workhorse?",
+                "options": [
+                  "RIP",
+                  "BGP",
+                  "OSPF",
+                  "ARP"
+                ],
+                "correct_index": 2,
+                "explanation": "OSPF (resource §4, module §Routing protocol map)."
+              },
+              {
+                "id": 5,
+                "question": "When a router has multiple routes to the same network, it prefers:",
+                "options": [
+                  "The shortest cable",
+                  "The longest (most specific) matching route",
+                  "The first route added",
+                  "The fastest MAC"
+                ],
+                "correct_index": 1,
+                "explanation": "Longest (most specific) match wins (resource §3, module §How a Router Picks a Path)."
+              },
+              {
+                "id": 6,
+                "question": "What happens if a static route is missing or misconfigured?",
+                "options": [
+                  "Nothing; routing is automatic",
+                  "Traffic to that network fails or takes a bad path",
+                  "DHCP breaks",
+                  "The switch reboots"
+                ],
+                "correct_index": 1,
+                "explanation": "Traffic to that network fails/misroutes (module §Lab 5C, §Check for Understanding)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 6,
+          "dbId": 23,
+          "title": "Module 6: Troubleshooting Methodology & Tools",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Apply a structured troubleshooting framework to network problems</li>\n<li>Use core diagnostic tools: ping, tracert, ipconfig, nslookup, netstat</li>\n<li>Interpret the output of each tool to isolate a problem</li>\n</ul>"
+              },
+              {
+                "title": "Routing Homework Discussion (8:30–9:00)",
+                "html": "Review last week's static route diagrams before moving into new material."
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>Troubleshooting Framework</h3>\n<ul><li>Gather information (distinguish symptoms from root causes)</li>\n<li>Form and test a hypothesis</li>\n<li>Isolate the problem (often layer by layer, OSI-style)</li>\n<li>Implement a solution</li>\n<li>Verify the fix actually worked</li>\n<li>Document findings</li>\n</ul>\n<h3>Diagnostic Tools</h3>\n<table><thead><tr><th>Tool</th><th>What It Checks</th></tr></thead><tbody><tr><td><strong>Ping</strong></td><td>Layer 3 IP connectivity to a target</td></tr><tr><td><strong>Tracert / Traceroute</strong></td><td>The routing path packets take, hop by hop</td></tr><tr><td><strong>Ipconfig / Ifconfig</strong></td><td>Local device's IP, gateway, DNS configuration</td></tr><tr><td><strong>Nslookup</strong></td><td>DNS resolution — what IP a name resolves to</td></tr><tr><td><strong>Netstat</strong></td><td>Active network connections on a device</td></tr><tr><td><strong>Arp</strong></td><td>The IP-to-MAC table on this device</td></tr><tr><td><strong>Pathping</strong> (Win)</td><td>Traceroute + per-hop packet-loss stats</td></tr></tbody></table>\n<h3>The &quot;Ping Outward&quot; Rule</h3>\nPing yourself, then your IP, then your gateway, then a far address —\n<strong>where the ping stops is where the problem lives</strong>:\n<table><thead><tr><th>Test</th><th>Fails → meaning</th></tr></thead><tbody><tr><td>ping 127.0.0.1</td><td>TCP/IP stack / drivers</td></tr><tr><td>ping own IP</td><td>Interface not up / wrong IP</td></tr><tr><td>ping default gateway</td><td>Layer 1/2 problem (cable, port, VLAN, DHCP)</td></tr><tr><td>ping remote IP</td><td>Routing / firewall / WAN</td></tr><tr><td>ping remote hostname (IP OK)</td><td>DNS problem</td></tr></tbody></table>"
+              },
+              {
+                "title": "Lab 6A: Hands-On Tools Demo (10:45–11:30)",
+                "html": "<ul><li>Ping a server and analyze the output</li>\n<li>Traceroute to a website and interpret each hop</li>\n<li>Run ipconfig and locate IP, gateway, and DNS server info</li>\n<li>Run nslookup on <code>google.com</code> and see the IP behind the domain</li>\n</ul>"
+              },
+              {
+                "title": "Lab 6B: Packet Tracer Tools (11:30–12:30 → 1:15–2:15)",
+                "html": "<ul><li>Use Packet Tracer's built-in Ping and Tracert utilities between devices</li>\n<li>Analyze the results and discuss what each tool would tell you</li>\n</ul>\n<h3>Scenario Analysis</h3>\n&quot;A user says: I can't reach Google.&quot; Walk through the systematic approach:\n<ul><li>Ping the gateway</li>\n<li>Ping the DNS server</li>\n<li>Run nslookup</li>\n<li>Narrow down where in the chain the failure is</li>\n</ul>"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Troubleshooting is a skill built through repetition. Next week: real\nbroken networks to diagnose and fix."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What's the first thing to check when a user can't reach a website?</li>\n<li>What does traceroute show that ping doesn't?</li>\n<li>Walk through the 6-step troubleshooting framework from memory.</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Run ipconfig on your home computer and document the results</li>\n<li>Ping 3 websites and save the output</li>\n<li>Traceroute to youtube.com and analyze the hops</li>\n<li>Write: &quot;What did each command tell you?&quot;</li>\n<li>Read: docs/resources/networking/network-utilities-and-troubleshooting.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "The \"ping outward\" rule says the FIRST ping test should be:",
+                "options": [
+                  "A far website",
+                  "Yourself (127.0.0.1)",
+                  "The default gateway",
+                  "The DNS server"
+                ],
+                "correct_index": 1,
+                "explanation": "Ping yourself (127.0.0.1) first (module §Ping Outward, resource §4)."
+              },
+              {
+                "id": 2,
+                "question": "If `ping 127.0.0.1` fails, the problem is:",
+                "options": [
+                  "The cable",
+                  "TCP/IP stack / drivers",
+                  "Routing",
+                  "DNS"
+                ],
+                "correct_index": 1,
+                "explanation": "TCP/IP stack / drivers (resource §4, module §Ping Outward)."
+              },
+              {
+                "id": 3,
+                "question": "If pinging the default gateway fails, the problem is likely at:",
+                "options": [
+                  "Layer 1/2 (cable, port, VLAN, DHCP)",
+                  "Layer 7 (application)",
+                  "DNS",
+                  "The internet"
+                ],
+                "correct_index": 0,
+                "explanation": "Layer 1/2 problem (cable, port, VLAN, DHCP) (resource §4, module §Ping Outward)."
+              },
+              {
+                "id": 4,
+                "question": "Which command shows the path and hops to a remote host?",
+                "options": [
+                  "ipconfig",
+                  "tracert",
+                  "netstat",
+                  "nslookup"
+                ],
+                "correct_index": 1,
+                "explanation": "tracert (Win) / traceroute (Lin) (resource §2, module §Diagnostic Tools)."
+              },
+              {
+                "id": 5,
+                "question": "Which command reveals the IP, mask, gateway, and DNS on a Windows device?",
+                "options": [
+                  "ipconfig /all",
+                  "arp -a",
+                  "pathping",
+                  "route print"
+                ],
+                "correct_index": 0,
+                "explanation": "ipconfig /all (resource §2, module §Diagnostic Tools)."
+              },
+              {
+                "id": 6,
+                "question": "In `tracert`, three asterisks (`* * *`) at a hop usually mean:",
+                "options": [
+                  "The network is down",
+                  "A router that doesn't answer ICMP (can still forward)",
+                  "DNS failure",
+                  "The hop is too slow to exist"
+                ],
+                "correct_index": 1,
+                "explanation": "Routers that don't answer ICMP still forward — don't assume broken (resource §3)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 7,
+          "dbId": 24,
+          "title": "Module 7: Troubleshooting Practicals — Broken Networks",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Apply the troubleshooting framework to realistic broken-network scenarios</li>\n<li>Diagnose and fix IP, gateway, routing, and DNS misconfigurations</li>\n<li>Design a troubleshooting scenario for a peer to solve</li>\n</ul>"
+              },
+              {
+                "title": "Setup (8:30–9:00)",
+                "html": "Review last week's tools, then load pre-made broken networks in Packet\nTracer for the session's scenarios."
+              },
+              {
+                "title": "Scenario 1: Wrong IP Configuration (9:00–9:45)",
+                "html": "<ul><li>Network: 4 PCs, 1 switch</li>\n<li>Problem: 2 PCs have IPs on the wrong subnet</li>\n<li>Students must: identify the problem PC, determine the correct IP,</li>\n</ul> fix it, and verify with ping"
+              },
+              {
+                "title": "Scenario 2: Missing Default Gateway (9:45–10:30)",
+                "html": "<ul><li>Network: 2 switches, 1 router, 8 PCs</li>\n<li>Symptom: some PCs can't reach the other network</li>\n<li>Troubleshooting flow:</li>\n</ul> 1. Ping local device — works\n 2. Ping remote device — fails\n 3. Check gateway configuration — missing!\n 4. Add the gateway, then verify"
+              },
+              {
+                "title": "Break (10:30–10:45)",
+                "html": ""
+              },
+              {
+                "title": "Scenario 3: Routing Issue (10:45–11:30)",
+                "html": "<ul><li>Multi-network topology with misconfigured routes</li>\n<li>Students analyze the routing table, identify the incorrect route,</li>\n</ul> fix it, and verify with tracert"
+              },
+              {
+                "title": "Scenario 4: DNS Problem (11:30–12:30)",
+                "html": "<ul><li>Network with a DNS server</li>\n<li>Symptom: ping by IP works, ping by name fails</li>\n<li>Students diagnose using nslookup, check DNS configuration, and</li>\n</ul> reconfigure as needed"
+              },
+              {
+                "title": "Lunch (12:30–1:15)",
+                "html": ""
+              },
+              {
+                "title": "Scenario 5: Student-Designed Challenge (1:15–2:15)",
+                "html": "<ul><li>Pairs build a broken network for another pair to solve</li>\n<li>Add one &quot;intentional problem,&quot; then swap</li>\n<li>The other pair must find and fix it — competitive but collaborative</li>\n<li>Celebrate successful fixes</li>\n</ul>"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Reinforce: &quot;Real networks have these exact issues — your skills are\nalready valuable.&quot; Preview: security concepts next week.\nAdd a 2-minute help-desk mindset note: document every scenario (symptom,\ntests, fix) — this is exactly how real support tickets work (the Cisco\nNetwork Support and Security course covers the same process)."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>If local pings work but remote pings fail, what should you check first?</li>\n<li>How would you confirm a DNS problem vs. a routing problem?</li>\n<li>Describe one intentional problem you'd design for a peer to solve.</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Document one troubleshooting scenario: problem, steps taken, solution</li>\n<li>Reflect: &quot;What was hardest to diagnose, and why?&quot;</li>\n<li>Prepare for security concepts next week</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "If local pings work but REMOTE pings fail, what should you check FIRST?",
+                "options": [
+                  "DNS",
+                  "The default gateway configuration",
+                  "The copper cable only",
+                  "The application layer"
+                ],
+                "correct_index": 1,
+                "explanation": "Local OK / remote fail → check gateway config first (module §Scenario 2)."
+              },
+              {
+                "id": 2,
+                "question": "In Scenario 1 (4 PCs, 1 switch), 2 PCs have IPs on the wrong subnet. The correct fix is:",
+                "options": [
+                  "Reboot the switch",
+                  "Change the wrong IPs to the correct subnet, then verify with ping",
+                  "Add a router",
+                  "Enable DHCP only"
+                ],
+                "correct_index": 1,
+                "explanation": "Correct the IP to the right subnet, verify with ping (module §Scenario 1)."
+              },
+              {
+                "id": 3,
+                "question": "A missing default gateway shows up as which symptom?",
+                "options": [
+                  "Nothing can ping locally",
+                  "Local pings work, remote pings fail",
+                  "DNS fails",
+                  "The switch floods"
+                ],
+                "correct_index": 1,
+                "explanation": "Local pings work, remote pings fail (module §Scenario 2)."
+              },
+              {
+                "id": 4,
+                "question": "To confirm DNS vs. routing, you would test:",
+                "options": [
+                  "Ping by IP vs. ping by name",
+                  "Only arp -a",
+                  "Only netstat",
+                  "Reboot the device"
+                ],
+                "correct_index": 0,
+                "explanation": "Ping by IP works, by name fails = DNS; not a routing/connectivity issue (module §Scenario 4, resource §4)."
+              },
+              {
+                "id": 5,
+                "question": "Which command reads the local routing table to spot a misconfigured route?",
+                "options": [
+                  "route print (Win) / ip route (Lin)",
+                  "nslookup",
+                  "ipconfig /flushdns",
+                  "pathping"
+                ],
+                "correct_index": 0,
+                "explanation": "route print (Win) / ip route (Lin) (resource §2, module §Scenario 3)."
+              },
+              {
+                "id": 6,
+                "question": "In the \"ping outward\" flow, after local ping OK and gateway ping OK, the next test is:",
+                "options": [
+                  "ping a remote IP",
+                  "ping yourself again",
+                  "reboot the switch",
+                  "ping the cable"
+                ],
+                "correct_index": 0,
+                "explanation": "After gateway OK, ping a remote IP (module §Setup, resource §4)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 8,
+          "dbId": 25,
+          "title": "Module 8: Network Security Basics",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Explain why network security matters and name common threat types</li>\n<li>Configure basic firewall rules and Access Control Lists (ACLs)</li>\n<li>Explain the purpose of VLANs and basic network segmentation</li>\n<li>Apply the CIA triad to a real security decision</li>\n<li>Secure a home router with best-practice settings</li>\n</ul>"
+              },
+              {
+                "title": "Discussion (8:30–9:00)",
+                "html": "Open with reflections on last week's troubleshooting successes before\nintroducing security concepts."
+              },
+              {
+                "title": "Lecture Notes (9:00–10:30)",
+                "html": "<h3>The Security Triad (CIA)</h3>\n<ul><li><strong>Confidentiality</strong> — only authorized people can read data</li>\n<li><strong>Integrity</strong> — data is accurate and unchanged</li>\n<li><strong>Availability</strong> — systems are up and usable when needed</li>\n<li>Every security control exists to protect one or more of these</li>\n</ul>\n<h3>Why Security Matters / Common Threats</h3>\n<ul><li><strong>Common threats:</strong> viruses, hacking attempts, Denial of Service (DoS)</li>\n<li><strong>Phishing / social engineering</strong> — the #1 attack vector (the human is</li>\n</ul> the weakest link; most breaches start with a phishing email, not a firewall)\n<ul><li><strong>Malware</strong> — viruses, worms, trojans, ransomware, spyware</li>\n<li><strong>Man-in-the-middle</strong> — eavesdropping or altering traffic between parties</li>\n<li><strong>Zero-day</strong> — attack on an unpatched vulnerability</li>\n</ul>\n<h3>Firewalls</h3>\n<ul><li><strong>Firewalls</strong> — hardware or software that filters traffic by rule</li>\n<li><strong>Access Control Lists (ACLs)</strong> — permit/deny rules applied to</li>\n</ul> specific traffic types or addresses\n<ul><li>Rule model (simplified): <strong>source IP:port → dest IP:port → action</strong></li>\n<li><strong>Default should be DENY</strong> — allow only what's needed</li>\n</ul>\n<h3>Defense in Depth</h3>\n<ul><li><strong>Defense in depth</strong> — layering multiple security measures rather than</li>\n</ul> relying on one (firewall + strong passwords + patching + antimalware)\n<ul><li><strong>Least privilege</strong> — give users only the access they need</li>\n<li><strong>Encryption</strong> (overview) — protects data in transit from being read</li>\n</ul> if intercepted\n<ul><li><strong>VPN</strong> (concept only) — creates an encrypted tunnel over a public network</li>\n<li><strong>Patching</strong> — keep systems updated; most attacks exploit known holes</li>\n</ul>"
+              },
+              {
+                "title": "Lab 8A: Firewall Rules in Packet Tracer (10:45–11:30)",
+                "html": "<ul><li>Load a network with a firewall device</li>\n<li>Demo: firewall blocks traffic by default</li>\n<li>Students create rules:</li>\n</ul> - Allow HTTP traffic (port 80)\n - Block Telnet (port 23)\n<ul><li>Test: allowed traffic passes, blocked traffic fails</li>\n<li>Discuss why certain ports get blocked in real networks</li>\n</ul>"
+              },
+              {
+                "title": "Lab 8B: Access Control Lists (11:30–12:30)",
+                "html": "<ul><li>Introduce the basic ACL concept: permit specific traffic, deny the rest</li>\n<li>Configure a simple ACL</li>\n<li>Test with ping (confirm allowed vs. denied traffic)</li>\n</ul>"
+              },
+              {
+                "title": "Lab 8C: Network Segmentation (1:15–2:00)",
+                "html": "<ul><li>Introduce VLANs — separating departments on the same physical switch</li>\n<li>Configure a VLAN and show that VLAN traffic is isolated</li>\n<li>Discuss real-world use: separating student vs. staff networks</li>\n<li>Note: VLANs = security AND performance (broadcast containment)</li>\n</ul>"
+              },
+              {
+                "title": "Security Discussion (2:00–2:15)",
+                "html": "<ul><li>Password strength &amp; policies (long passphrases + MFA)</li>\n<li>Changing default passwords (routers ship with known credentials)</li>\n<li>Role-based access control (least privilege)</li>\n<li>Monitoring &amp; alerts</li>\n<li>Securing a home router: change defaults, enable WPA2/WPA3 (never WEP),</li>\n</ul> disable remote admin, update firmware"
+              },
+              {
+                "title": "Wrap-Up (2:15–2:30)",
+                "html": "Security is everyone's responsibility, and these concepts commonly come\nup in job interviews. Preview: final exam next week."
+              },
+              {
+                "title": "Check for Understanding",
+                "html": "<ul><li>What's the difference between a firewall rule and an ACL?</li>\n<li>Why would a company separate students and staff onto different VLANs?</li>\n<li>Name one reason default passwords are a security risk.</li>\n<li>What are the three parts of the CIA triad, and give an attack on each?</li>\n</ul>"
+              },
+              {
+                "title": "Home Assignment",
+                "html": "<ul><li>Check whether your home router's firewall is enabled (screenshot)</li>\n<li>Research: what are ports 22, 443, and 80 used for, and why do they matter?</li>\n<li>Study: review all Part 2 concepts ahead of the Saturday 9 exam</li>\n<li>Practice: redo your favorite Packet Tracer labs</li>\n<li>Read: docs/resources/networking/network-security-basics.md</li>\n</ul>"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "The CIA triad stands for:",
+                "options": [
+                  "Confidentiality, Integrity, Availability",
+                  "Certificates, Identity, Access",
+                  "Control, Integrity, Authentication",
+                  "Confidentiality, Identity, Authentication"
+                ],
+                "correct_index": 0,
+                "explanation": "Confidentiality, Integrity, Availability (resource §1, module §CIA)."
+              },
+              {
+                "id": 2,
+                "question": "Which is the #1 attack vector for most breaches?",
+                "options": [
+                  "A misconfigured firewall",
+                  "Phishing / social engineering (the human is the weakest link)",
+                  "Unpatched network hardware only",
+                  "Cable faults"
+                ],
+                "correct_index": 1,
+                "explanation": "Phishing/social engineering; the human is the weakest link (resource §3, module §Common Threats)."
+              },
+              {
+                "id": 3,
+                "question": "What is the default firewall rule model recommended in the material?",
+                "options": [
+                  "Allow everything, then block what's bad",
+                  "Deny by default; explicitly allow what's needed",
+                  "Block all UDP",
+                  "Allow all LAN traffic unconditionally"
+                ],
+                "correct_index": 1,
+                "explanation": "Deny by default, allow what's needed (resource §5, module §Firewalls)."
+              },
+              {
+                "id": 4,
+                "question": "Which wireless security is recommended (NOT WEP)?",
+                "options": [
+                  "WEP",
+                  "WPA2/WPA3",
+                  "Open network",
+                  "Hidden SSID"
+                ],
+                "correct_index": 1,
+                "explanation": "WPA2/WPA3, never WEP (resource §4, module §Security Discussion)."
+              },
+              {
+                "id": 5,
+                "question": "A malware type that encrypts your data and demands payment is:",
+                "options": [
+                  "Spyware",
+                  "Ransomware",
+                  "Botnet",
+                  "Zero-day"
+                ],
+                "correct_index": 1,
+                "explanation": "Ransomware (resource §2, module §Common Threats)."
+              },
+              {
+                "id": 6,
+                "question": "The principle that gives users only the access they need is:",
+                "options": [
+                  "Defense in depth",
+                  "Least privilege",
+                  "Multi-factor authentication",
+                  "Patching"
+                ],
+                "correct_index": 1,
+                "explanation": "Least privilege (resource §4, module §Defense in Depth)."
+              }
+            ]
+          }
+        },
+        {
+          "num": 9,
+          "dbId": 26,
+          "title": "Module 9: Final Assessment & Certification",
+          "notes": {
+            "sections": [
+              {
+                "title": "Learning Objectives",
+                "html": "<ul><li>Build and configure a complete network topology under timed conditions</li>\n<li>Diagnose and fix multiple intentional faults in a broken network</li>\n<li>Demonstrate theory retention across all Part 2 topics</li>\n</ul>"
+              },
+              {
+                "title": "Arrival (8:30–9:00)",
+                "html": "Settle in, review final expectations for the day."
+              },
+              {
+                "title": "Practical Exam 1: Network Build & Configuration (9:00–10:00, 60 min)",
+                "html": "Students build an assigned topology in Packet Tracer (e.g., &quot;3 networks,\n1 router, 12 total PCs&quot;):\n<ul><li>Configure all devices with correct IP addresses</li>\n<li>Set up static routing between networks</li>\n<li>Enable DHCP on one router</li>\n<li>Verify: all devices can ping each other</li>\n</ul>\n<strong>Grading focus:</strong> correct topology, proper configuration, full connectivity"
+              },
+              {
+                "title": "Break (10:00–10:30)",
+                "html": ""
+              },
+              {
+                "title": "Practical Exam 2: Troubleshooting Challenge (10:30–11:30, 60 min)",
+                "html": "Students receive a broken network with 3 intentional problems. They must:\n<ul><li>Identify each of the 3 problems</li>\n<li>Explain what's wrong</li>\n<li>Fix each one and verify the fix</li>\n<li>Document their findings</li>\n</ul>\n<strong>Possible fault types:</strong>\n<ul><li>Wrong IP configuration</li>\n<li>Missing default gateway</li>\n<li>Incorrect routing</li>\n<li>DNS not configured</li>\n<li>Firewall blocking needed traffic</li>\n</ul>"
+              },
+              {
+                "title": "Break / Lunch (11:30–12:30)",
+                "html": ""
+              },
+              {
+                "title": "Written Exam (12:30–1:15, 45 min)",
+                "html": "<ul><li>20 multiple choice questions (theory concepts)</li>\n<li>5 short-answer questions (subnetting, routing decisions)</li>\n<li>1 essay question (troubleshooting scenario)</li>\n</ul>\n<strong>Topics covered:</strong> IP addressing &amp; subnetting, DHCP &amp; DNS, static/dynamic\nrouting, troubleshooting methodology, security basics"
+              },
+              {
+                "title": "Lunch + Results Scoring (1:15–2:15)",
+                "html": "Instructors score exams while students wait and celebrate finishing."
+              },
+              {
+                "title": "Results & Certificates (2:15–2:30)",
+                "html": "<ul><li>Return graded exams with individual feedback</li>\n<li>Award <strong>&quot;Network Operations Graduate&quot;</strong> certificates</li>\n<li>Group photo and celebration</li>\n<li>Discuss next steps:</li>\n</ul> - CompTIA Network+ (30–40 more hours)\n - Cisco CCNA (60–80 more hours)\n - Available industry networking technician roles"
+              },
+              {
+                "title": "Completion Pathways",
+                "html": "After Part 2, students can:\n<ul><li>Pursue CompTIA Network+ (industry-recognized)</li>\n<li>Pursue Cisco CCNA</li>\n<li>Seek networking technician roles directly</li>\n<li>Specialize further in security, cloud, or wireless</li>\n</ul>\n**Congratulations to all Network Operations graduates — and to everyone\nwho has completed the full 100-hour, 18-Saturday program.**"
+              }
+            ]
+          },
+          "quiz": {
+            "questions": [
+              {
+                "id": 1,
+                "question": "A `/30` subnet provides how many usable addresses?",
+                "options": [
+                  "14",
+                  "6",
+                  "2",
+                  "254"
+                ],
+                "correct_index": 2,
+                "explanation": "/30 → 2 usable (point-to-point) (resource §5)."
+              },
+              {
+                "id": 2,
+                "question": "Which scenario symptom points to a DHCP problem?",
+                "options": [
+                  "169.254.x.x (APIPA) address",
+                  "ping by name fails, IP works",
+                  "Remote pings fail, local works",
+                  "`* * *` in tracert"
+                ],
+                "correct_index": 0,
+                "explanation": "APIPA 169.254.x.x = no DHCP answer (resource §5, module-04)."
+              },
+              {
+                "id": 3,
+                "question": "To route between two VLANs you need:",
+                "options": [
+                  "A switch alone",
+                  "Layer 3 routing (router-on-a-stick or L3 switch)",
+                  "A bridge",
+                  "A repeater"
+                ],
+                "correct_index": 1,
+                "explanation": "Inter-VLAN routing happens at Layer 3 (resource §6)."
+              },
+              {
+                "id": 4,
+                "question": "Which protocol is used for routing on the internet between autonomous systems?",
+                "options": [
+                  "RIP",
+                  "OSPF",
+                  "BGP",
+                  "STP"
+                ],
+                "correct_index": 2,
+                "explanation": "BGP routes the internet between ASes (resource §4, module-05)."
+              },
+              {
+                "id": 5,
+                "question": "The default admin credentials on a new router should be:",
+                "options": [
+                  "Kept as-is",
+                  "Changed immediately",
+                  "Only changed if someone complains",
+                  "Shared with all users"
+                ],
+                "correct_index": 1,
+                "explanation": "Change defaults immediately (resource §6, module-08)."
+              },
+              {
+                "id": 6,
+                "question": "STP (Spanning Tree Protocol) exists to:",
+                "options": [
+                  "Speed up routing",
+                  "Prevent Layer-2 loops (broadcast storms)",
+                  "Encrypt traffic",
+                  "Assign IP addresses"
+                ],
+                "correct_index": 1,
+                "explanation": "Prevents Layer-2 loops / broadcast storms (resource §7)."
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+  // ============================================================
+  // Storage: private per-student. When signed in with Puter, the
+  // progress lives in the student's own Puter cloud KV (private to
+  // them and this app). Otherwise it falls back to this device only.
+  // ============================================================
+  var LIB_KEY = 'cn_companion_' + COURSE_COMPANION.courseId; // puter.kv key
+  var LS_KEY = 'cn_companion_' + COURSE_COMPANION.courseId;  // localStorage fallback
+  var progress = loadLocal();
+
+  function loadLocal() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(progress)); } catch (e) {}
+  }
+  function puterSignedIn() {
+    return !!(window.puter && puter.auth && puter.auth.isSignedIn());
+  }
+
+  // Two-way mirror: load cloud KV into memory, then keep both in sync.
+  function refreshStorage() {
+    if (!puterSignedIn()) return Promise.resolve();
+    return puter.kv.get(LIB_KEY).then(function (raw) {
+      if (raw) {
+        try {
+          var cloud = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          Object.keys(cloud).forEach(function (k) { progress[k] = cloud[k]; });
+        } catch (e) {}
+      }
+      saveLocal();
+    }).catch(function () { /* anonymous or blocked */ });
+  }
+  function persist() {
+    saveLocal();
+    if (!puterSignedIn()) return Promise.resolve(false);
+    return puter.kv.set(LIB_KEY, JSON.stringify(progress))
+      .then(function () { return true; })
+      .catch(function () { return false; });
+  }
+  function bestScore(moduleNum) {
+    var m = progress.modules && progress.modules[moduleNum];
+    return m ? (m.best || 0) : 0;
+  }
+
+  // ============================================================
+  // Element refs + state
+  // ============================================================
+  function $(id) { return document.getElementById(id); }
+  var modules = COURSE_COMPANION.modules || [];
+  var activeModule = modules.length ? modules[0].num : null;
+  var activeView = 'notes';
+  var quiz = null;    // { idx, correct, responses, answered, finished, source }
+  var chatHistory = [];
+  var chatBusy = false;
+
+  // ============================================================
+  // Header
+  // ============================================================
+  function renderHead() {
+    $('courseTitle').textContent = COURSE_COMPANION.title;
+    $('appEyebrow').textContent = 'Course Companion · ' + COURSE_COMPANION.port +
+      ' · v' + COURSE_COMPANION.version;
+    document.title = COURSE_COMPANION.title + ' — Course Companion';
+    if (COURSE_COMPANION.note) $('courseLede').textContent = COURSE_COMPANION.note;
+  }
+
+  function renderHeroStats() {
+    var done = 0, bestSum = 0;
+    modules.forEach(function (m) {
+      if (bestScore(m.num) > 0) { done++; bestSum += bestScore(m.num); }
+    });
+    var avg = done ? Math.round(bestSum / done) : 0;
+    $('heroStats').innerHTML =
+      '<span class="stat">Modules <b>' + modules.length + '</b></span>' +
+      '<span class="stat">Best <b>' + avg + '%</b> avg</span>' +
+      '<span class="stat">Private progress <b>' + (puterSignedIn() ? 'Puter cloud' : 'this device') + '</b></span>';
+    $('authPill').textContent = puterSignedIn() ? '● Signed in with Puter' : '○ Not signed in';
+    $('authPill').className = 'auth-pill' + (puterSignedIn() ? ' on' : '');
+    $('signInBtn').style.display = puterSignedIn() ? 'none' : 'inline-block';
+  }
+
+  $('signInBtn').addEventListener('click', function () {
+    if (!window.puter || !puter.auth) return;
+    puter.auth.signIn().then(function () {
+      return refreshStorage();
+    }).then(function () {
+      renderHeroStats();
+      renderRail();
+      var m = current();
+      renderModule(m);
+    }).catch(function (err) {
+      appendChat('error', 'Sign-in failed or was cancelled: ' + (err && err.message ? err.message : 'unknown'));
+    });
+  });
+
+  function current() {
+    for (var i = 0; i < modules.length; i++) if (modules[i].num === activeModule) return modules[i];
+    return modules[0];
+  }
+
+  // ============================================================
+  // Module rail
+  // ============================================================
+  function renderRail() {
+    var html = '';
+    modules.forEach(function (m) {
+      var best = bestScore(m.num);
+      html +=
+        '<button type="button" class="mod-chip' + (m.num === activeModule ? ' active' : '') + '" data-module="' + m.num + '" role="tab">' +
+          '<span class="mod-tag">MOD ' + pad(m.num) + '</span>' +
+          '<span class="mod-title">' + escapeHtml(m.title) + '</span>' +
+          '<span class="mod-best' + (best > 0 ? '' : ' none') + '">' + (best > 0 ? '★ ' + best + '%' : 'Not attempted') + '</span>' +
+        '</button>';
+    });
+    $('moduleRail').innerHTML = html;
+    $('moduleRail').querySelectorAll('.mod-chip').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var num = parseInt(b.getAttribute('data-module'), 10);
+        if (num !== activeModule) {
+          activeModule = num;
+          chatHistory = [];
+          renderRail();
+          chatRender();
+        }
+        renderModule(current());
+      });
+    });
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ============================================================
+  // View switching
+  // ============================================================
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      activeView = t.getAttribute('data-view');
+      document.querySelectorAll('.tab').forEach(function (x) {
+        x.classList.toggle('active', x === t);
+      });
+      ['notes', 'quiz', 'chat'].forEach(function (v) {
+        $('panel-' + v).classList.toggle('active', v === activeView);
+      });
+      var m = current();
+      if (activeView === 'notes') renderNotes(m);
+      if (activeView === 'quiz') renderQuiz(m);
+      if (activeView === 'chat') chatRender();
+    });
+  });
+
+  // ============================================================
+  // Study notes
+  // ============================================================
+  function renderModule(m) {
+    if (!m) return;
+    renderNotes(m);
+    if (activeView === 'quiz') renderQuiz(m);
+    if (activeView === 'chat') chatRender();
+  }
+
+  function renderNotes(m) {
+    $('notesTitle').textContent = 'MOD ' + pad(m.num) + ' — ' + m.title;
+    $('notesMeta').textContent = 'Study notes';
+    var sections = (m.notes && m.notes.sections) || [];
+    var html = '';
+    sections.forEach(function (s) {
+      html += s.title ? '<h2>' + escapeHtml(s.title) + '</h2>' : '';
+      html += s.html || '';
+    });
+    $('notesBody').innerHTML = html || '<p style="color:var(--text-dim)">No study notes for this module yet.</p>';
+  }
+
+  // ============================================================
+  // Quiz engine (mirrors the study-pack quiz behaviour)
+  // ============================================================
+  function questionsFor(m) {
+    return (m && m.quiz && m.quiz.questions) || [];
+  }
+
+  function renderQuiz(m) {
+    var qs = questionsFor(m);
+    $('quizModule').textContent = '— MOD ' + pad(m.num);
+    if (!qs.length) {
+      $('quizZone').innerHTML = '<div class="quiz-results"><h3>No questions yet</h3>' +
+        '<p style="color:var(--text-muted)">This module has no quiz questions yet.</p></div>';
+      return;
+    }
+    quiz = { idx: 0, correct: 0, responses: [], answered: false, finished: false, source: m.num };
+    rebuildQuizDom();
+    drawQuestion();
+  }
+
+  function rebuildQuizDom() {
+    $('quizZone').innerHTML =
+      '<div class="quiz-strip" id="quizScreen">' +
+        '<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>' +
+        '<div class="q-num" id="qNum"></div>' +
+        '<p class="q-text" id="qText"></p>' +
+        '<div class="options" id="qOptions"></div>' +
+        '<div class="feedback" id="qFeedback"></div>' +
+        '<div class="quiz-controls"><button class="btn btn-primary" id="nextBtn" style="display:none;" type="button">Next Question →</button></div>' +
+      '</div>';
+    $('nextBtn').addEventListener('click', quizNext);
+  }
+
+  function drawQuestion() {
+    var m = current();
+    var qs = questionsFor(m);
+    var gotAnswered = quiz.answered;
+    var q = qs[quiz.idx];
+    $('qNum').textContent = 'Question ' + (quiz.idx + 1) + ' of ' + qs.length;
+    $('qText').textContent = q.question;
+    $('progressFill').style.width = (quiz.idx / qs.length * 100) + '%';
+
+    var opts = '';
+    q.options.forEach(function (o, i) {
+      var letter = String.fromCharCode(65 + i);
+      var cls = 'option';
+      var extra = '';
+      if (gotAnswered) {
+        if (i === q.correct_index) { cls += ' correct'; extra = ' ✓'; }
+        else if (quiz.selectedIndex === i) { cls += ' wrong'; extra = ' ✗'; }
+      }
+      opts += '<button type="button" class="' + cls + '" data-i="' + i + '"' + (gotAnswered ? ' disabled' : '') + '>' +
+        '<span class="letter">' + letter + '</span><span>' + escapeHtml(o) + extra + '</span></button>';
+    });
+    $('qOptions').innerHTML = opts;
+    $('qOptions').querySelectorAll('.option').forEach(function (b) {
+      b.addEventListener('click', function () { onChoose(parseInt(b.getAttribute('data-i'), 10)); });
+    });
+
+    if (gotAnswered) {
+      showFeedback(quiz.selectedIndex === q.correct_index, q);
+      $('nextBtn').style.display = 'inline-block';
+      $('nextBtn').textContent = (quiz.idx === qs.length - 1) ? 'Finish Quiz' : 'Next Question →';
+    } else {
+      $('qFeedback').style.display = 'none';
+      $('nextBtn').style.display = 'none';
+    }
+  }
+
+  function onChoose(i) {
+    if (!quiz || quiz.answered) return;
+    var m = current();
+    var qs = questionsFor(m);
+    var q = qs[quiz.idx];
+    quiz.answered = true;
+    quiz.selectedIndex = i;
+    var isCorrect = i === q.correct_index;
+    if (isCorrect) quiz.correct++;
+
+    $('qOptions').querySelectorAll('.option').forEach(function (b) {
+      var k = parseInt(b.getAttribute('data-i'), 10);
+      b.disabled = true;
+      if (k === q.correct_index) b.classList.add('correct');
+      else if (k === i) b.classList.add('wrong');
+    });
+    quiz.responses.push({ questionId: (q.id || quiz.idx + 1), selectedIndex: i, isCorrect: isCorrect });
+    saveProgress(m.num);
+    showFeedback(isCorrect, q);
+    $('nextBtn').style.display = 'inline-block';
+    $('nextBtn').textContent = (quiz.idx === qs.length - 1) ? 'Finish Quiz' : 'Next Question →';
+  }
+
+  function showFeedback(isCorrect, q) {
+    var f = $('qFeedback');
+    f.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    f.textContent = isCorrect ? 'Correct ✓' : (q.explanation || 'Incorrect');
+    f.style.display = 'block';
+  }
+
+  function quizNext() {
+    var m = current();
+    var qs = questionsFor(m);
+    quiz.idx++;
+    if (quiz.idx >= qs.length) { finishQuiz(); return; }
+    quiz.answered = false;
+    quiz.selectedIndex = null;
+    drawQuestion();
+  }
+
+  function finishQuiz() {
+    if (!quiz || quiz.finished) return;
+    quiz.finished = true;
+    var m = current();
+    var qs = questionsFor(m);
+    var score = Math.round(quiz.correct / qs.length * 100);
+    var prev = bestScore(m.num);
+    if (score > prev) {
+      progress.modules = progress.modules || {};
+      progress.modules[m.num] = progress.modules[m.num] || {};
+      progress.modules[m.num].best = score;
+      persist();
+    }
+    saveLocal();
+    renderHeroStats();
+    renderRail();
+    quiz.syncMsg = '';
+
+    var saved = bestScore(m.num);
+    $('quizZone').innerHTML =
+      '<div class="quiz-results">' +
+        '<h3>Quiz Complete</h3>' +
+        '<div class="big-score">' + score + '%</div>' +
+        '<p style="color:var(--text-muted)">' + quiz.correct + ' correct out of ' + qs.length + '.</p>' +
+        (saved > 0 ? '<span class="best-badge">Best: ' + saved + '%</span>' : '') +
+        '<div class="sync-note" id="syncNote"></div>' +
+        '<div class="quiz-controls">' +
+          '<button class="btn btn-primary" id="retryBtn" type="button">Try Again</button>' +
+          '<button class="btn btn-ghost" id="notesBtn" type="button">Read Notes</button>' +
+        '</div>' +
+      '</div>';
+    var note = $('syncNote');
+    note.textContent = puterSignedIn()
+      ? '✓ Saved to your private Puter cloud.'
+      : 'Saved on this device. Sign in with Puter to back it up to your private cloud.';
+    $('retryBtn').addEventListener('click', function () { renderQuiz(current()); });
+    $('notesBtn').addEventListener('click', function () {
+      activeView = 'notes';
+      document.querySelectorAll('.tab').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-view') === 'notes');
+      });
+      ['notes', 'quiz', 'chat'].forEach(function (v) {
+        $('panel-' + v).classList.toggle('active', v === 'notes');
+      });
+      renderNotes(current());
+    });
+  }
+
+  // Keep persistent progress fresh as answers land (best = max seen).
+  function saveProgress(num) {
+    var seen = quiz.responses.filter(function (r) { return r.isCorrect; }).length;
+    var pct = current() && current().quiz && current().quiz.questions.length
+      ? Math.round(seen / current().quiz.questions.length * 100) : 0;
+    progress.modules = progress.modules || {};
+    progress.modules[num] = progress.modules[num] || {};
+    if (pct > (progress.modules[num].best || 0)) progress.modules[num].best = pct;
+    saveLocal();
+  }
+
+  // ============================================================
+  // AI Mentor (Puter user-pays keyless chat, course-aware)
+  // ============================================================
+  var MODEL = 'gpt-5.4-nano';
+
+  function mentorContext() {
+    var m = current();
+    var lines = [
+      'You are the AI Mentor for Cable&Net Courses, a friendly, patient study buddy for students of data cabling and networking.',
+      'Explain concepts clearly in simple language with analogies. Guide students toward understanding — you may ask a guiding question back — but never refuse to help.',
+      'Stay strictly on-topic: data cabling, networking, the internet, and related course material. If asked something off-topic or inappropriate, politely decline and steer back to the course.',
+      'You are an AI assistant, NOT a human instructor, and you never grade or decide pass/fail.',
+      '',
+      'COURSE CONTEXT: ' + COURSE_COMPANION.title + ' (' + COURSE_COMPANION.port + ').',
+      'Modules:',
+      modules.map(function (x) {
+        return 'MOD ' + pad(x.num) + ' — ' + x.title;
+      }).join('\n')
+    ];
+    if (m) {
+      lines.push('');
+      lines.push('The student is currently studying: MOD ' + pad(m.num) + ' — ' + m.title +
+        (m.notes && m.notes.sections && m.notes.sections[0] ? '. Topics: ' + m.notes.sections.map(function (s) { return s.title; }).join(', ') : ''));
+    }
+    return lines.join('\n');
+  }
+
+  function chatEls() {
+    return { auth: $('chatAuth'), messages: $('chatMessages'), input: $('chatInput'), send: $('chatSend') };
+  }
+
+  function chatRender() {
+    var e = chatEls();
+    e.auth.innerHTML = '';
+    if (!puterSignedIn()) {
+      e.auth.textContent = 'Chat uses your own free Puter account (User-Pays — no API key, no card). ';
+      var btn = document.createElement('button');
+      btn.className = 'btn btn-ghost';
+      btn.type = 'button';
+      btn.textContent = 'Sign in with Puter';
+      btn.addEventListener('click', function () {
+        puter.auth.signIn().then(function () {
+          renderHeroStats();
+          chatRender();
+        }).catch(function () { appendChat('error', 'Sign-in failed or was cancelled.'); });
+      });
+      e.auth.appendChild(btn);
+    } else {
+      e.auth.textContent = '● Signed in — answers stream from your Puter account. The mentor keeps topics general; it never grades you.';
+    }
+    if (!chatHistory.length && e.messages.children.length === 0) {
+      e.messages.innerHTML = '<div class="msg assistant">Hi — I\'m the AI Mentor for <strong>' +
+        escapeHtml(COURSE_COMPANION.title) + '</strong>. Ask me anything about the module you\'re on. I\'m here to help you understand, not to judge or grade.</div>';
+    }
+  }
+
+  function appendChat(role, html) {
+    var e = chatEls();
+    var div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.innerHTML = html;
+    e.messages.appendChild(div);
+    e.messages.scrollTop = e.messages.scrollHeight;
+    return div;
+  }
+
+  $('chatSend').addEventListener('click', sendChat);
+  $('chatInput').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') sendChat();
+  });
+
+  function sendChat() {
+    var e = chatEls();
+    var text = e.input.value.trim();
+    if (!text || chatBusy) return;
+    if (!puterSignedIn()) {
+      appendChat('error', 'Please sign in with Puter (free) to chat — the mentor runs on your own account.');
+      chatRender();
+      return;
+    }
+    if (navigator.onLine === false) {
+      appendChat('error', 'No connection — the AI Mentor needs the internet to answer.');
+      return;
+    }
+
+    appendChat('user', escapeHtml(text));
+    e.input.value = '';
+    chatHistory.push({ role: 'user', content: text });
+    chatBusy = true;
+    e.send.disabled = true;
+
+    var typing = appendChat('assistant', '…');
+    typing.classList.add('typing');
+
+    var messages = [{ role: 'system', content: mentorContext() }].concat(chatHistory.slice(-8));
+
+    callChat(messages).then(function (reply) {
+      if (reply) {
+        typing.classList.remove('typing');
+        typing.innerHTML = renderMarkdown(reply);
+        chatHistory.push({ role: 'assistant', content: reply });
+      } else {
+        typing.remove();
+        appendChat('error', 'No reply received — try again.');
+        chatHistory.pop();
+      }
+    }).catch(function (err) {
+      var msg = (err && err.message) || String(err);
+      var busy = /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+      typing.remove();
+      appendChat('error', busy
+        ? 'The AI Mentor is busy right now — give it a few seconds and try again.'
+        : 'Could not reach the AI Mentor: ' + msg);
+      chatHistory.pop();
+    }).finally(function () {
+      chatBusy = false;
+      e.send.disabled = false;
+      e.input.focus();
+    });
+  }
+
+  async function callChat(messages) {
+    var lastErr = null;
+    var attempts = 4;
+    for (var i = 0; i < attempts; i++) {
+      try {
+        var resp = await chatStream(messages);
+        return resp;
+      } catch (err) {
+        lastErr = err;
+        if (!isBusy(err) || i === attempts - 1) break;
+        await new Promise(function (r) { setTimeout(r, 1000 * Math.pow(2, i)); });
+      }
+    }
+    throw lastErr;
+  }
+
+  function isBusy(err) {
+    var msg = (err && err.message) || String(err);
+    return /503|queue is full|rate.?limit|too many|busy|temporarily unavailable/i.test(msg);
+  }
+
+  async function chatStream(messages) {
+    var e = chatEls();
+    var typing = e.messages.lastChild;
+    var out = '';
+    var resp = await puter.ai.chat(messages, { model: MODEL, stream: true });
+    for await (var part of resp) {
+      if (part && part.text) {
+        out += part.text;
+        if (typing && typing.classList && typing.classList.contains('typing')) {
+          typing.classList.remove('typing');
+        }
+        typing.innerHTML = renderMarkdown(out);
+        e.messages.scrollTop = e.messages.scrollHeight;
+      }
+    }
+    return out;
+  }
+
+  // ---- Lightweight markdown -> HTML (escaped first) ----
+  function renderMarkdown(text) {
+    var lines = escapeHtml(text).split('\n');
+    var out = [];
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      var heading = line.match(/^(#{1,4})\s+(.*)$/);
+      if (heading) {
+        var level = Math.min(heading[1].length + 1, 5);
+        out.push('<h' + level + '>' + inline(heading[2]) + '</h' + level + '>');
+        i++; continue;
+      }
+      if (/^\s*[-*]\s+/.test(line)) {
+        var items = [];
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+          items.push('<li>' + inline(lines[i].replace(/^\s*[-*]\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ul>' + items.join('') + '</ul>'); continue;
+      }
+      if (/^\s*\d+\.\s+/.test(line)) {
+        var items2 = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+          items2.push('<li>' + inline(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>');
+          i++;
+        }
+        out.push('<ol>' + items2.join('') + '</ol>'); continue;
+      }
+      var para = [];
+      while (i < lines.length && lines[i].trim() &&
+        !/^(#{1,4})\s+/.test(lines[i]) &&
+        !/^\s*[-*]\s+/.test(lines[i]) &&
+        !/^\s*\d+\.\s+/.test(lines[i])) {
+        para.push(inline(lines[i]));
+        i++;
+      }
+      out.push('<p>' + para.join('<br>') + '</p>');
+    }
+    return out.join('');
+  }
+
+  function inline(s) {
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  }
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  function boot() {
+    renderHead();
+    renderHeroStats();
+
+    if (!modules.length) {
+      $('moduleRail').innerHTML = '<p style="color:var(--text-dim)" class="mod-chip">No modules embedded yet.</p>';
+      $('notesBody').innerHTML = '<p style="color:var(--text-dim)">This companion app has no course data embedded yet. Run <code>tools/build-puter-course-app.js</code> to generate it.</p>';
+      return;
+    }
+
+    activeModule = modules[0].num;
+    renderRail();
+    renderModule(current());
+    chatRender();
+
+    refreshStorage().then(function () {
+      renderHeroStats();
+      renderRail();
+    });
+
+    window.addEventListener('online', renderHeroStats);
+    window.addEventListener('offline', renderHeroStats);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
