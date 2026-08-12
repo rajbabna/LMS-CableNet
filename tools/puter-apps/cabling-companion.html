@@ -520,7 +520,22 @@
   </section>
 </div>
 
-<script src="https://js.puter.com/v2/"></script>
+<script>
+  (function () {
+    // Puter.js only runs over http(s); opened from disk (file://) it blocks the
+    // whole page with its "Unsupported Protocol" banner. Skip the SDK there and
+    // let the app run in local-preview mode (localStorage only).
+    var proto = window.location.protocol;
+    var LOCAL_MODE = (proto !== 'http:' && proto !== 'https:');
+    window.CN_COMPANION_LOCAL_MODE = LOCAL_MODE;
+    if (!LOCAL_MODE) {
+      var s = document.createElement('script');
+      s.src = 'https://js.puter.com/v2/';
+      s.async = false;
+      document.head.appendChild(s);
+    }
+  })();
+</script>
 <script>
 (function () {
   'use strict';
@@ -1604,6 +1619,7 @@
   // ============================================================
   var LIB_KEY = 'cn_companion_' + COURSE_COMPANION.courseId; // puter.kv key
   var LS_KEY = 'cn_companion_' + COURSE_COMPANION.courseId;  // localStorage fallback
+  var LOCAL_MODE = !!window.CN_COMPANION_LOCAL_MODE;         // file:// (Puter.js skipped)
   var progress = loadLocal();
 
   function loadLocal() {
@@ -1674,6 +1690,12 @@
       '<span class="stat">Modules <b>' + modules.length + '</b></span>' +
       '<span class="stat">Best <b>' + avg + '%</b> avg</span>' +
       '<span class="stat">Private progress <b>' + (puterSignedIn() ? 'Puter cloud' : 'this device') + '</b></span>';
+    if (LOCAL_MODE) {
+      $('authPill').textContent = '● Local preview — no Puter sync';
+      $('authPill').className = 'auth-pill';
+      $('signInBtn').style.display = 'none';
+      return;
+    }
     $('authPill').textContent = puterSignedIn() ? '● Signed in with Puter' : '○ Not signed in';
     $('authPill').className = 'auth-pill' + (puterSignedIn() ? ' on' : '');
     $('signInBtn').style.display = puterSignedIn() ? 'none' : 'inline-block';
@@ -1977,7 +1999,9 @@
   function chatRender() {
     var e = chatEls();
     e.auth.innerHTML = '';
-    if (!puterSignedIn()) {
+    if (LOCAL_MODE) {
+      e.auth.textContent = 'This is a local preview copy opened from disk — the AI Mentor needs the hosted version to run. Progress is kept on this device only.';
+    } else if (!puterSignedIn()) {
       e.auth.textContent = 'Chat uses your own free Puter account (User-Pays — no API key, no card). ';
       var btn = document.createElement('button');
       btn.className = 'btn btn-ghost';
@@ -2018,6 +2042,10 @@
     var e = chatEls();
     var text = e.input.value.trim();
     if (!text || chatBusy) return;
+    if (LOCAL_MODE) {
+      appendChat('error', 'This local preview can\'t reach the AI Mentor — the hosted version (open the Course Companion link from your course page) runs it on your own Puter account.');
+      return;
+    }
     if (!puterSignedIn()) {
       appendChat('error', 'Please sign in with Puter (free) to chat — the mentor runs on your own account.');
       chatRender();
