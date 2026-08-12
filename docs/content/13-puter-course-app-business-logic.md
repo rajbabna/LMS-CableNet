@@ -8,17 +8,23 @@ The generic design below was realized as a **Course Companion** app:
   (`docs/resources/quizzes/**`) and lesson bundles (`docs/cablenet-courses-bundle/*.md`)
   the live course/study packs use, and emits one single-file app per course:
   `tools/puter-apps/<course>-companion.html` (cabling + networking).
-- **Template:** `tools/puter-course-companion-template.html` — dark AwsomeDesign
-  glassmorphism shell with a module rail and three tabs (Study notes / Quiz / AI Mentor).
-- **AI Mentor:** built-in `puter.ai.chat()` chat (user-pays model — ga student's own
+- **Template:** `tools/puter-course-companion-template.html` — light cable-pair site
+  theme shell (matches the main LMS; AwsomeDesign dark glassmorphism was replaced
+  2026-08-12) with a module rail and three tabs (Study notes / Quiz / AI Mentor).
+- **AI Mentor:** built-in `puter.ai.chat()` chat (user-pays model — each student's own
   free Puter account covers usage, no API key), grounded in the course curriculum and the
   active module.
 - **Storage:** per-student private progress via `puter.kv` when signed in with Puter;
   localStorage fallback for anonymous use. The app never touches Supabase (Option A below).
+- **Local-preview mode:** opened from disk (`file://`) the app skips the Puter.js SDK
+  entirely (it blocks the page with an "Unsupported Protocol" banner) and boots as a
+  local-only preview — Study + Quiz tabs work with device-local progress, the AI Mentor
+  tab explains it needs the hosted version. Detection: `window.CN_COMPANION_LOCAL_MODE`.
 - **Entry point:** "Course Companion ↗" link in the course-header footer on `course.html`.
-- **Deploy (owner action):** upload each generated `.html` to Puter under the trainer's
-  account → Puter issues a shareable URL → post the link on the course page.
-- Regenerate after editing quiz banks / lesson markdown: `node tools/build-puter-course-app.js`.
+- **Deploy:** uploaded to Puter 2026-08-12 and live — URLs wired as
+  `window.PUTER_COMPANION_URLS` in `js/config.js` (see `docs/CURRENT-STATUS.md`).
+  Regenerate + re-upload after editing quiz banks / lesson markdown:
+  `node tools/build-puter-course-app.js`.
 
 ## Business Logic & System Design
 

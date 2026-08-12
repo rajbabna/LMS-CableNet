@@ -1,9 +1,10 @@
 # What Remains — LMS Cable&Net
 
 *Source of truth: `docs/SESSION-HANDOFF.md` + `docs/CURRENT-STATUS.md`. Deployed at
-commit `d9e1a7e`. The Step-17 testing checklist is fully closed
+commit `1363ff1`. The Step-17 testing checklist is fully closed
 (pgTAP 93/93, Playwright suite green). The Course Companion apps are **deployed to
-Puter and wired live** (item 1 below is closed — `js/config.js` has the share URLs).*
+Puter and wired live** (item 1 below is closed — `js/config.js` has the share URLs),
+and opened-from-disk copies run in local-preview mode (no `file://` banner, `1363ff1`).*
 
 ---
 

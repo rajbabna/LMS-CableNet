@@ -107,17 +107,21 @@ with the current `sql/` folder and the latest commits.*
 - Regenerate after editing any quiz bank / lesson markdown: `node tools/build-study-packs.js`.
 
 ### Puter course-app (roadmap #9, second half — built)
-- **`tools/puter-course-companion-template.html`** — single-file, dark-glassmorphism
-  (AwsomeDesign) "Course Companion" app shell: `COURSE_COMPANION` data contract,
-  module rail + Study / Quiz / AI Mentor tabs, immediate-feedback quiz with best-score
-  per module, and `puter.ai.chat` (user-pays model — each student's free Puter account
-  covers usage; no API key).
+- **`tools/puter-course-companion-template.html`** — single-file, light cable-pair
+  site-theme (mirrors the main LMS) "Course Companion" app shell: `COURSE_COMPANION`
+  data contract, module rail + Study / Quiz / AI Mentor tabs, immediate-feedback quiz
+  with best-score per module, and `puter.ai.chat` (user-pays model — each student's
+  free Puter account covers usage; no API key).
 - **`tools/build-puter-course-app.js`** — regenerates `tools/puter-apps/<course>-companion.html`
   for cabling + networking from the **same** quiz banks and lesson bundles as the
   online course/study packs.
 - **Privacy** — signed-in progress lives in the student's own Puter cloud KV
   (`puter.kv`, private to them + this app); anonymous use falls back to localStorage.
   The app never touches Supabase (satellite practice tool, no sync decision).
+- **Local-preview mode** — opened from disk (`file://`) the app skips the Puter.js SDK
+  (which otherwise blocks the page with an "Unsupported Protocol" banner) and boots as a
+  local-only preview: Study + Quiz work with device-local progress, AI Mentor tab
+  explains it needs the hosted version (`window.CN_COMPANION_LOCAL_MODE`).
 - **Entry point** — course-header footer on `course.html` shows a "Course Companion ↗"
   link beside the primary CTA (via `js/load-modules.js`).
 - **Deployed (2026-08-12)** — each app uploaded to Puter and live:
