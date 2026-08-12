@@ -12,7 +12,7 @@ and opened-from-disk copies run in local-preview mode (no `file://` banner, `136
 
 | # | Item | Type | Notes |
 |---|------|------|-------|
-| 1 | **Beta onboarding** | Owner action | Separate-account co-teaching checklist already passed (2026-08-02). Onboard beta students next. |
+| 1 | **Beta onboarding** | Owner: **YOU** | Separate-account co-teaching checklist already passed (2026-08-02). **PREPPED 2026-08-12:** live roster verified (5 students), `batch-2026-002` (2026 Intake 2 — Beta) seeded in `batches.json`, invite messages ready (copy-paste) in `docs/content/beta-onboarding-roster.md`. ⏳ **YOUR TASK:** check/extend each student's access duration in the admin dashboard → create any new students → send the invites. |
 | 2 | **Instructors cannot read feedback** | Deliberate | Keeps sql/29 Course-scoped RLS clean — intentional, not a bug. |
 
 ## Discarded for this phase (not planned)
@@ -24,6 +24,11 @@ and opened-from-disk copies run in local-preview mode (no `file://` banner, `136
 
 ## Housekeeping to remember
 
+- **Beta onboarding prepped 2026-08-12** — roster + invites in
+  `docs/content/beta-onboarding-roster.md` (local-only); `batch-2026-002`
+  (2026 Intake 2 — Beta) seeded in `docs/resources/batches/batches.json`;
+  KrishB + RahnV moved from `test-users` to the beta cohort. Owner: extend access
+  durations → create any new students → send invites.
 - **Never run pgTAP / bootstrap against production** — the TEST project only
   (`tests/.env` → `LMS_PGTAP_DB_URL`).
 - `sql/` is gitignored — migrations stay local-only, never shipped.

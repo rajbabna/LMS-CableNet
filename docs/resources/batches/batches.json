@@ -7,10 +7,20 @@
       "startDate": null,
       "isTest": true,
       "students": [
-        "rajbabna@gmail.com",
         "rajbabna.backup@gmail.com",
-        "rajbabna.ml@gmail.com",
-        "rahnluv@gmail.com"
+        "rajbabna.ml@gmail.com"
+      ]
+    },
+    {
+      "id": "batch-2026-002",
+      "label": "2026 Intake 2 — Beta",
+      "startDate": "2026-08-12",
+      "students": [
+        "matouminou@gmail.com",
+        "faaiza.test@test.com",
+        "rajbabna@gmail.com",
+        "rahnluv@gmail.com",
+        "rbabna@mitd.mu"
       ]
     }
   ]
