@@ -22,6 +22,7 @@ This is the **allowed list**. A QA account belongs here by explicit entry only.
 |---|---|
 | `rajbabna.backup@gmail.com` | Auxiliary QA/login test account |
 | `rajbabna.ml@gmail.com` | Secondary QA account (referenced in admin-creation scripts) |
+| `racheltest@test.com` | Rachelle — QA student account (added 2026-08-09) |
 
 > **Moved out 2026-08-12:** `rajbabna@gmail.com` (KrishB) and `rahnluv@gmail.com`
 > (RahnV) left this QA batch to join **`batch-2026-002`** (2026 Intake 2 — Beta) as
