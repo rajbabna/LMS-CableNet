@@ -34,6 +34,6 @@ window.PUTER_QUIZ_URL = "tools/basic-network-quiz.html";
 // Puter. Owner action: upload each generated app, then paste the share URLs here.
 // Leave empty to keep using the same-repo local copy (works for preview/testing).
 window.PUTER_COMPANION_URLS = {
-  cabling: "",
-  networking: ""
+  cabling: "https://cabling-companion.puter.site/cabling-companion.html",
+  networking: "https://networking-companion.puter.site/networking-companion.html"
 };
