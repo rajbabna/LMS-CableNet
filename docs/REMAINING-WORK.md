@@ -1,11 +1,9 @@
 # What Remains — LMS Cable&Net
 
 *Source of truth: `docs/SESSION-HANDOFF.md` + `docs/CURRENT-STATUS.md`. Deployed at
-commit `9336b65`; the Step-17 testing checklist is fully closed
-(pgTAP 93/93, Playwright suite green). Uncommitted in the working tree: the Course
-Companion apps (`tools/puter-course-companion-template.html`,
-`tools/build-puter-course-app.js`, `tools/puter-apps/*-companion.html`) + docs — deploy
-them next (item 1 below is local-only).*
+commit `d9e1a7e`. The Step-17 testing checklist is fully closed
+(pgTAP 93/93, Playwright suite green). The Course Companion apps are **deployed to
+Puter and wired live** (item 1 below is closed — `js/config.js` has the share URLs).*
 
 ---
 
@@ -13,9 +11,8 @@ them next (item 1 below is local-only).*
 
 | # | Item | Type | Notes |
 |---|------|------|-------|
-| 1 | **Puter course-app** (roadmap #9 "other half") | Owner: **YOU** | ✅ Built — Course Companion apps (`tools/puter-apps/*-companion.html`) for both courses; generator `tools/build-puter-course-app.js`. Wiring done: `js/config.js` now has `window.PUTER_COMPANION_URLS = { cabling, networking }` (empty slot), and `js/load-modules.js:518` uses it with fallback to the local copy. ⏳ **YOUR TASK:** upload each app to Puter → paste the share URLs into `js/config.js` → push. |
-| 2 | **Beta onboarding** | Owner action | Separate-account co-teaching checklist already passed (2026-08-02). Onboard beta students next. |
-| 3 | **Instructors cannot read feedback** | Deliberate | Keeps sql/29 Course-scoped RLS clean — intentional, not a bug. |
+| 1 | **Beta onboarding** | Owner action | Separate-account co-teaching checklist already passed (2026-08-02). Onboard beta students next. |
+| 2 | **Instructors cannot read feedback** | Deliberate | Keeps sql/29 Course-scoped RLS clean — intentional, not a bug. |
 
 ## Discarded for this phase (not planned)
 

@@ -12,7 +12,7 @@ with the current `sql/` folder and the latest commits.*
 |------|-------|
 | Live site | https://rajbabna.github.io/LMS-CableNet (GitHub Pages, auto-deploy on push to `main`) |
 | Backend | Supabase project `mantjzpfhikezztonrga` — email/password auth, email confirmation OFF |
-| Git source of truth | local `LMS - V2.0` (branch `main`; uncommitted = Course Companion apps + docs, see §2) |
+| Git source of truth | local `LMS - V2.0` (branch `main`; clean — Course Companion deployed, see §2) |
 | Mirrors to keep in sync | `Sites\WEB`, `Sites\GitHub Web\cable-net-courses` |
 | Client key posture | publishable key only client-side, no `service_role` key in repo/history |
 | SQL migrations | `sql/01` → `sql/63` (folder is **gitignored** — local only, never ships to GitHub) |
@@ -120,8 +120,12 @@ with the current `sql/` folder and the latest commits.*
   The app never touches Supabase (satellite practice tool, no sync decision).
 - **Entry point** — course-header footer on `course.html` shows a "Course Companion ↗"
   link beside the primary CTA (via `js/load-modules.js`).
-- **Deploy** — upload each generated single-file `.html` to Puter under the trainer's
-  account, then share the generated URL on the course page.
+- **Deployed (2026-08-12)** — each app uploaded to Puter and live:
+  `https://cabling-companion.puter.site/cabling-companion.html` and
+  `https://networking-companion.puter.site/networking-companion.html`; wired as
+  `window.PUTER_COMPANION_URLS` in `js/config.js` with local-copy fallback. Apps
+  were restyled to the light cable-pair site theme (AwsomeDesign tokens replaced
+  the dark glassmorphism). Cache bumped, deployed on `main` + `gh-pages`.
 - Regenerate after editing quiz banks / lesson markdown: `node tools/build-puter-course-app.js`.
   See `docs/content/13-puter-course-app-business-logic.md`.
 
@@ -197,8 +201,7 @@ Legacy leftovers still defined but unused: `approve_instructor`, `get_pending_in
 
 - **Discarded** (this phase): student self-enrollment, payments, embedded simulators /
   branching scenarios, self-serve expiry/renewal UX.
-- **Puter course-app** (#9 other half) IS built — see §2 "Puter course-app".
-  Not yet deployed to Puter (owner action: upload + share URL).
+- **Puter course-app** (#9 other half) IS built AND deployed — see §2 "Puter course-app".
 - **Certificates** auto-issue at last-module completion (`sql/63`), so claim-vs-completion timing is no longer a gap.
 - **Instructors cannot read feedback** — deliberate (keeps sql/29 scoping clean).
 - **Topics summaries only** — AI Mentor raw messages are never stored or shown, by design.
