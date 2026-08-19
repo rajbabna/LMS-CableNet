@@ -1112,8 +1112,14 @@
           <button class="btn btn-primary btn-action" id="enrollBtn" onclick="openEnrollModal()">
             ➕ Add Student / Account
           </button>
+          <button class="btn btn-ghost btn-action" id="bulkEnrollBtn" onclick="openBulkEnrollModal()" style="margin-top:0.4rem; margin-bottom:0.5rem;">
+            ⬆️ Bulk Enroll — Upload .xlsx / .csv
+          </button>
           <small style="display:block; margin-top:0.4rem; color: var(--ink-soft);">
             Enroll an existing student, or create a new account (no confirmation email needed).
+          </small>
+          <small style="display:block; margin-top:0.2rem; color: var(--ink-soft);">
+            Or upload a spreadsheet to enroll many students at once.
           </small>
         </div>
 
@@ -1499,6 +1505,52 @@
     </div>
   </div>
 
+  <!-- Modal: Bulk Enroll from Spreadsheet -->
+  <div id="bulkEnrollModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bulkEnrollModalTitle">
+    <div class="modal" style="max-width: 760px;">
+      <h3 id="bulkEnrollModalTitle">⬆️ Bulk Enroll from Spreadsheet</h3>
+
+      <div class="field">
+        <label for="bulkFileInput">Spreadsheet (.xlsx, .xls or .csv)</label>
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <input type="file" id="bulkFileInput" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv">
+          <button type="button" class="btn btn-sm" onclick="downloadBulkTemplate()">⬇ Download template</button>
+        </div>
+        <small>First row must be a header: <strong>Email</strong>, Full Name, Course, Access Duration, Test student.</small>
+      </div>
+
+      <div id="bulkStep2" style="display:none;">
+        <div class="field">
+          <label for="bulkTempPassword">Temporary password for new accounts</label>
+          <input type="text" id="bulkTempPassword" value="CableNet2026!" autocomplete="off">
+          <small>Only used when a row's email has no account yet. Existing accounts ignore this field.</small>
+        </div>
+
+        <div style="max-height: 320px; overflow-y: auto; border:1px solid var(--line); border-radius:8px; margin-bottom:0.8rem;">
+          <table class="data-table" style="margin:0; border:none;">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Access</th>
+                <th>Group</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="bulkPreviewBody"></tbody>
+          </table>
+        </div>
+        <div id="bulkSummary" style="font-size:0.85rem; color: var(--ink-soft); margin-bottom:0.6rem;"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeBulkEnrollModal()">Cancel</button>
+        <button class="btn btn-primary" id="bulkEnrollSubmitBtn" onclick="submitBulkEnroll()" disabled>Enroll</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Update Status -->
   <div id="statusModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
     <div class="modal">
@@ -1773,6 +1825,9 @@
 
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- SheetJS: parses .xlsx/.xls/.csv for bulk enroll -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Load config and client BEFORE auth check -->
 <script src="js/config.js?v=46B5A7FD"></script>
@@ -2775,6 +2830,353 @@
         showAlert(`Unexpected error: ${err.message}`, 'error');
       }
     }
+
+    // ============================================
+    // BULK ENROLL FROM SPREADSHEET
+    // Reuses the same create-account (GoTrue signUp) +
+    // add_student RPC path as submitEnroll(), row by row.
+    // ============================================
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let bulkRows = [];            // validated rows ready to enroll
+    let bulkCourseCache = null;   // [{course_id, title}]
+
+    function normalizeCell(v) {
+      if (v === null || v === undefined) return '';
+      return String(v).trim();
+    }
+
+    function parseBool(v) {
+      return ['yes', 'true', '1', 'y', 'test', 'x', 'checked', '✓', '✔'].includes(normalizeCell(v).toLowerCase());
+    }
+
+    async function ensureBulkCourseCache() {
+      if (bulkCourseCache) return bulkCourseCache;
+      const { data, error } = await supabaseClient.rpc('get_my_courses');
+      if (error) throw error;
+      bulkCourseCache = data || [];
+      return bulkCourseCache;
+    }
+
+    function matchCourse(raw, courses) {
+      const s = normalizeCell(raw).toLowerCase();
+      if (!s) return null;                 // no course requested -> account only
+      const byId = courses.find(c => String(c.course_id).toLowerCase() === s);
+      if (byId) return byId.course_id;
+      const byTitle = courses.find(c => String(c.title).toLowerCase() === s);
+      if (byTitle) return byTitle.course_id;
+      return false;                        // not found -> validation error
+    }
+
+    function matchDuration(raw) {
+      const s = normalizeCell(raw).toLowerCase();
+      if (!s || s === 'lifetime') return { days: null };
+      const num = parseInt(s, 10);
+      if (!isNaN(num) && num > 0) return { days: num };
+      return null;                         // invalid -> validation error
+    }
+
+    function bulkHeaderIndex(headers) {
+      const idx = {};
+      (headers || []).forEach((h, i) => {
+        idx[String(h).trim().toLowerCase().replace(/\s+/g, ' ')] = i;
+      });
+      const col = (...names) => {
+        for (const n of names) if (idx[n] !== undefined) return idx[n];
+        return -1;
+      };
+      return {
+        email:    col('email', 'email address'),
+        name:     col('full name', 'name', 'student name'),
+        course:   col('course', 'course id', 'course title'),
+        duration: col('access duration', 'duration', 'access'),
+        test:     col('test student', 'test', 'is test', 'group')
+      };
+    }
+
+    async function handleBulkFile(file) {
+      if (!window.XLSX) {
+        showAlert('Spreadsheet parser not loaded — check your connection and reload.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        try {
+          const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          await buildBulkPreview(rows);
+        } catch (err) {
+          console.error('Bulk parse error:', err);
+          showAlert('Could not read that file: ' + err.message, 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function buildBulkPreview(rows) {
+      if (!rows || rows.length < 2) {
+        showAlert('The file needs a header row plus at least one student row.', 'error');
+        return;
+      }
+      const cols = bulkHeaderIndex(rows[0]);
+      if (cols.email < 0) {
+        showAlert('Header must include an "Email" column. Use the template for the exact format.', 'error');
+        return;
+      }
+
+      let courses;
+      try {
+        courses = await ensureBulkCourseCache();
+      } catch (err) {
+        showAlert('Could not load the course list: ' + err.message, 'error');
+        return;
+      }
+
+      const seen = new Set();
+      bulkRows = [];
+      const bodyRows = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i] || [];
+        const email     = normalizeCell(cols.email >= 0 ? r[cols.email] : '').toLowerCase();
+        const name      = normalizeCell(cols.name >= 0 ? r[cols.name] : '');
+        const courseRaw = normalizeCell(cols.course >= 0 ? r[cols.course] : '');
+        const durRaw    = normalizeCell(cols.duration >= 0 ? r[cols.duration] : '');
+        const testRaw   = normalizeCell(cols.test >= 0 ? r[cols.test] : '');
+
+        if (!email && !name && !courseRaw && !durRaw && !testRaw) continue; // skip blank rows
+
+        const errors = [];
+        if (!email) errors.push('Email missing');
+        else if (!EMAIL_RE.test(email)) errors.push('Invalid email');
+        if (email) {
+          if (seen.has(email)) errors.push('Duplicate email in file');
+          seen.add(email);
+        }
+
+        let courseId = null;
+        if (courseRaw) {
+          courseId = matchCourse(courseRaw, courses);
+          if (courseId === false) errors.push(`Unknown course "${courseRaw}"`);
+        }
+
+        const dur = matchDuration(durRaw);
+        if (dur === null) errors.push('Access must be Lifetime or a day count');
+
+        const ok = errors.length === 0;
+        const rec = {
+          email, name,
+          course_id: courseId === false ? null : courseId,
+          days: dur ? dur.days : null,
+          is_test: testRaw ? parseBool(testRaw) : false,
+          ok, errors
+        };
+        bulkRows.push(rec);
+
+        const courseLabel = courseId === false ? '<em>?</em>' : (courseId || '—');
+        bodyRows.push(`
+          <tr>
+            <td>${escapeHtml(email) || '<em>—</em>'}</td>
+            <td>${escapeHtml(name) || '—'}</td>
+            <td>${escapeHtml(courseLabel)}</td>
+            <td>${dur ? (dur.days ? dur.days + ' days' : 'Lifetime') : '<em>?</em>'}</td>
+            <td>${rec.is_test
+              ? '<span class="group-badge group-test">TEST</span>'
+              : '<span class="group-badge group-real">REAL</span>'}</td>
+            <td>${ok
+              ? '<span style="color:var(--green); font-weight:600;">✓ ready</span>'
+              : '<span style="color:var(--copper-dark); font-weight:600;">✗ ' + escapeHtml(errors.join(', ')) + '</span>'}</td>
+          </tr>`);
+      }
+
+      document.getElementById('bulkPreviewBody').innerHTML =
+        bodyRows.join('') || '<tr><td colspan="6" class="empty-state">No student rows found in the file.</td></tr>';
+
+      const valid = bulkRows.filter(r => r.ok).length;
+      const failed = bulkRows.length - valid;
+      document.getElementById('bulkSummary').textContent =
+        `${bulkRows.length} student${bulkRows.length !== 1 ? 's' : ''} found · ${valid} ready to enroll · ${failed} need fixing (skipped).`;
+      document.getElementById('bulkEnrollSubmitBtn').disabled = valid === 0;
+      document.getElementById('bulkEnrollSubmitBtn').textContent = `Enroll ${valid} student${valid !== 1 ? 's' : ''}`;
+      document.getElementById('bulkStep2').style.display = '';
+    }
+
+    async function bulkEnrollOne(rec, password) {
+      let userId = null;
+      let isNew = false;
+
+      if (password) {
+        // Save the admin's session first: with email confirmation off,
+        // signUp switches the active session to the new account.
+        const { data: sessData } = await supabaseClient.auth.getSession();
+        const adminSession = sessData.session;
+
+        const { data: su, error: suError } = await supabaseClient.auth.signUp({
+          email: rec.email,
+          password,
+          options: { data: { role: 'student' } }
+        });
+
+        if (suError) {
+          // Already-registered accounts are handled by add_student below.
+          if (!/already|registered/i.test(suError.message || '')) {
+            return { ok: false, message: 'Sign-up error: ' + suError.message };
+          }
+        } else if (su.user) {
+          userId = su.user.id;
+          isNew = true;
+        }
+
+        if (adminSession) {
+          await supabaseClient.auth.setSession({
+            access_token: adminSession.access_token,
+            refresh_token: adminSession.refresh_token
+          });
+        }
+      }
+
+      let expiresAt = null;
+      if (rec.days) {
+        expiresAt = new Date(Date.now() + rec.days * 24 * 60 * 60 * 1000).toISOString();
+      }
+
+      const { data, error } = await supabaseClient.rpc('add_student', {
+        p_email:      rec.email,
+        p_role:       'student',
+        p_full_name:  rec.name || null,
+        p_course_id:  rec.course_id || null,
+        p_user_id:    userId || null,
+        p_expires_at: expiresAt,
+        p_is_test:    rec.is_test
+      });
+
+      if (error) return { ok: false, message: error.message };
+      if (data === 'not_authorized')  return { ok: false, message: 'Not authorized' };
+      if (data === 'bad_role')        return { ok: false, message: 'Bad role' };
+      if (data === 'password_required') return { ok: false, message: 'No account — set a temp password' };
+      if (data === 'user_not_found')  return { ok: false, message: 'Account not found' };
+      return { ok: true, message: isNew ? 'Account created + enrolled' : 'Enrolled' };
+    }
+
+    async function submitBulkEnroll() {
+      const valid = bulkRows.filter(r => r.ok);
+      if (valid.length === 0) {
+        showAlert('Nothing to enroll — fix the highlighted rows first.', 'error');
+        return;
+      }
+
+      const password = document.getElementById('bulkTempPassword').value.trim();
+      const btn = document.getElementById('bulkEnrollSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Enrolling…';
+
+      const tableRows = document.querySelectorAll('#bulkPreviewBody tr');
+      let created = 0, enrolled = 0;
+      const failures = [];
+
+      for (let i = 0; i < bulkRows.length; i++) {
+        const rec = bulkRows[i];
+        if (!rec.ok) continue;
+        const res = await bulkEnrollOne(rec, password);
+        const cell = tableRows[i] && tableRows[i].cells[5];
+        if (res.ok) {
+          if (res.message === 'Account created + enrolled') created++;
+          else enrolled++;
+          if (cell) cell.innerHTML = '<span style="color:var(--green); font-weight:600;">✓ ' + escapeHtml(res.message) + '</span>';
+        } else {
+          failures.push(`${rec.email}: ${res.message}`);
+          if (cell) cell.innerHTML = '<span style="color:var(--copper-dark); font-weight:600;">✗ ' + escapeHtml(res.message) + '</span>';
+        }
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Enroll';
+
+      const done = created + enrolled;
+      const passNote = password && created ? ` — temp password "${escapeHtml(password)}"` : '';
+      const failNote = failures.length
+        ? ` ${failures.length} failed: ${failures.slice(0, 3).map(f => escapeHtml(f)).join('; ')}${failures.length > 3 ? '…' : ''}`
+        : '';
+      showAlert(`✓ Bulk enroll finished: ${done}/${valid.length} done${passNote}.${failNote}`, failures.length ? 'error' : 'success');
+      if (failures.length) console.warn('Bulk enroll failures:', failures);
+
+      await loadDashboard();
+      await loadAuditLog();
+      if (currentUserRole === 'admin') await loadAdminOverview();
+    }
+
+    async function openBulkEnrollModal() {
+      if (currentUserRole !== 'admin') {
+        showAlert('Only admins can bulk enroll.', 'error');
+        return;
+      }
+      try { await ensureBulkCourseCache(); } catch (e) { console.error('bulk course cache:', e); }
+      document.getElementById('bulkFileInput').value = '';
+      document.getElementById('bulkStep2').style.display = 'none';
+      document.getElementById('bulkPreviewBody').innerHTML = '';
+      document.getElementById('bulkSummary').textContent = '';
+      document.getElementById('bulkEnrollSubmitBtn').disabled = true;
+      document.getElementById('bulkEnrollSubmitBtn').textContent = 'Enroll';
+      document.getElementById('bulkEnrollModal').classList.add('active');
+    }
+
+    function closeBulkEnrollModal() {
+      document.getElementById('bulkEnrollModal').classList.remove('active');
+      document.getElementById('bulkFileInput').value = '';
+      document.getElementById('bulkStep2').style.display = 'none';
+      document.getElementById('bulkPreviewBody').innerHTML = '';
+      document.getElementById('bulkSummary').textContent = '';
+      document.getElementById('bulkEnrollSubmitBtn').disabled = true;
+      document.getElementById('bulkEnrollSubmitBtn').textContent = 'Enroll';
+    }
+
+    function downloadBulkTemplate() {
+      // Prefer the ready-made .xlsx template; fall back to a CSV generator
+      // if the file isn't served (e.g. opened as file://).
+      fetch('resources/student-bulk-enroll-template.xlsx')
+        .then(res => {
+          if (!res.ok) throw new Error('not found');
+          return res.blob();
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'student-bulk-enroll-template.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        })
+        .catch(() => {
+          const csv = [
+            'Email,Full Name,Course,Access Duration,Test student',
+            '',
+            '',
+            '',
+            '',
+            ''
+          ].join('\n');
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'student-bulk-enroll-template.csv';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+    }
+
+    (function wireBulkEnroll() {
+      const input = document.getElementById('bulkFileInput');
+      if (input) {
+        input.addEventListener('change', function () {
+          if (input.files && input.files[0]) handleBulkFile(input.files[0]);
+        });
+      }
+    })();
 
     // ============================================
     // UPDATE STATUS
